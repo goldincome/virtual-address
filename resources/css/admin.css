@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+/* .dashboard-layout is now handled by Tailwind classes directly in HTML */
+
+/* Sidebar link styling */
+.sidebar a {
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+.sidebar a.active, .sidebar a:hover {
+    background-color: #fb923c; /* orange-400 */
+    color: white;
+}
+.sidebar a.active i, .sidebar a:hover i {
+    color: white;
+}
+/* Footer link styling */
+ footer a:not(.social-icon) {
+     @apply hover:text-orange-300 transition duration-300 hover:underline;
+}

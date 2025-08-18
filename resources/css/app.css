@@ -1,3 +1,130 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+ /* Apply Inter font globally */
+ body {
+    font-family: 'Inter', sans-serif;
+}
+/* Custom styles if needed */
+.hero-bg {
+    background-image: url('https://images.unsplash.com/photo-1524758631624-e2822e304c36'); /* Using Unsplash */
+    background-size: cover;
+    background-position: center;
+}
+.service-card, .room-card, .plan-card {
+    display: flex;
+    flex-direction: column;
+}
+.service-card .card-content, .room-card .card-content, .plan-card .card-content {
+    flex-grow: 1;
+}
+.room-card, .plan-card {
+    background-color: white; /* Ensure background for shadow */
+}
+ /* FAQ Accordion Styles */
+.faq-item {
+    border-bottom: 1px solid #e5e7eb; /* gray-200 */
+}
+.faq-question {
+    cursor: pointer;
+}
+.faq-answer {
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    max-height: 0; /* Initially hidden */
+}
+.faq-answer.open {
+     max-height: 300px; /* Adjust max-height as needed for content */
+     margin-top: 0.5rem; /* Add some space when open */
+}
+/* How it Works Step Number */
+.step-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin: 0 auto 1rem auto; /* Center horizontally */
+}
+ /* Style for highlighting the popular package */
+.popular-package {
+    border: 2px solid #f97316; /* Orange border */
+    position: relative;
+    overflow: hidden; /* To contain the badge */
+}
+.popular-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #f97316; /* Orange */
+    color: white;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transform: rotate(45deg) translate(25%, -15%);
+    transform-origin: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.star-rating i {
+    color: #f59e0b; /* Tailwind amber-500 */
+}
+    /* Modal Styles */
+.modal-overlay {
+    transition: opacity 0.3s ease-in-out;
+}
+.modal-content {
+    transition: transform 0.3s ease-in-out;
+}
+        /* Hide scrollbar for gallery container, but allow scrolling */
+.gallery-scroll::-webkit-scrollbar {
+     display: none; /* Chrome, Safari, Opera */
+}
+.gallery-scroll {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+ /* Sidebar link styling */
+        .sidebar a {
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, padding-left 0.2s ease-in-out; /* Added padding-left transition */
+        }
+        .sidebar a.active {
+            background-color: #f97316; /* orange-500 */
+            color: white;
+            border-left-width: 4px;
+            border-left-color: #fbbf24; /* amber-400 for a slightly different accent */
+            padding-left: calc(1rem - 4px); /* Adjust padding to account for border */
+        }
+        .sidebar a:hover:not(.active) { /* Ensure hover doesn't override active too much */
+            background-color: #3b82f6; /* blue-500 - slightly lighter than sidebar bg */
+            color: white;
+        }
+        .sidebar a.active i, .sidebar a:hover i {
+            color: white; /* Ensure icon color matches text on hover/active */
+        }
+        .sidebar a i {
+            transition: color 0.2s ease-in-out;
+        }
+        /* Footer link styling */
+        footer a:not(.social-icon) { /* Exclude social icons from underline */
+            @apply hover:text-orange-300 transition duration-300 hover:underline;
+        }
+        .status-active {
+            @apply bg-green-100 text-green-800;
+        }
+
+        .status-pending {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+
+        .status-cancelled {
+            @apply bg-red-100 text-red-800;
+        }
+
+        .status-completed {
+            @apply bg-blue-100 text-blue-800;
+        }

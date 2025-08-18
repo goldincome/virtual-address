@@ -60,6 +60,27 @@ return [
             'report' => false,
         ],
 
+        'virtual_address' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/virtual-addresses'),
+            'url' => env('APP_URL') . '/storage/virtual-addresses',
+            'visibility' => 'public',
+        ],
+
+        'meeting_room' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/meeting-rooms'),
+            'url' => env('APP_URL') . '/storage/meeting-rooms',
+            'visibility' => 'public',
+        ],
+
+        'conference_room' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/conference-rooms'),
+            'url' => env('APP_URL') . '/storage/conference-rooms',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*
