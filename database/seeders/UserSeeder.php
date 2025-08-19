@@ -56,7 +56,6 @@ class UserSeeder extends Seeder
                 'trial_ends_at' => null,
             ],
             [
-                'id' => 4,
                 'name' => 'Preston Bridges',
                 'email' => 'rilox@mailinator.com',
                 'first_name' => null,
