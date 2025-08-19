@@ -23,7 +23,7 @@ use App\Http\Controllers\Admin\Auth\PasswordController;
 use App\Http\Controllers\Admin\ConferenceRoomController;
 use App\Http\Controllers\Admin\FeatureSettingController;
 use App\Http\Controllers\Front\PaymentWebhookController;
-use App\Http\Controllers\front\VirtualAddressController;
+use App\Http\Controllers\Front\VirtualAddressController;
 use App\Http\Controllers\Admin\PlanRoomDiscountController;
 use App\Http\Controllers\Front\MeetingRoomOrderController;
 use App\Http\Controllers\Admin\Auth\RegisteredUserController;
@@ -31,8 +31,8 @@ use App\Http\Controllers\Front\ConferenceRoomOrderController;
 use App\Http\Controllers\Front\VirtualAddressOrderController;
 use App\Http\Controllers\Admin\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Admin\Auth\AdminAuthenticatedSessionController;
-use App\Http\Controllers\front\MeetingRoomController as FrontMeetingRoomController;
-use App\Http\Controllers\front\ConferenceRoomController as FrontConferenceRoomController;
+use App\Http\Controllers\Front\MeetingRoomController as FrontMeetingRoomController;
+use App\Http\Controllers\Front\ConferenceRoomController as FrontConferenceRoomController;
 
 // Handles Stripe payments webhooks
 Route::post('/stripe/webhook', [PaymentWebhookController::class, 'handleWebhook'])->name('cashier.webhook');
