@@ -118,8 +118,6 @@ class CartController extends Controller
             }
             $subscriptionType = SubscriptionTypeEnum::class;
             
-            Mail::to('bodypal4me@gmail.com')->queue(new NewOrderEmail($order));
-            //return view('emails.CustomerOrderEmail', compact('order','jsonPlan','subscriptionType'));
             return view('front.checkout.success',compact('order','jsonPlan','subscriptionType'));
         } catch (\Exception $e) {
             return redirect()->route('cart.index')->with('error', 'Order not found or an error occurred: ' . $e->getMessage());
