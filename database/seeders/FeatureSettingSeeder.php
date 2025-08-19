@@ -332,6 +332,7 @@ class FeatureSettingSeeder extends Seeder
                 'updated_at' => '2025-06-04 11:30:39',
             ],
             [
+                'id' => 33,
                 'slug' => 'capacity-up-to-2-people',
                 'name' => 'Capacity: Up to 2 people',
                 'description' => null,
