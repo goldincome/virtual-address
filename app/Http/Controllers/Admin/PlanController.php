@@ -24,6 +24,7 @@ class PlanController extends Controller
         if($product){
             $plans = $product->plans()->with(['features', 'media'])->latest()->paginate(10);
         }
+        dd($plans);
         return view('admin.plans.index', compact('product', 'plans'));
     }
 
