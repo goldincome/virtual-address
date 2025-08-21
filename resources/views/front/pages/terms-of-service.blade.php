@@ -152,7 +152,7 @@
             <section id="complaints">
                 <h3 class="text-2xl font-semibold text-orange-600 mb-4 flex items-center"><i class="fas fa-headset mr-3"></i> 9. Complaints</h3>
                 <div class="pl-8 border-l-2 border-orange-200 text-gray-700 leading-relaxed">
-                    <p>We are committed to providing a high-quality service. For a copy of our complaints procedure, please contact us at 0203 476 7792 or <a href="mailto:team@virtually-there.net" class="text-blue-600 hover:underline">team@virtually-there.net</a>.</p>
+                    <p>We are committed to providing a high-quality service. For a copy of our complaints procedure, please contact us at +44 (0) 2032474747 or <a href="mailto:team@nurud.com" class="text-blue-600 hover:underline">team@nurud.com</a>.</p>
                 </div>
             </section>
 
@@ -174,7 +174,7 @@
                     <p><strong>11.6</strong> We hold identification and company information securely to protect our position and prevent money laundering. This is never passed to third parties.</p>
                     <p><strong>11.7</strong> Your details may be added to our mailing list, from which you can unsubscribe at any time.</p>
                     <p><strong>11.8</strong> We retain personal information for up to 6 years for legal reasons.</p>
-                    <p><strong>11.9</strong> For data issues, contact us at 0203 476 7792 or <a href="mailto:team@virtually-there.net" class="text-blue-600 hover:underline">team@virtually-there.net</a>.</p>
+                    <p><strong>11.9</strong> For data issues, contact us at 0203 476 7792 or <a href="mailto:team@nurud.com" class="text-blue-600 hover:underline">team@nurud.com</a>.</p>
                     <p><strong>11.10</strong> You have rights including SAR, rectification, erasure, and others. More information is available at www.ico.org.uk.</p>
                     <p><strong>11.11</strong> We retain data for up to 6 years, as this is the time limit for initiating civil action against us.</p>
                 </div>
@@ -182,9 +182,9 @@
         </div>
         
         <div class="mt-20 pt-8 border-t text-center text-sm text-gray-500">
-            <p>Virtually There Offices Limited Company No: 8047761</p>
-            <p>Registered office: 2 Gloucester Road North, Bristol, England, BS7 0SF</p>
-            <p>More information on how we hold and process your data is available at our website: virtually-there.net</p>
+            <p>NURUD</p>
+            <p>Registered office: Unit 6, Block 3 Woolwich, Dockyard Industrial Estate, Woolwich Church St, Charlton, London SE18 5PQ</p>
+            <p>More information on how we hold and process your data is available at our website: nurud.com</p>
         </div>
 
     </main>

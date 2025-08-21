@@ -23,7 +23,7 @@
                  <h5 class="text-lg font-semibold mb-4 text-white">Contact Us</h5>
                  <address class="not-italic text-sm space-y-2 mb-4">
                     <p><i class="fas fa-map-marker-alt mr-2 text-orange-400"></i>Unit 6,Block 3, Dockyard Industrial Estate,<br>Church Street, Woolwich, London UK</p>
-                    <p><i class="fas fa-phone-alt mr-2 text-orange-400"></i><a href="tel:+23412345678">+44 2000 0000 000</a></p>
+                    <p><i class="fas fa-phone-alt mr-2 text-orange-400"></i><a href="tel:+23412345678">+44 (0) 2032474747</a></p>
                     <p><i class="fas fa-envelope mr-2 text-orange-400"></i><a href="mailto:support@NURUD.com">support@NURUD.com</a></p>
                  </address>
                  <div class="flex space-x-4">
@@ -35,8 +35,8 @@
         </div>
         <div class="mt-8 pt-8 border-t border-blue-700 text-center text-sm">
              &copy; 2025 NURUD Virtual Offices. All Rights Reserved. |
-             <a href="#">Privacy Policy</a> |
-             <a href="#">Terms of Service</a>
+             <a href="{{ route('privacy-policy.index') }}">Privacy Policy</a> |
+             <a href="{{ route('terms-of-service.index') }}">Terms of Service</a>
         </div>
     </div>
 </footer>

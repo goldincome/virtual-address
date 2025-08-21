@@ -192,11 +192,11 @@
                 <div class="space-y-2 text-gray-700">
                     <div>
                         <h4 class="text-xl font-semibold text-orange-600">Owner and Data Controller</h4>
-                        <p>Virtually There - Henleaze Business Centre, 13 Harbury Road</p>
+                        <p>Nurud - Unit 6, Block 3 Woolwich, Dockyard Industrial Estate, Woolwich Church St, Charlton, London SE18 5PQ</p>
                     </div>
                     <div>
                          <h4 class="text-xl font-semibold text-orange-600 mt-4">Owner contact email</h4>
-                         <a href="mailto:enquiries@virtually-there.net" class="text-blue-600 hover:underline">enquiries@virtually-there.net</a>
+                         <a href="mailto:enquiries@nurud.com" class="text-blue-600 hover:underline">enquiries@nurud.com</a>
                     </div>
                 </div>
             </div>
