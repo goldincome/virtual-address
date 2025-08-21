@@ -83,7 +83,10 @@ class MeetingRoomController extends Controller
                         $planData = [
                             'name' => ProductTypeEnum::MEETING_ROOM->label(),
                             'is_active' => false,
-                            'price' => 0.00
+                            'price' => 0.00,
+                            'yearly_monthly_price' => 0.00,
+                            'discount_percent' => 0.00,
+                            'discount_amount' => 0.00,
                         ];
                         $plan = $planService->createPlanForProduct($product, $planData, $validated['features']);
                     }
