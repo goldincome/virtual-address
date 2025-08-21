@@ -44,7 +44,7 @@
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-phone-alt fa-fw text-orange-500 mt-1 mr-3"></i>
-                            <a href="tel:+4420000000000" class="hover:text-orange-600">+44 2000 0000 000</a>
+                            <a href="tel:+4420000000000" class="hover:text-orange-600">+44 (0) 2032474747</a>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-envelope fa-fw text-orange-500 mt-1 mr-3"></i>
