@@ -45,12 +45,21 @@ class StripeGateway implements PaymentGatewayInterface
                     $planPriceId = $paymentData['plan']['stripe_price_id_yearly'];
                     // Create a new subscription for the user.      
                     $checkout = $user->newSubscription('default', $planPriceId);
-                    
-                    $checkout = $checkout->withMetadata([
-                        'order_no' => $paymentData['order_no'],
-                        'setup_monthly_metered_plan' => 'true',
-                        'monthly_metered_price_id' => $mailPriceSetting['stripe_price_id'] ]
-                    );
+                    if($mailPriceSetting) {
+                        // Add metered prices if they exist in cart
+                        $checkout = $checkout->withMetadata([
+                            'order_no' => $paymentData['order_no'],
+                            'setup_monthly_metered_plan' => 'true',
+                            'monthly_metered_price_id' => $mailPriceSetting['stripe_price_id']]
+                        );
+                    }
+                    else{
+                        $checkout = $checkout->withMetadata([
+                            'order_no' => $paymentData['order_no'],
+                            'setup_monthly_metered_plan' => 'false'
+                            ]
+                        );
+                    }
                 }
                 else{
                     //dd($paymentData, $plan, $mailPriceSetting );

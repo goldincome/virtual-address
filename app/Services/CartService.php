@@ -58,7 +58,7 @@ class CartService
                     'tax' => (config('cart.tax')/100) * ($price * $quantity),
                     'product_model_id' => $product->id, // Original product model ID
                     'plan_id' => $plan->id,
-                    'subscription_type' => $plan->subscription_type ,
+                    'subscription_type' => $plan->subscription_type ?? null,
                     'mail_type' => $mailSetting->mail_type ?? null,
                     'mail_price_setting' => $mailSetting ?? null,
                     'plan' => $plan ? $plan : null,
@@ -288,7 +288,7 @@ class CartService
     {
         foreach (Cart::content() as $item) {
             if ($item->options->type === ProductTypeEnum::VIRTUAL_ADDRESS->value) {
-                return $item->options->mail_price_setting;
+                return $item->options->mail_price_setting ?? null;
             }
         }
         return null;
