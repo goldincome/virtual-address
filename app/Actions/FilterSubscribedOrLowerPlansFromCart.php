@@ -17,6 +17,7 @@ class FilterSubscribedOrLowerPlansFromCart
             if ($item->options->type === ProductTypeEnum::VIRTUAL_ADDRESS->value) {
                 $cartPlan = app(CartService::class)->getPlanFromCart();
                 if ($cartPlan) {
+                    dd($cartPlan);
                     $cartPlan = Plan::find($cartPlan->id);
                     if (auth()->user() && auth()->user()->subscribed('default')) // user has a plan 
                     {
