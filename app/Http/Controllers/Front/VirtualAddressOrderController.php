@@ -23,9 +23,12 @@ class VirtualAddressOrderController extends Controller
         //get the current vitual address plan order detail and json decode it
         $jsonPlan = json_decode($user->orderDetails()->where('product_type', ProductTypeEnum::VIRTUAL_ADDRESS->value)->latest()->first()->plan);
         //get mail type customer ordered(scan or forwarding)
-        $mailType = $jsonPlan->mail_type === MailTypeEnum::Scanned->value 
-            ? MailTypeEnum::Scanned->label().'(All your mails will be scanned to you)' 
-            : MailTypeEnum::Forwarded->label().'All your mails will be forwarded to you';
+        $mailType = null;
+        if(count($jsonPlan->mail_settings) > 0){
+            $mailType = $jsonPlan->mail_type === MailTypeEnum::Scanned->value 
+                ? MailTypeEnum::Scanned->label().'(All your mails will be scanned to you)' 
+                : MailTypeEnum::Forwarded->label().'All your mails will be forwarded to you';
+        }
         //get subscription type (yearly or monthly)
         $subscriptionInterval = $jsonPlan->subscription_type;
         //get current active subscription
