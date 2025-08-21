@@ -152,9 +152,9 @@
                 <div class="bg-gray-50 p-6 rounded-md text-left my-8 border border-gray-200">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Subscription Details</h3>
                     <div class="space-y-2 text-gray-700">
-                        <p><strong>Plan Type:</strong> {{ auth()->user()->subscription('default')->plan->name }} ({{  $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? 'Billed Yearly' : 'Billed Monthly'  }})</p>
-                        <p><strong>Activation Date:</strong> {{ auth()->user()->subscription('default')->created_at->format('D, M j, Y') }}</p>
-                        <p><strong>Next Renewal Date:</strong> {{ auth()->user()->subscription('default')->created_at->addYear(1)->format('D, M j, Y')}}</p>
+                        <p><strong>Plan Type:</strong> {{ $order->user->subscription('default')->plan->name }} ({{  $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? 'Billed Yearly' : 'Billed Monthly'  }})</p>
+                        <p><strong>Activation Date:</strong> {{ $order->user->subscription('default')->created_at->format('D, M j, Y') }}</p>
+                        <p><strong>Next Renewal Date:</strong> {{ $order->user->subscription('default')->created_at->addYear(1)->format('D, M j, Y')}}</p>
                     </div>
                 </div>
                 @endif
