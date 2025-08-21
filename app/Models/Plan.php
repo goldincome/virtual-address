@@ -51,7 +51,7 @@ class Plan extends Model implements HasMedia
 
     public function getPrimaryImageAttribute()
     {
-        return $this->getMedia(self::PRIMARY_IMAGE)->first()->getUrl() ?? '';
+        return isset($this->getMedia(self::PRIMARY_IMAGE)->first()) ? $this->getMedia(self::PRIMARY_IMAGE)->first()->getUrl() : '';
     }
 
     public function getAdditionalImagesAttribute()
