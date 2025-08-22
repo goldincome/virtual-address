@@ -57,7 +57,7 @@
                                     </a>
                                 @endif
                                 @if($mail->mail_status->value === $mailStatuses::Scanned->value)
-                                    <a href="#"
+                                    <a href="{{ asset($mail->scan_upload_url) }}"
                                         class="text-green-600 hover:text-green-900">
                                         Download Mail
                                     </a>
