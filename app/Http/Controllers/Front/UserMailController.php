@@ -21,47 +21,20 @@ class UserMailController extends Controller
         return view('front.mails.index', compact('mails', 'mailStatuses'));
     }
 
-    public function create()
-    {
-        //$this->authorize('create', Mail::class);
-        $mailTypes = MailTypeEnum::cases();
-        return view('front.mails.create', compact('mailTypes'));
-    }
-
-    public function store(UserMailRequest $request)
-    {
-        //$this->authorize('create', Mail::class);
-
-        Auth::user()->mails()->create($request->validated());
-
-        return redirect()->route('mails.index')->with('success', 'Your mail request has been submitted successfully.');
-    }
-
     public function show(Mail $mail)
     {
         //$this->authorize('view', $mail);
         return view('front.mails.show', compact('mail'));
     }
 
-    public function edit(Mail $mail)
+    public function download(Mail $mail)
     {
-        //$this->authorize('update', $mail);
-        $mailTypes = MailTypeEnum::cases();
-        return view('front.mails.edit', compact('mail', 'mailTypes'));
-    }
+        //$this->authorize('view', $mail);
+        if($mail->mail_status->value !== MailStatusEnum::Scanned->value || !$mail->scan_upload_url) {
+            return redirect()->route('mails.index')->with('error', 'The scanned mail is not available for download.');
+        }
 
-    public function update(UserMailRequest $request, Mail $mail)
-    {
-        //$this->authorize('update', $mail);
-        $mail->update($request->validated());
-        return redirect()->route('mails.index')->with('success', 'Your mail request has been updated.');
-    }
-
-    public function destroy(Mail $mail)
-    {
-        //$this->authorize('delete', $mail);
-        $mail->delete();
-        return redirect()->route('mails.index')->with('success', 'Your mail request has been cancelled.');
+        return response()->download(public_path('storage/' . $mail->scan_upload_url));
     }
 
 

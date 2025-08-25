@@ -12,10 +12,8 @@ class ConferenceRoomOrderController extends Controller
     protected $productType = ProductTypeEnum::CONFERENCE_ROOM->value;
     public function index()
     {
-       $userOrderDetails  = OrderDetail::where('product_type', $this->productType)
-        ->whereHas('order', function ($query) {
-                $query->where('user_id', auth()->id());
-        })->paginate(); 
+        $user = auth()->user();
+        $userOrderDetails  = $user->orderDetails()->where('product_type', $this->productType)->latest()->paginate(); 
         return view('front.orders.conference-order', compact('userOrderDetails'));
     }
 

@@ -8,10 +8,7 @@
     <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl">
         <div class="flex justify-between items-center mb-6 pb-4 border-b">
             <h2 class="text-2xl font-semibold text-blue-800">Mail & Service Requests</h2>
-            <a href="{{ route('mails.create') }}"
-                class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
-                <i class="fas fa-plus-circle mr-2"></i> New Request
-            </a>
+           
         </div>
 
         @if (session('success'))
@@ -57,7 +54,7 @@
                                     </a>
                                 @endif
                                 @if($mail->mail_status->value === $mailStatuses::Scanned->value)
-                                    <a href="{{ asset($mail->scan_upload_url) }}"
+                                    <a href="{{ route('mails.download', $mail) }}"
                                         class="text-green-600 hover:text-green-900">
                                         Download Mail
                                     </a>
@@ -66,16 +63,6 @@
                                     class="text-blue-600 hover:text-blue-900">
                                     View
                                 </a>
-
-                                <a href="{{ route('mails.edit', $mail) }}"
-                                    class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                <form action="{{ route('mails.destroy', $mail) }}" method="POST" class="inline-block"
-                                    onsubmit="return confirm('Are you sure you want to cancel this request?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900">Cancel</button>
-                                </form>
-
                             </td>
                         </tr>
                     @empty

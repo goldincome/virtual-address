@@ -90,7 +90,7 @@ class PaymentController extends Controller
             //check if payment was Direct Debit
             if($request->payment_method === PaymentMethodEnum::DirectDebit->value)
             {
-                $order = $this->directDebitSuccess($request, app(OrderService::class));
+                $order = $this->directDebitSuccess($request);
                 if ($order) {
                     return redirect()->route('checkout.success', $order->order_no)->with('success', 'Payment successful!');
                 } else {
@@ -103,8 +103,9 @@ class PaymentController extends Controller
         }
     }
 
-     public function directDebitSuccess(Request $request, OrderService $orderService)
+     public function directDebitSuccess(Request $request)
     {
+        $orderService = app(OrderService::class);
         try {
             $paymentMethod = $this->cartService->getPaymentMethodFromCart();
             if ($paymentMethod === PaymentMethodEnum::DirectDebit->value) {

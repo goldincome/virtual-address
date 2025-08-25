@@ -74,7 +74,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('virtual-address-orders', VirtualAddressOrderController::class);
     Route::resource('meeting-room-orders', MeetingRoomOrderController::class);
     Route::resource('conference-room-orders', ConferenceRoomOrderController::class);
-    Route::resource('mails', UserMailController::class);
+    Route::get('mails/download/{mail}', [UserMailController::class, 'download'])->name('mails.download');
+    Route::resource('mails', UserMailController::class)->only('index', 'show', 'download');
     Route::resource('invoices', InvoiceController::class)->only('index', 'show', 'print');
 });
 
