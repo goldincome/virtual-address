@@ -31,8 +31,8 @@ class ContactUsController extends Controller
 
         try{
             Mail::send('emails.ContactUsAdminNotification', $data, function ($message){
-                $message->to(config('app.admin_email'), 'NURUD - UK');
-                $message->subject('New Message Virtual Address Website-NURUD');
+                $message->to(config('app.admin_email'), 'Charlton Virtual Office - UK');
+                $message->subject('New Message Virtual Address Website-Charlton Virtual Office');
                 $message->replyTo('info@ninuk.co.uk');
             });
         } catch(\Throwable $e){

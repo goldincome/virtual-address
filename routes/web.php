@@ -36,6 +36,8 @@ use App\Http\Controllers\Front\ConferenceRoomController as FrontConferenceRoomCo
 
 // Handles Stripe payments webhooks
 Route::post('/stripe/webhook', [PaymentWebhookController::class, 'handleWebhook'])->name('cashier.webhook');
+//sitemap
+Route::get('/sitemap.xml', [App\Http\Controllers\Front\SitemapController::class, 'index'])->name('sitemap.index');
 
 Route::middleware('web')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home.index');

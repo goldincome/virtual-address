@@ -2,11 +2,15 @@
 
 
 @section('title')
-    Virtual Office Address Services - NURUD
+    {{ $plan->name }} Virtual Address & Mail Forwarding 
 @endsection
 
 @section('description')
-    Virtual Office Address Services - NURUD
+     Get a professional {{ $plan->name }} Virtual Office Address in Woolwich, London. Low-cost mail handling and forwarding for a reputable London presence.
+@endsection
+
+@section('keywords')
+    {{ $plan->name }} Virtual Office Address, Mail Forwarding, Low Cost, Cheap, Professional Address, Woolwich, London
 @endsection
 
 @section('css')

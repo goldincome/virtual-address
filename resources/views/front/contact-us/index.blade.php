@@ -1,13 +1,13 @@
 @extends('layouts.front')
 
 
-@section('title')
-    Contact Us - NURUD
-@endsection
+@section('title', "Contact Us")
 
 @section('description')
-    Contact Us - NURUD
+   Contact Charlton Virtual Office in Woolwich, London for support with Virtual Office, Meeting Room, and Conference Room services.
 @endsection
+
+@section('keywords', "Contact Us, Virtual Office, Meeting Room, Conference Room, Business Address, Mail Handling, London, Woolwich, Charlton")
 
 @section('css')
     <style>
@@ -48,7 +48,7 @@
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-envelope fa-fw text-orange-500 mt-1 mr-3"></i>
-                            <a href="mailto:support@NURUD.com" class="hover:text-orange-600">support@NURUD.com</a>
+                            <a href="mailto:support@Charlton Virtual Office.com" class="hover:text-orange-600">support@charltonvirtualoffice.com</a>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-clock fa-fw text-orange-500 mt-1 mr-3"></i>

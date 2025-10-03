@@ -69,7 +69,7 @@
                 </div>
             </div>
             <div class="text-xs text-gray-500 pt-2 border-t mt-2">
-                By proceeding, you are authorising NURUD to send instructions to your bank to debit your account in accordance with the Direct Debit Guarantee.
+                By proceeding, you are authorising Charlton Virtual Office to send instructions to your bank to debit your account in accordance with the Direct Debit Guarantee.
             </div>
         </div>
     </div>

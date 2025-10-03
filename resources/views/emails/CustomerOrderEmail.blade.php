@@ -63,7 +63,7 @@
     <div class="container">
         <div class="email-wrapper">
             <div class="header">
-                <h1>Nurud Virtual Offices</h1>
+                <h1>Charlton Virtual Office </h1>
             </div>
             <div class="content">
                 <div class="text-center mb-8">
@@ -179,7 +179,7 @@
                 </div>
             </div>
             <div class="footer">
-                <p>&copy; {{ date('Y') }} NURUD Virtual Offices. All Rights Reserved.</p>
+                <p>&copy; {{ date('Y') }} Charlton Virtual Office. All Rights Reserved.</p>
                 <p class="mt-2">
                     <a href="{{ url('/contact-us') }}">Contact Support</a> | 
                     <a href="{{ url('/') }}">Visit our Website</a>

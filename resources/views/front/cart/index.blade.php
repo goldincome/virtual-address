@@ -1,11 +1,11 @@
 @extends('layouts.front') 
 
 @section('title')
-    Shopping Cart - NURUD
+    Shopping Cart - Charlton Virtual Office
 @endsection
 
 @section('description')
-    Shopping Cart- NURUD
+    Shopping Cart- Charlton Virtual Office
 @endsection
 
 @section('content')

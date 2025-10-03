@@ -1,11 +1,11 @@
 @extends('layouts.app')
 @section('title')
     Track and manage your virtual office address subscriptions and history.
-    Meeting Room Booking Details #{{ $orderDetail->ref_no }} - NURUD
+    Meeting Room Booking Details #{{ $orderDetail->ref_no }} - Charlton Virtual Office
 @endsection
 
 @section('page_title')
-    Meeting Room Booking Details #{{ $orderDetail->ref_no }} - NURUD
+    Meeting Room Booking Details #{{ $orderDetail->ref_no }} - Charlton Virtual Office
 @endsection
 
 @section('page_intro')
@@ -74,7 +74,7 @@
                         
                         <div>
                             <p class="text-gray-500">Location:</p>
-                            <p class="text-gray-800 font-medium">NURUD Woolwich Center</p>
+                            <p class="text-gray-800 font-medium">Charlton Virtual Office Woolwich Center</p>
                         </div>
                     </div>
                 </div>

@@ -1,10 +1,10 @@
 
 @extends('layouts.front')
 @section('title')
- Login -NURUD
+ Login -Charlton Virtual Office
 @endsection
 @section('description')
-Login -NURUD
+Login -Charlton Virtual Office
 @endsection
 
 @section('content')
@@ -14,7 +14,7 @@ Login -NURUD
         <!-- Left side remains unchanged -->
         <div class="hidden md:block md:w-1/2 auth-bg-image">
             <div class="flex flex-col justify-end h-full p-12 bg-black bg-opacity-40 text-white">
-                <h2 class="text-3xl font-bold leading-tight mb-3">Access Your NURUD Dashboard</h2>
+                <h2 class="text-3xl font-bold leading-tight mb-3">Access Your Charlton Virtual Office Dashboard</h2>
                 <p class="text-lg text-blue-100">Manage your virtual office, bookings, and mail all in one place.</p>
             </div>
         </div>
@@ -24,7 +24,7 @@ Login -NURUD
             <div class="text-center md:text-left">
                 @include('front.common.error-and-message') 
                 <h2 class="text-3xl font-bold text-blue-800 mb-3">Customer Login</h2>
-                <p class="text-gray-600 mb-8">Welcome Back!</br>Login to continue to your NURUD account.</p>
+                <p class="text-gray-600 mb-8">Welcome Back!</br>Login to continue to your Charlton Virtual Office account.</p>
             </div>
 
             <form action="{{ route('login') }}" method="POST" class="space-y-6">

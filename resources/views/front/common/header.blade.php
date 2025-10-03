@@ -1,7 +1,7 @@
 <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
         <a href="{{ route('home.index') }}" class="text-2xl font-bold hover:text-orange-300 transition duration-300">
-            <i class="fas fa-building mr-2"></i> NURUD
+            <i class="fas fa-building mr-2"></i> Charlton Virtual Office
         </a>
         <ul class="hidden md:flex space-x-6 items-center">
             <li><a href="{{ route('home.index') }}" class="{{ request()->is('/') ? 'text-orange-300 font-medium border-b-2 border-orange-300 pb-1' : '' }}">Home</a></li>

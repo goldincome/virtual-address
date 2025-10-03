@@ -2,12 +2,12 @@
 
 
 @section('title')
-    About Us - NURUD
+    About Us: Professional Spaces in London
 @endsection
 
-@section('description')
-    About Us - NURUD
-@endsection
+@section('description', "Learn about Charlton Virtual Office, a leading provider of virtual office services in London. Discover our commitment to flexible workspace solutions.")
+
+@section('keywords', "About Us, Charlton Virtual Office, Woolwich, Greenwich, South East London, Professional Space")
 
 @section('css')
     <style>
@@ -23,7 +23,7 @@
 @section('content')
     <section class="hero-bg-about text-white relative">
         <div class="absolute inset-0 bg-blue-900 opacity-70"></div> <div class="container mx-auto px-6 py-24 md:py-32 relative z-10 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-3 leading-tight">About NURUD</h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-3 leading-tight">About Charlton Virtual Office</h1>
             <p class="text-lg md:text-xl mb-6 text-blue-100 max-w-3xl mx-auto">
                 Empowering Businesses with Flexible and Professional Workspace Solutions.
             </p>
@@ -36,7 +36,7 @@
                 <div>
                     <h2 class="text-3xl font-bold text-blue-800 mb-4">Empowering Your Business Growth</h2>
                     <p class="text-gray-700 leading-relaxed mb-4">
-                        NURUD was founded with a clear goal: to provide startups, freelancers, and established businesses with the professional image and essential services they need to thrive, without the burden of traditional office overheads. We understand the challenges of modern business and offer flexible solutions that adapt to your needs.
+                        Charlton Virtual Office was founded with a clear goal: to provide startups, freelancers, and established businesses with the professional image and essential services they need to thrive, without the burden of traditional office overheads. We understand the challenges of modern business and offer flexible solutions that adapt to your needs.
                     </p>
                     <p class="text-gray-700 leading-relaxed">
                         We offer prestigious Virtual Office Addresses complete with mail handling, professional Meeting Rooms for your important discussions, and fully-equipped Conference Rooms for larger events and presentations. Our focus is on providing high-quality, reliable services that allow you to concentrate on what you do best running your business.
@@ -51,8 +51,8 @@
             </div>
         </section>
 
-        <section id="why-choose-NURUD" class="py-16 md:py-20 bg-blue-50 rounded-lg px-6">
-            <h2 class="text-3xl font-bold text-center text-blue-800 mb-12">Why Partner with NURUD?</h2>
+        <section id="why-choose-Charlton Virtual Office" class="py-16 md:py-20 bg-blue-50 rounded-lg px-6">
+            <h2 class="text-3xl font-bold text-center text-blue-800 mb-12">Why Partner with Charlton Virtual Office?</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 <div class="text-center p-6 bg-white rounded shadow">
                     <i class="fas fa-medal text-orange-500 text-4xl"></i>

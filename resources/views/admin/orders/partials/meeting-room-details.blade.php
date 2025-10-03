@@ -27,7 +27,7 @@
         </div>
         <div>
             <p class="text-gray-500">Location:</p>
-            <p class="text-gray-800 font-medium">NURUD Woolwich Center</p>
+            <p class="text-gray-800 font-medium">Charlton Virtual Office Woolwich Center</p>
         </div>
     </div>
 

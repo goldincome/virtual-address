@@ -2,11 +2,11 @@
 
 
 @section('title')
-    Privacy Policy - NURUD
+    Privacy Policy 
 @endsection
 
 @section('description')
-    Privacy Policy - NURUD
+    This Website collects some Personal Data from its Users. Your Data, Your Trust.
 @endsection
 
 @section('css')
@@ -192,11 +192,11 @@
                 <div class="space-y-2 text-gray-700">
                     <div>
                         <h4 class="text-xl font-semibold text-orange-600">Owner and Data Controller</h4>
-                        <p>Nurud - Unit 6, Block 3 Woolwich, Dockyard Industrial Estate, Woolwich Church St, Charlton, London SE18 5PQ</p>
+                        <p>Charlton Virtual Office - Unit 6, Block 3 Woolwich, Dockyard Industrial Estate, Woolwich Church St, Charlton, London SE18 5PQ</p>
                     </div>
                     <div>
                          <h4 class="text-xl font-semibold text-orange-600 mt-4">Owner contact email</h4>
-                         <a href="mailto:enquiries@nurud.com" class="text-blue-600 hover:underline">enquiries@nurud.com</a>
+                         <a href="mailto:enquiries@Charlton Virtual Office.com" class="text-blue-600 hover:underline">enquiries@Charlton Virtual Office.com</a>
                     </div>
                 </div>
             </div>

@@ -2,12 +2,13 @@
 
 
 @section('title')
-    Virtual Office Address Services - NURUD
+    Professional Conference Room Booking in London
 @endsection
 
 @section('description')
-    Virtual Office Address Services - NURUD
+    Book a professional Conference Room near Woolwich, Greenwich, and Charlton. Ideal for corporate meetings & training. Easy online booking.
 @endsection
+@section('keywords', "Conference Room,  Boardroom, Seminar Hall, Training Center, Business Meeting, Presentation Room, Workshop Space, Corporate Events, London Conference Rooms, Virtual Office Conference Facilities")
 
 @section('css')
     <style>

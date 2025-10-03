@@ -1,11 +1,11 @@
 @extends('layouts.front')
 
 @section('title')
-    Checkout - NURUD
+    Checkout - Charlton Virtual Office
 @endsection
 
 @section('description')
-    Checkout - NURUD
+    Checkout - Charlton Virtual Office
 @endsection
 
 @section('content')
@@ -180,7 +180,7 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                    <h3 class="text-lg font-semibold text-blue-700 mb-4 text-center">Why Choose NURUD?</h3>
+                    <h3 class="text-lg font-semibold text-blue-700 mb-4 text-center">Why Choose Charlton Virtual Office?</h3>
                     <ul class="space-y-3 text-sm text-gray-700">
                         <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i><span>Prestigious London Business Address.</span></li>
                         <li class="flex items-start"><i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i><span>Secure Mail Handling & Forwarding.</span></li>

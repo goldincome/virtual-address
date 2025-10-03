@@ -2,13 +2,14 @@
 
 {{-- SEO Sections --}}
 @section('title')
-    {{ $meetingRoom->name }} - Book Meeting Room - NURUD
+    {{ $meetingRoom->name }} Hire | Woolwich, London
 @endsection
 
 @section('description')
-    Book {{ $meetingRoom->name }}. {{ Str::limit($meetingRoom->description ?: 'High-quality meeting and meeting rooms available for booking.', 160) }}
+    Book {{ $meetingRoom->name }} in Woolwich, London for your most important meetings. High-spec, premium Meeting Room designed to impress clients. 
 @endsection
 
+@section('keywords', "{{ $meetingRoom->name }}, High-Spec, Premium Venue, Boardroom, Woolwich, London, Impress Clients")
 
 @section('content')
     <div class="container mx-auto px-6 py-16 md:py-10 max-w-7xl">

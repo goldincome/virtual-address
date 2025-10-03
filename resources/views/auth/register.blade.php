@@ -1,9 +1,9 @@
 @extends('layouts.front')
 @section('title')
-    Register -NURUD
+    Register -Charlton Virtual Office
 @endsection
 @section('description')
-    Register -NURUD
+    Register -Charlton Virtual Office
 @endsection
 
 @section('content')
@@ -11,7 +11,7 @@
         <div class="w-full max-w-5xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden md:flex">
             <div class="hidden md:block md:w-1/2 auth-bg-image-register">
                 <div class="flex flex-col justify-end h-full p-12 bg-black bg-opacity-40 text-white">
-                    <h2 class="text-3xl font-bold leading-tight mb-3">Join NURUD Today</h2>
+                    <h2 class="text-3xl font-bold leading-tight mb-3">Join Charlton Virtual Office Today</h2>
                     <p class="text-lg text-blue-100">Unlock premium virtual office solutions, Room and Conference meeting and streamline your business operations.</p>
                 </div>
             </div>
@@ -19,7 +19,7 @@
             <div class="w-full md:w-1/2 p-8 md:p-12">
                 <div class="text-center md:text-left">
                     <h2 class="text-3xl font-bold text-blue-800 mb-3">Create Your Account</h2>
-                    <p class="text-gray-600 mb-8">Get started with NURUD by filling out the form below.</p>
+                    <p class="text-gray-600 mb-8">Get started with Charlton Virtual Office by filling out the form below.</p>
                 </div>
 
                 <form action="{{ route('register') }}" method="POST" class="space-y-5">

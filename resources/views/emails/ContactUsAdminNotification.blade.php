@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Lobster:wght@400;700&display=swap" rel="stylesheet">
-    <title>New Message - NIN UK</title>
+    <title>New Message - Charlton Virtual Office</title>
 
 </head>
 
@@ -23,7 +23,7 @@
                 style="height:100px;text-align:center;background-size:cover;background-repeat:no-repeat;background-position:center;background-color:#0fc55e;display:flex;">
                 <div class="header-title"
                     style="margin:auto;color:#fff;font-size:50px;font-weight:bold;font-family:'Lobster', cursive;">
-                    nin<span style="color: #ffd700">uk</span>.co.uk
+                    CharltonVirtualOffice.com
                 </div>
             </div>
             <div class="body" style="padding:30px 20px;">
@@ -80,12 +80,12 @@
                 </div>
             </div>
             <div class="footer" style="padding:30px 20px;font-size:12px;background-color:#f8f8f8;">
-                This email was sent to example@example.com.
+                
                 <br>
-                If this email you received, is not as a result of a recent action on <a href="https://ninuk.co.uk"
-                    style="color:#0fc55e;">https://ninuk.co.uk</a>,
+                If this email you received, is not as a result of a recent action on <a href="https://charltonvirtualoffice.com"
+                    style="color:#0fc55e;">https://charltonvirtualoffice.com</a>,
                 please contact NIN UK team at <a href="mailto:info@ninuk.co.uk"
-                    style="color:#0fc55e;">info@ninuk.co.uk</a>.
+                    style="color:#0fc55e;">info@charltonvirtualoffice.com</a>.
             </div>
             <div class="footer-bottom" style="height:20px;text-align:center;background-color:#0fc55e;"></div>
         </div>

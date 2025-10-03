@@ -2,13 +2,14 @@
 
 {{-- SEO Sections --}}
 @section('title')
-    {{ $conferenceRoom->name }} - Book Conference Room - NURUD
+    {{ $conferenceRoom->name }} Hire | Large Conference Room 
 @endsection
 
 @section('description')
-    Book {{ $conferenceRoom->name }}. {{ Str::limit($conferenceRoom->description ?: 'High-quality conference and meeting rooms available for booking.', 160) }}
+    Conference Room bookings for large groups near Greenwich and Charlton. "{{ $conferenceRoom->name }}" is fully equipped for all your training and presentation needs. Book instantly.
 @endsection
 
+@section('keywords', "{{ $conferenceRoom->name }}, Large Conference Room, Training Venue, Presentation Space, High Capacity, Woolwich, South East London")
 
 @section('content')
     <div class="container mx-auto px-6 py-16 md:py-10 max-w-7xl">

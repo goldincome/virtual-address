@@ -2,12 +2,14 @@
 
 
 @section('title')
-    Meeting Room - NURUD
+    Book a Meeting Room in South East London
 @endsection
 
 @section('description')
-    Meeting Room - NURUD
+    Instant online booking for professional Meeting Rooms near Woolwich, Greenwich, Charlton, Plumstead, and Abbeywood. Hourly and daily rates available.
 @endsection
+
+@section('keywords', "Meeting Room,  Business Meeting, Client Meeting, Team Meeting, Presentation Room, Workshop Space, Flexible Workspace, Hourly Booking, Daily Booking, London Meeting Rooms")
 
 @section('css')
     <style>

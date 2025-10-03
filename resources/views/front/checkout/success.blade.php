@@ -1,11 +1,11 @@
 @extends('layouts.front') 
 
 @section('title')
-    Order Successful   - NURUD
+    Order Successful   - Charlton Virtual Office
 @endsection
 
 @section('description')
-    Order Successful - NURUD
+    Order Successful - Charlton Virtual Office
 @endsection
 
 @section('content')

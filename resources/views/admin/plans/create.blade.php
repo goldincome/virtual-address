@@ -5,7 +5,7 @@
         <header class="bg-blue-700 text-white shadow-sm">
             <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
                 <a href="#" class="text-2xl font-bold hover:text-orange-300 transition duration-300">
-                    <i class="fas fa-building mr-2"></i> NURUD Admin
+                    <i class="fas fa-building mr-2"></i> Charlton Virtual Office Admin
                 </a>
                 <a href="{{ route('admin.plans.index') }}" class="text-sm hover:text-orange-300 transition duration-300">
                     <i class="fas fa-arrow-left mr-1"></i> Back to  Plans

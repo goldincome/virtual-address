@@ -5,7 +5,7 @@
                 <i class="fas fa-bars text-xl"></i>
             </button>
             <a href="{{ route('admin.dashboard.index') }}" class="text-2xl font-bold hover:text-orange-300 transition duration-300">
-                <i class="fas fa-building mr-2"></i> NURUD Admin Panel
+                <i class="fas fa-building mr-2"></i> Charlton Virtual Office Admin Panel
             </a>
         </div>
         <div class="flex items-center space-x-4">

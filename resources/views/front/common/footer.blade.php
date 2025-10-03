@@ -24,7 +24,7 @@
                  <address class="not-italic text-sm space-y-2 mb-4">
                     <p><i class="fas fa-map-marker-alt mr-2 text-orange-400"></i>Unit 6,Block 3, Dockyard Industrial Estate,<br>Church Street, Woolwich, London UK</p>
                     <p><i class="fas fa-phone-alt mr-2 text-orange-400"></i><a href="tel:+23412345678">+44 (0) 2032474747</a></p>
-                    <p><i class="fas fa-envelope mr-2 text-orange-400"></i><a href="mailto:support@NURUD.com">support@NURUD.com</a></p>
+                    <p><i class="fas fa-envelope mr-2 text-orange-400"></i><a href="mailto:support@charltonvirtualoffice.com">support@charltonvirtualoffice.com</a></p>
                  </address>
                  <div class="flex space-x-4">
                     <a href="#" aria-label="LinkedIn" class="social-icon text-xl hover:text-orange-300 transition duration-300"><i class="fab fa-linkedin"></i></a>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="mt-8 pt-8 border-t border-blue-700 text-center text-sm">
-             &copy; 2025 NURUD Virtual Offices. All Rights Reserved. |
+             &copy; 2025 Charlton Virtual Office. All Rights Reserved. |
              <a href="{{ route('privacy-policy.index') }}">Privacy Policy</a> |
              <a href="{{ route('terms-of-service.index') }}">Terms of Service</a>
         </div>
