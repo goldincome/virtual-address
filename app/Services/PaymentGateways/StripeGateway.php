@@ -73,13 +73,13 @@ class StripeGateway implements PaymentGatewayInterface
                 }
                 // Check if there are also one-time products in the cart to add to the first invoice.
                 $oneTimeItems = $this->getOneTimeItemsFromCart();
-                dd($oneTimeItems);
+                
                 $checkoutItems = !empty($oneTimeItems)
                     ? array_merge($returnUrls, ['line_items' => $oneTimeItems])
                     : $returnUrls;
-
+                
                 $session = $checkout->checkout($checkoutItems);
-
+                //dd($checkoutItems, $session);
                 return redirect()->away($session->url)->send();
             }
 
