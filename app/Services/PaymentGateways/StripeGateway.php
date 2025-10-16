@@ -183,7 +183,7 @@ class StripeGateway implements PaymentGatewayInterface
                 'quantity'   => 1,
             ];
         }
-        dd($lineItems);
+        //dd($lineItems);
         return $lineItems;
     }
 }
