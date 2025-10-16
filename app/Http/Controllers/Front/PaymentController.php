@@ -173,7 +173,7 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
         
             //dd($e->getMessage());
-            return redirect()->route('cart.index')->with('error', 'Payment confirmation failed: ');
+            return redirect()->route('cart.index')->with('error', 'Payment confirmation failed:'.$e->getMessage());
         }
     }
 

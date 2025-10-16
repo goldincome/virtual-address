@@ -88,11 +88,11 @@ class ConferenceRoomController extends Controller
         } 
         catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error creating meeting room: ' . $e->getMessage());
+                ->with('error', 'Error creating conference room: ' . $e->getMessage());
         }
 
         return redirect()->route('admin.conference-rooms.index')
-                            ->with('success', 'Meeting Room created successfully.');
+                            ->with('success', 'Conference Room created successfully.');
     }
 
     /**
@@ -149,10 +149,10 @@ class ConferenceRoomController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error updating virtual address: ');
+                ->with('error', 'Error updating conference room: ');
         }
         return redirect()->route('admin.conference-rooms.index')
-                ->with('success', 'Meeting Room updated successfully.');
+                ->with('success', 'Conference Room updated successfully.');
     }
 
     /**
@@ -166,9 +166,9 @@ class ConferenceRoomController extends Controller
             });
         }catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error creating meeting room: ' . $e->getMessage());
+                ->with('error', 'Error deleting conference room: ' . $e->getMessage());
         }
         return redirect()->route('admin.conference-rooms.index')
-                            ->with('success', 'Meeting Room deleted successfully.');
+                            ->with('success', 'Conference Room deleted successfully.');
     }
 }

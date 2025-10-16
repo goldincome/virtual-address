@@ -161,14 +161,17 @@
 
                 {{-- Event Booking Details Section --}}
                 {{-- This section will only show if the order has event booking details --}}
-                @if(isset($order->eventBooking))
+                @if($order->hasBookingRoom())
                 <div class="bg-gray-50 p-6 rounded-md text-left my-8 border border-gray-200">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Event Booking Details</h3>
-                    <div class="space-y-2 text-gray-700">
-                        <p><strong>Event/Room:</strong> {{ $order->eventBooking->room_name }}</p>
-                        <p><strong>Date:</strong> {{ $order->eventBooking->event_date->format('F j, Y') }}</p>
-                        <p><strong>Time Slot:</strong> {{ $order->eventBooking->start_time->format('g:i A') }} - {{ $order->eventBooking->end_time->format('g:i A') }} ({{ $order->eventBooking->hours_booked }} hours)</p>
-                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Booking Details</h3>
+                    @foreach($order->bookingRoomDetails as $bookingRoomDetail)
+                        <div class="space-y-2 text-gray-700">
+                            <p><strong>Event/Room:</strong> {{ $bookingRoomDetail->name }}</p>
+                            <p><strong>Date:</strong> {{ $order->eventBooking->event_date->format('F j, Y') }}</p>
+                            <p><strong>Time Slot:</strong> {{ $order->eventBooking->start_time->format('g:i A') }} - {{ $order->eventBooking->end_time->format('g:i A') }} ({{ $order->eventBooking->hours_booked }} hours)</p>
+                        </div>
+                        <hr/>
+                    @endforeach
                 </div>
                 @endif
 
