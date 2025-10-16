@@ -73,6 +73,7 @@ class StripeGateway implements PaymentGatewayInterface
                 }
                 // Check if there are also one-time products in the cart to add to the first invoice.
                 $oneTimeItems = $this->getOneTimeItemsFromCart();
+                dd($oneTimeItems);
                 $checkoutItems = !empty($oneTimeItems)
                     ? array_merge($returnUrls, ['line_items' => $oneTimeItems])
                     : $returnUrls;
@@ -164,7 +165,7 @@ class StripeGateway implements PaymentGatewayInterface
                             'name' => $item->name,
                             'description' => $item->options->description ?? $item->name,
                         ],
-                        'price'  => (int)($item->price * 100),
+                        'unit_amount'  => (int)($item->price * 100),
                     ],
                     'quantity'   => $item->qty,
                 ];
@@ -180,7 +181,7 @@ class StripeGateway implements PaymentGatewayInterface
                     'product_data' => [
                         'name' => 'VAT (' . config('cart.tax') . "%)",
                     ],
-                    'price'  => (int)(Cart::tax() * 100),
+                    'unit_amount'  => (int)(Cart::tax() * 100),
                 ],
                 'quantity'   => 1,
             ];
