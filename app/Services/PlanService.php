@@ -19,7 +19,7 @@ class PlanService
             'slug' => Str::slug($planData['name']),
             'description' => $planData['description'] ?? null,
             'price' => $planData['price'],
-            'yearly_monthly_price' => $planData['yearly_monthly_price'],
+            'yearly_monthly_price' => $planData['yearly_monthly_price'] ?? 0.00,
             'invoice_period' => $planData['invoice_period'] ?? 1,
             'is_active' => $planData['is_active'] ?? false,
             'level' => $planData['level'] ?? 0,
