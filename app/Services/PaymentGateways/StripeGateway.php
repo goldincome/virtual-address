@@ -157,6 +157,7 @@ class StripeGateway implements PaymentGatewayInterface
             // Assuming VIRTUAL_ADDRESS is your subscription product type.
             if ($item->options->type !== ProductTypeEnum::VIRTUAL_ADDRESS->value) {
                 $lineItems[] = [
+                    'price'  => (int)($item->price * 100),
                     'price_data' => [
                         'currency'     => strtolower(config('cashier.currency', 'gbp')),
                         'product_data' => [
@@ -173,6 +174,7 @@ class StripeGateway implements PaymentGatewayInterface
         // Add Tax/VAT if applicable.
         if (config('cart.tax') > 0 && Cart::tax() > 0) {
             $lineItems[] = [
+                'price'  => (int)(Cart::tax() * 100),
                 'price_data' => [
                     'currency'     => strtolower(config('cashier.currency', 'gbp')),
                     'product_data' => [
