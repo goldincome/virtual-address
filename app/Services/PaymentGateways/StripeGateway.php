@@ -84,8 +84,8 @@ class StripeGateway implements PaymentGatewayInterface
 
             // --- SCENARIO 2: The cart contains ONLY non-subscription products. ---
             $lineItems = $this->getOneTimeItemsFromCart();
-            dd($lineItems);
-            exit;
+            //dd($lineItems);
+            
             if (!empty($lineItems)) {
                 Stripe::setApiKey(config('cashier.secret'));
                 $orderNo = $cartService->getOrderNoFromCartItem();
@@ -183,7 +183,7 @@ class StripeGateway implements PaymentGatewayInterface
                 'quantity'   => 1,
             ];
         }
-
+        dd($lineItems);
         return $lineItems;
     }
 }
