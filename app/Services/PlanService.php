@@ -25,8 +25,8 @@ class PlanService
             'level' => $planData['level'] ?? 0,
             'invoice_interval' => 'month',
             'discount_duration_in_months' => $planData['discount_duration_in_months'] ?? null,
-            'discount_amount' => $planData['discount_amount'] ?? null,
-            'discount_percent' => $planData['discount_percent'] ?? null,
+            'discount_amount' => $planData['discount_amount'] ?? 0.00,
+            'discount_percent' => $planData['discount_percent'] ?? 0.00,
             'currency' => config('cashier.currency'),
             // ... other fields
         ]);
