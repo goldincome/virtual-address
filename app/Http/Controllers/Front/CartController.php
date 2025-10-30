@@ -107,7 +107,19 @@ class CartController extends Controller
     }
 
     public function checkoutSuccess(string $order_no)
-    {   
+    {  /* 
+        $user = auth()->user();
+        $order = $user->orders()->where('order_no', $order_no)->where('user_id', auth()->id())->firstOrFail();
+        $subscriptionDetail = $order->hasSubscription() 
+        ? $order->orderDetails()->where('product_type', ProductTypeEnum::VIRTUAL_ADDRESS->value)->latest()->first() 
+        : null;
+        return view('emails.CustomerOrderEmail', [
+                'order' => $order,
+                'jsonPlan' => json_decode($subscriptionDetail?->plan), 
+                'subscriptionType' => SubscriptionTypeEnum::class,
+        ]); 
+        */
+            
         try{
             $user = auth()->user();
             $order = $user->orders()->where('order_no', $order_no)->where('user_id', auth()->id())->firstOrFail();

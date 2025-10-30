@@ -34,7 +34,7 @@ class Order extends Model
     }
     public function bookingRoomDetails()
     {
-        $this->orderDetails()->where('product_type', ProductTypeEnum::CONFERENCE_ROOM->value)
-            ->orWhere('product_type', ProductTypeEnum::MEETING_ROOM->value)->get();
+        return $this->orderDetails()->where('product_type', ProductTypeEnum::CONFERENCE_ROOM->value)
+            ->orWhere('product_type', ProductTypeEnum::MEETING_ROOM->value);
     }
 }

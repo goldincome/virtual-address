@@ -42,7 +42,7 @@
                             Full Name :
                         </span>
                         <span>
-                            {{$contactUs->name}}
+                            {{$contactUs['name']}}
                         </span>
                     </div>
                     <div style="margin-bottom: 15px;">
@@ -50,23 +50,16 @@
                             Email Address :
                         </span>
                         <span>
-                            {{$contactUs->email}}
+                            {{$contactUs['email']}}
                         </span>
                     </div>
-                    <div style="margin-bottom: 15px;">
-                        <span style="font-weight: bold;">
-                            Phone Number :
-                        </span>
-                        <span>
-                            {{$contactUs->phone}}
-                        </span>
-                    </div>
+                    
                     <div style="margin-bottom: 15px;">
                         <span style="font-weight: bold;">
                             Subject :
                         </span>
                         <span>
-                            {{$contactUs->subject}}
+                            {{$contactUs['subject']}}
                         </span>
                     </div>
                     <div style="margin-bottom: 15px;">
@@ -74,7 +67,7 @@
                             Message :
                         </span>
                         <span>
-                            {!! nl2br( $contactUs->message)!!}
+                            {!! nl2br( $contactUs['message'])!!}
                         </span>
                     </div>
                 </div>

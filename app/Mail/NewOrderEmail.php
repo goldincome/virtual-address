@@ -14,7 +14,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class NewOrderEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    //use Queueable, SerializesModels;
+    use SerializesModels;
 
     /**
      * Create a new message instance.
@@ -33,7 +34,7 @@ class NewOrderEmail extends Mailable
     {
         return new Envelope(
             subject: 'Order Confirmation - ' . $this->order->order_no,
-            from: new Address('hello@demomailtrap.co', 'Jeffrey Way'),
+            from: new Address(config('app.admin_email'), 'Charlton Virtual Office'),
             
         );
     }

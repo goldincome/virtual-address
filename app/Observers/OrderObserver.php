@@ -8,6 +8,7 @@ use App\Enums\ProductTypeEnum;
 use App\Enums\SubscriptionTypeEnum;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendOrderConfirmationEmail;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class OrderObserver
@@ -19,15 +20,9 @@ class OrderObserver
     {
 
         try{
-           
-            Mail::to($order->user->email)->queue(new NewOrderEmail($order));
-            /*
-            Mail::send('emails.CustomerOrderEmail', $data, function ($message) use ($order) {
-                $message->to($order->user->email, $order->user->name)
-                    ->from('info@ninuk.co.uk', 'Ninuk Virtual Address')
-                    ->subject('Order Confirmation - ' . $order->order_no);
-            });
-            */
+            SendOrderConfirmationEmail::dispatch($order);
+            //Mail::to($order->user->email)->queue(new NewOrderEmail($order));
+            
         } catch (\Exception $e) {
             // Log the error or handle it as needed
             //Log::error('Failed to send order confirmation email: ' . $e->getMessage());

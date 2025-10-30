@@ -123,6 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'admin_email' => env('APP_ADMIN_EMAIL', 'info@virtualaddress.co.uk'),
+    'admin_email' => env('APP_ADMIN_EMAIL', 'info@charltonvirtualoffice.com'),
 
 ];

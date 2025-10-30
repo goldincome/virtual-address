@@ -164,11 +164,21 @@
                 @if($order->hasBookingRoom())
                 <div class="bg-gray-50 p-6 rounded-md text-left my-8 border border-gray-200">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Booking Details</h3>
-                    @foreach($order->bookingRoomDetails as $bookingRoomDetail)
+                    @foreach($order->orderDetails as $bookingRoomDetail)
                         <div class="space-y-2 text-gray-700">
                             <p><strong>Event/Room:</strong> {{ $bookingRoomDetail->name }}</p>
-                            <p><strong>Date:</strong> {{ $order->eventBooking->event_date->format('F j, Y') }}</p>
-                            <p><strong>Time Slot:</strong> {{ $order->eventBooking->start_time->format('g:i A') }} - {{ $order->eventBooking->end_time->format('g:i A') }} ({{ $order->eventBooking->hours_booked }} hours)</p>
+                            <p><strong>Booked Date:</strong> {{ date('D, M j, Y', strtotime($bookingRoomDetail->booked_date))}}</p>
+                            <p><strong>Time Slot:</strong>
+                                <ul>
+                                @php
+                                    $bookedTimes = json_decode($bookingRoomDetail->all_booked_time, true) ?? [];
+                                @endphp
+                                @foreach ($bookedTimes as $bookedTime)
+                                    <li>{{ \Carbon\Carbon::parse($bookedTime['startDate'])->format('g:i A') }} - {{ \Carbon\Carbon::parse($bookedTime['endDate'])->format('g:i A') }}</li>
+                                @endforeach
+                                </ul> 
+                            </p>
+                            <p><strong>Total Duration:</strong>  {{ $bookingRoomDetail->quantity }}  hours</p>
                         </div>
                         <hr/>
                     @endforeach

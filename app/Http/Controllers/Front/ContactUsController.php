@@ -33,10 +33,10 @@ class ContactUsController extends Controller
             Mail::send('emails.ContactUsAdminNotification', $data, function ($message){
                 $message->to(config('app.admin_email'), 'Charlton Virtual Office - UK');
                 $message->subject('New Message Virtual Address Website-Charlton Virtual Office');
-                $message->replyTo('info@ninuk.co.uk');
+                $message->replyTo('info@charltonvirtualoffice.com');
             });
         } catch(\Throwable $e){
-            return redirect()->back()->withErrors(['error' => 'Failed to send message. Please try again later.'])->withInput();
+            return redirect()->back()->withErrors(['error' => 'Failed to send message. Please try again later.'. $e->getMessage()])->withInput();
         }
         // Redirect back with a success message
         return redirect()->route('contact-us.index')->with('success', 'Your message has been sent successfully!');
