@@ -18,8 +18,8 @@
 
             <div class="w-full md:w-1/2 p-8 md:p-12">
                 <div class="text-center md:text-left">
-                    <h2 class="text-3xl font-bold text-blue-800 mb-3">Create Your Account</h2>
-                    <p class="text-gray-600 mb-8">Get started with Charlton Virtual Office by filling out the form below.</p>
+                    <h2 class="text-3xl font-bold text-blue-800 mb-3">Subscription Account Creation</h2>
+                    <p class="text-gray-600 mb-8">Fill the information below to continue your subscription.</p>
                 </div>
 
                 <form action="{{ route('register') }}" method="POST" class="space-y-5">
@@ -93,7 +93,7 @@
                     <div>
                         <button type="submit"
                                 class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-300">
-                            <i class="fas fa-user-plus mr-2"></i> Create Account
+                            <i class="fas fa-user-plus mr-2"></i> Continue Subscription
                         </button>
                     </div>
                 </form>

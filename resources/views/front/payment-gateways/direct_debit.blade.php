@@ -1,4 +1,4 @@
-@if($isSubscription)
+@if(!$isSubscription)
     <div>
         {{-- This is the main clickable card for the Direct Debit option --}}
         <div class="payment-method payment-option p-4 rounded-lg cursor-pointer flex items-center justify-between"

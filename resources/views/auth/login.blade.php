@@ -23,8 +23,16 @@ Login -Charlton Virtual Office
         <div class="w-full md:w-1/2 p-8 md:p-12">
             <div class="text-center md:text-left">
                 @include('front.common.error-and-message') 
-                <h2 class="text-3xl font-bold text-blue-800 mb-3">Customer Login</h2>
-                <p class="text-gray-600 mb-8">Welcome Back!</br>Login to continue to your Charlton Virtual Office account.</p>
+                <h2 class="text-2xl font-bold text-blue-800 mb-1">Customer Login</h2>
+                <p class="text-gray-600 mb-2">Welcome Back!</br>Login to continue to your Charlton Virtual Office account.</p>
+                @php
+                    use Gloudemans\Shoppingcart\Facades\Cart;
+                @endphp
+                @if(Cart::count() > 0)
+                    <p class="font-bold text-gray-600 mb-2">Not Subscribed To a Plan?</br>Click <a href="{{ route('register') }}" class="font-medium text-orange-600 hover:text-orange-500">
+                            Continue Subscription
+                        </a> to continue your subscription.</p>
+                @endif
             </div>
 
             <form action="{{ route('login') }}" method="POST" class="space-y-6">
@@ -73,11 +81,11 @@ Login -Charlton Virtual Office
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <label class="ml-2 block text-sm text-gray-900">Not a member?</label>
+                        <label class="ml-2 block text-sm text-gray-900">Not yet subscribed?</label>
                     </div>
                    <div class="text-sm"> 
-                        <a href="{{ route('register') }}" class="font-medium text-orange-600 hover:text-orange-500">
-                            Register Now!
+                        <a href="{{ route('virtual-address.index') }}" class="font-medium text-orange-600 hover:text-orange-500">
+                            Subscribe To a Plan Now!
                         </a>
                     </div> 
                 </div>

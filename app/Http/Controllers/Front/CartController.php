@@ -45,6 +45,9 @@ class CartController extends Controller
         if(Cart::count() == 0){
             return to_route('cart.index');
         }
+        if(!auth()->check()){
+            return to_route('register');
+        }
         try {
            $cartItems = Cart::content();
            $productType =  ProductTypeEnum::class;
