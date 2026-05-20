@@ -58,7 +58,7 @@
 
                                 </span>
                                 <input type="number" step="0.01" id="yearly_monthly_price" name="yearly_monthly_price" required
-                                  readonly  class="w-full pl-8 pr-3 bg-gray-200 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
+                                  required  class="w-full pl-8 pr-3 bg-gray-200 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
                             </div>
                         </div>
                         <!-- Modify the main image section in your Blade file -->

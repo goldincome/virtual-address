@@ -53,7 +53,7 @@ class PlanController extends Controller
                     }
                     $planData = [];
                     $planData['discount_duration_in_months'] = 10;
-                    $planData['yearly_monthly_price'] = $request->price * 10;
+                    $planData['yearly_monthly_price'] = $request->input('yearly_monthly_price') ?? $request->price * 10;
                     $planData['discount_amount'] = ($request->price * 12) - $planData['yearly_monthly_price'];
                     $planData['discount_percent'] =(float) number_format(($planData['discount_amount']/($request->price * 12)) * 100, 2);
                     //dd($planData);
@@ -104,11 +104,13 @@ class PlanController extends Controller
 
     public function update(UpdateVirtualAddressRequest $request, Plan $plan, PlanService $planService)
     {   
+        $validated = $request->validated();
+        //dd($validated);
         try {
             \DB::transaction(function () use ($request, $plan, $planService) {
                 $planData = $request->only(['name', 'description', 'price', 'is_active', 'level']);
                     $planData['discount_duration_in_months'] = 10;
-                    $planData['yearly_monthly_price'] = $request->price * 10;
+                    $planData['yearly_monthly_price'] = $request->input('yearly_monthly_price') ?? $request->price * 10;
                     $planData['discount_amount'] = ($request->price * 12) - $planData['yearly_monthly_price'];
                     $planData['discount_percent'] =(float) number_format(($planData['discount_amount']/($request->price * 12)) * 100, 2);
                 if ($request->hasFile('main_product_image')) {
