@@ -57,7 +57,17 @@
                         <div class="bg-white p-8 rounded-lg shadow-lg border flex flex-col popular-package">
                             <div class="popular-badge">Popular</div>
                             <h3 class="text-2xl font-semibold text-orange-600 mb-4 text-center">{{ $plan->name }}</h3>
-                            <p class="text-4xl font-bold text-center text-blue-900 mb-6">{{ currencyFormatter($plan->price) }}<span class="text-lg font-normal text-gray-500">/month</span></p>
+                            <p class="text-4xl font-bold text-center text-blue-900 mb-6">{{ currencyFormatter($plan->price) }}<span class="text-lg font-normal text-gray-600">/month</span></p>
+                            <div class="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-6 text-center">
+                                    <p class="text-sm font-semibold uppercase tracking-wider text-orange-700 mb-1">Yearly Discount</p>
+                                    <p class="text-3xl font-bold text-orange-800 flex flex-wrap items-center justify-center gap-2">
+                                        <span class="line-through text-gray-600 text-xl font-normal">{{ currencyFormatter($plan->price * 12) }}</span>
+                                        <span>{{ currencyFormatter($plan->yearly_monthly_price) }}<span class="text-lg font-normal text-gray-700">/year</span></span>
+                                    </p>
+                                    <span class="inline-block mt-2 text-sm font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
+                                        You save {{ currencyFormatter($plan->price * 12 - $plan->yearly_monthly_price) }}
+                                    </span>
+                            </div>
                             <ul class="space-y-3 text-gray-700 mb-8 flex-grow">
                                 @foreach($plan->features as $index => $feature)
                                     <li class="flex items-center"><i class="{{ $feature->featureSetting->status ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-400' }} mr-2"></i>
@@ -72,7 +82,17 @@
                     @else
                         <div class="bg-gray-50 p-8 rounded-lg shadow-md border border-gray-200 flex flex-col">
                             <h3 class="text-2xl font-semibold text-blue-700 mb-4 text-center">{{ $plan->name }}</h3>
-                            <p class="text-4xl font-bold text-center text-blue-900 mb-6">{{ currencyFormatter($plan->price) }}<span class="text-lg font-normal text-gray-500">/month</span></p>
+                            <p class="text-4xl font-bold text-center text-blue-900 mb-6">{{ currencyFormatter($plan->price) }}<span class="text-lg font-normal text-gray-600">/month</span></p>
+                            <div class="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-6 text-center">
+                                    <p class="text-sm font-semibold uppercase tracking-wider text-orange-700 mb-1">Yearly Discount</p>
+                                    <p class="text-3xl font-bold text-orange-800 flex flex-wrap items-center justify-center gap-2">
+                                        <span class="line-through text-gray-600 text-xl font-normal">{{ currencyFormatter($plan->price * 12) }}</span>
+                                        <span>{{ currencyFormatter($plan->yearly_monthly_price) }}<span class="text-lg font-normal text-gray-700">/year</span></span>
+                                    </p>
+                                    <span class="inline-block mt-2 text-sm font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
+                                        You save {{ currencyFormatter($plan->price * 12 - $plan->yearly_monthly_price) }}
+                                    </span>
+                            </div>
                             <ul class="space-y-3 text-gray-600 mb-8 flex-grow">
                                 @foreach($plan->features as $index => $feature)
                                     <li class="flex items-center"><i class="{{ $feature->is_activated ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-400' }} mr-2"></i>

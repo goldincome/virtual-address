@@ -44,8 +44,7 @@
 
     <section id="introduction" class="mb-16 md:mb-20">
         <div class="container mx-auto px-6 max-w-7xl">
-            <div
-                class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-12 items-stretch bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-12 items-stretch bg-white rounded-lg shadow-lg overflow-hidden">
                 <!-- Left: Description -->
                 <div class="p-8 flex flex-col justify-center">
                     <h2 class="text-3xl font-bold text-blue-800 mb-4">
@@ -56,15 +55,14 @@
                     </p>
                 </div>
 
-                <!-- MODIFIED: Right: Call to Action with Fancy Radio Buttons -->
+                <!-- Right: Call to Action with Checked Card Radios -->
                 <div class="p-8 bg-blue-50 flex flex-col justify-center">
                     <h3 class="text-2xl font-semibold text-blue-800 mb-4">Start with the {{ $plan->name }} Plan</h3>
                     <ul class="text-gray-700 space-y-3 mb-6">
                         <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Instant business credibility</li>
                         <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Prime mailing address included</li>
                         <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Cancel anytime, no hidden fees</li>
-                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Access to meeting rooms & mail handling
-                        </li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Access to meeting rooms & mail handling</li>
                     </ul>
                     
                     <form action="{{ route('virtual-address.store', ['plan_id' => $plan->id]) }}" method="POST">
@@ -76,33 +74,43 @@
                         <fieldset class="space-y-4 mb-6">
                             <legend class="sr-only">Subscription Options</legend>
                             @foreach($subscriptionTypes::cases() as $type)
-                                <label for="{{ $type->value }}_sub" class="subscription-option flex justify-between items-center">
+                                <div class="relative">
                                     <input type="radio" id="{{ $type->value }}_sub" name="subscription_type"
-                                        value="{{ $type->value }}" class="sr-only" {{ $loop->first ? 'checked' : '' }}>
-                                    <div>
-                                        <span class="font-semibold text-lg text-blue-800">{{ ucfirst($type->value) }}
-                                            Subscription</span>
-                                        <p class="text-sm text-gray-600">
-                                            @if($type->value === $subscriptionTypes::MONTHLY->value)
-                                                Billed monthly 
-                                            @else
-                                                Save with annual plan <br/>
-                                                <span class="font-bold text-blue-600">({{ $plan->discount_percent.'% discount' }})</span>
+                                        value="{{ $type->value }}" class="sr-only peer" {{ $loop->first ? 'checked' : '' }}>
+                                    
+                                    <!-- Checked style indicator circle -->
+                                    <label for="{{ $type->value }}_sub" class="flex justify-between items-center p-4 bg-white border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200 select-none pr-14 peer-checked:border-blue-600 peer-checked:bg-blue-50/40 shadow-sm hover:border-gray-300">
+                                        <div>
+                                            <span class="font-semibold text-lg text-blue-800">
+                                                {{ ucfirst($type->value) }} Subscription
+                                            </span>
+                                            <div class="text-sm text-gray-600 mt-1">
+                                                @if($type->value === $subscriptionTypes::MONTHLY->value)
+                                                    Billed monthly 
+                                                @else
+                                                    Save with annual plan <br/>
+                                                    <span class="font-bold text-blue-600">({{ $plan->discount_percent.'% discount' }})</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="text-right mr-4">
+                                            <span class="text-xl font-bold text-orange-600">
+                                                £{{ $type->value === $subscriptionTypes::MONTHLY->value ? $plan->price.'/month' : $plan->yearly_monthly_price.'/year'}}
+                                            </span>
+                                             @if($type->value !== $subscriptionTypes::MONTHLY->value)
+                                                <p class="text-sm font-bold text-blue-600 mt-1">
+                                                    You save £{{ ($plan->price * 12) - $plan->yearly_monthly_price }}
+                                                </p>
                                             @endif
-                                        </p>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-xl font-bold text-orange-600">
-                                            £{{ $type->value === $subscriptionTypes::MONTHLY->value ? $plan->price.'/month' : $plan->yearly_monthly_price.'/year'}}
-                                        </span>
-                                         @if($type->value !== $subscriptionTypes::MONTHLY->value)
-                                            <p class="text-sm font-bold text-blue-600">
-                                                You save £{{ ($plan->price * 12) - $plan->yearly_monthly_price }}
-                                            </p>
-                                        @endif
-                                    </div>
-                          
-                                </label>
+                                        </div>
+
+                                        <!-- Corrected CSS structure to enforce check sign fill matching state -->
+                                        <div class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center transition-all duration-200 pointer-events-none
+                                            peer-checked:border-blue-600 peer-checked:bg-blue-600">
+                                            <i class="fas fa-check text-white text-[10px] transform scale-0 transition-transform duration-200 peer-checked:scale-100"></i>
+                                        </div>
+                                    </label>
+                                </div>
                             @endforeach
                         </fieldset>
 
@@ -115,41 +123,45 @@
                             <fieldset class="space-y-4 mb-6">
                                 <legend class="sr-only">Mail Delivery Options</legend>
                                 @foreach($plan->mailSettings as $mailSetting)
-                                    <label for="{{ $mailSetting->mail_type->value }}" class="subscription-option flex justify-between items-center">
+                                    <div class="relative">
                                         <input type="radio" id="{{ $mailSetting->mail_type->value }}" required name="mail_type"
-                                            value="{{ $mailSetting->mail_type->value }}" class="sr-only" {{ $loop->first ? 'checked' : '' }}>
-                                        <div>
-                                            <span class="font-semibold text-lg text-blue-800">
-                                                @if($mailSetting->mail_type->value === $mailTypes::Scanned->value)
-                                                    {{ $mailTypes::Scanned->label() }}
-                                                @else
-                                                    {{ $mailTypes::Forwarded->label() }} 
-                                                @endif
+                                            value="{{ $mailSetting->mail_type->value }}" class="sr-only peer" {{ $loop->first ? 'checked' : '' }}>
+                                        
+                                        <label for="{{ $mailSetting->mail_type->value }}" class="flex justify-between items-center p-4 bg-white border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200 select-none pr-14 peer-checked:border-blue-600 peer-checked:bg-blue-50/40 shadow-sm hover:border-gray-300">
+                                            <div>
+                                                <span class="font-semibold text-lg text-blue-800">
+                                                    @if($mailSetting->mail_type->value === $mailTypes::Scanned->value)
+                                                        {{ $mailTypes::Scanned->label() }}
+                                                    @else
+                                                        {{ $mailTypes::Forwarded->label() }} 
+                                                    @endif
+                                                </span>
+                                                <p class="text-sm text-gray-600 mt-1">
+                                                    @if($mailSetting->mail_type->value === $mailTypes::Scanned->value)
+                                                        All your mails will be scanned to you
+                                                    @else
+                                                        All your mail will be forwarded to you
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            <span class="text-lg font-semibold text-orange-600 mr-4">
+                                                {{ currencyFormatter($mailSetting->price) }}/mail
                                             </span>
-                                            <p class="text-sm text-gray-600">
-                                                @if($mailSetting->mail_type->value === $mailTypes::Scanned->value)
-                                                    All your mails will be scanned to you
-                                                @else
-                                                    All your mail will be forwarded to you
-                                                @endif
-                                            </p>
-                                        </div>
-                                        <span class="text-lg font-semibold text-orange-600">
-                                            @if($mailSetting->mail_type->value === $mailTypes::Scanned->value)
-                                                {{ currencyFormatter($mailSetting->price) }}/mail
-                                            @else
-                                                {{ currencyFormatter($mailSetting->price) }}/mail
-                                            @endif
-                                        </span>
-                                      
-                                    </label>
+
+                                            <!-- Corrected CSS structure to enforce check sign fill matching state -->
+                                            <div class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center transition-all duration-200 pointer-events-none
+                                                peer-checked:border-blue-600 peer-checked:bg-blue-600">
+                                                <i class="fas fa-check text-white text-[10px] transform scale-0 transition-transform duration-200 peer-checked:scale-100"></i>
+                                            </div>
+                                        </label>
+                                    </div>
                                 @endforeach
                             </fieldset>
                         @endif
+
                         @if($subscription)
                             @if($subscription->plan->id === $plan->id)
-                                <span 
-                                    class="w-full bg-blue-500 hover:bg-orange-600 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow">
+                                <span class="w-full bg-blue-500 hover:bg-orange-600 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow block text-center">
                                     You are currently subscribed to this Plan
                                 </span>
                             @endif
@@ -163,11 +175,10 @@
                                     @if($dplan->level > $subscription->plan->level)
                                         <hr class="my-6 border-t border-gray-300">
                                         <a href="{{ route('virtual-address.show',$dplan->slug) }}" 
-                                            class="w-full bg-orange-500 hover:bg-orange-600 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow">
+                                            class="w-full bg-orange-500 hover:bg-orange-600 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow block text-center">
                                             Upgrade to {{ $dplan->name }} Plan Now
-                                        </a><br/><br/>
-                                        Enjoy upto 16% Special Discount
-                                        
+                                        </a><br/>
+                                        <div class="text-center text-gray-700">Enjoy upto 16% Special Discount</div>
                                     @endif
                                 @endforeach
                             @endif
@@ -179,7 +190,7 @@
                         @endif
                     </form>
 
-                    <p class="text-sm text-gray-600 mt-3 text-center">Secure checkout. </p>
+                    <p class="text-sm text-gray-600 mt-3 text-center">Secure checkout.</p>
                 </div>
             </div>
         </div>

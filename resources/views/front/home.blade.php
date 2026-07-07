@@ -138,7 +138,20 @@
                             <div class="popular-badge">Popular</div>
                             <div class="card-content">
                                 <h3 class="text-2xl font-semibold text-orange-600 mb-4 text-center">{{ $plan->name }}</h3>
-                                <p class="text-4xl font-bold text-center text-blue-800 mb-6">{{ currencyFormatter($plan->price) }}<span class="text-lg font-normal text-gray-500">/month</span></p>
+                                <p class="text-4xl font-bold text-center text-blue-800 mb-6">{{ currencyFormatter($plan->price) }}<span class="text-lg font-normal text-gray-800">/month</span></p>
+                                
+                                <!-- Highlighted Yearly Section -->
+                                <div class="bg-orange-50 p-4 rounded-lg border border-orange-200 mb-6 text-center">
+                                    <p class="text-sm font-semibold uppercase tracking-wider text-orange-700 mb-1">Yearly Discount</p>
+                                    <p class="text-3xl font-bold text-orange-800 flex flex-wrap items-center justify-center gap-2">
+                                        <span class="line-through text-gray-600 text-xl font-normal">{{ currencyFormatter($plan->price * 12) }}</span>
+                                        <span>{{ currencyFormatter($plan->yearly_monthly_price) }}<span class="text-lg font-normal text-gray-700">/year</span></span>
+                                    </p>
+                                    <span class="inline-block mt-2 text-sm font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
+                                        You save {{ currencyFormatter($plan->price * 12 - $plan->yearly_monthly_price) }}
+                                    </span>
+                                </div>
+
                                 <ul class="space-y-2 text-gray-700 mb-8 text-sm">
                                     @foreach($plan->features as $index => $feature)
                                         <li class="flex items-center"><i class="{{ $feature->is_activated ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-400' }} mr-2"></i>
@@ -156,6 +169,19 @@
                             <div class="card-content">
                                 <h3 class="text-2xl font-semibold text-blue-700 mb-4 text-center">{{ $plan->name }}</h3>
                                 <p class="text-4xl font-bold text-center text-blue-800 mb-6">{{ currencyFormatter($plan->price) }}<span class="text-lg font-normal text-gray-500">/month</span></p>
+                                
+                                <!-- Highlighted Yearly Section -->
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6 text-center">
+                                    <p class="text-sm font-semibold uppercase tracking-wider text-blue-700 mb-1">Yearly Discount</p>
+                                    <p class="text-3xl font-bold text-orange-800 flex flex-wrap items-center justify-center gap-2">
+                                        <span class="line-through text-gray-600 text-xl font-normal">{{ currencyFormatter($plan->price * 12) }}</span>
+                                        <span>{{ currencyFormatter($plan->yearly_monthly_price) }}<span class="text-lg font-normal text-gray-700">/year</span></span>
+                                    </p>
+                                    <span class="inline-block mt-2 text-sm font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
+                                        You save {{ currencyFormatter($plan->price * 12 - $plan->yearly_monthly_price) }}
+                                    </span>
+                                </div>
+
                                 <ul class="space-y-2 text-gray-600 mb-8 text-sm">
                                     @foreach($plan->features as $index => $feature)
                                         <li class="flex items-center"><i class="{{ $feature->is_activated ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-400' }} mr-2"></i>
