@@ -56,6 +56,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('checkout.index', absolute: false));
+        return redirect(route('cart.index', absolute: false));
     }
 }

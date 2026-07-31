@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Mail\PasswordChangedEmail;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 
 class PasswordController extends Controller
@@ -23,6 +26,12 @@ class PasswordController extends Controller
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        try {
+            Mail::to($request->user()->email)->send(new PasswordChangedEmail($request->user()));
+        } catch (\Exception $e) {
+            Log::error('PasswordChangedEmail send failed for user ' . $request->user()->id . ': ' . $e->getMessage());
+        }
 
         return back()->with('status', 'password-updated');
     }

@@ -4,11 +4,9 @@ namespace App\Services;
 use App\Models\Plan;
 use App\Models\User;
 use App\Models\Order;
-use App\Mail\NewOrderEmail;
 use App\Models\OrderDetail;
 use App\Enums\PaymentStatusEnum;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use App\Actions\CalculateCartTotalDiscount;
 use Symfony\Component\Mailer\Messenger\SendEmailMessage;
@@ -40,19 +38,12 @@ class OrderService
             //create order details
             $this->createOrderDetails($order);
              DB::commit();
-            //send order confirmation email
-            try{
-                Mail::to($order->user->email)->send(new NewOrderEmail($order));
-            } catch (\Exception $e) {
-                // Log the email sending failure, but do not rollback the transaction
-                \Log::error('Failed to send order confirmation email: ' . $e->getMessage());
-            }
+
+            return $order;
         } catch (\Exception $e) {
             DB::rollBack();
             throw new \Exception('Order creation failed');
         }
-        
-        return $order;
     }
 
 
