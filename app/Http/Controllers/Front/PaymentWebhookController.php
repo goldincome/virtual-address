@@ -8,6 +8,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Cashier;
 use App\Enums\PaymentStatusEnum;
+use App\Jobs\SendPaymentReceiptEmail;
 use Illuminate\Support\Facades\Log;
 use Stripe\Subscription as StripeSubscription;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,9 +47,10 @@ class PaymentWebhookController extends CashierController
                     }
                 }
                 if(isset($metadata['order_no'])){
-                    $order = Order::where('order_no')->first();
+                    $order = Order::where('order_no', $metadata['order_no'])->first();
                     if($order){
                         $order->update(['status' => PaymentStatusEnum::Paid->value]);
+                        SendPaymentReceiptEmail::dispatch($order, $payload['id']);
                     }
                 }
                 Log::info('Webhook: New subscription created.', [ 'user_id' => $user->id, 'payload' => $payload]);
@@ -74,20 +76,31 @@ class PaymentWebhookController extends CashierController
      */
     public function handleInvoicePaymentSucceeded(array $payload): Response
     {
-        // Add custom logic for successful payments here.
-        // For example, fulfilling an order, sending a thank you email, etc.
-        $stripeCustomerId = $payload['data']['object']['customer'];
-        $user = Cashier::findBillable($stripeCustomerId);
+        try {
+            $stripeCustomerId = $payload['data']['object']['customer'];
+            $user = Cashier::findBillable($stripeCustomerId);
 
-        if ($user) {
+            if ($user) {
+                $order = $this->findOrderFromInvoice($payload, $user);
 
-                 // Extract order_no from the subscription metadata within the invoice payload.
-                //$order = $this->updateOrderFromMetadata($payload);
-        } 
-        else {
-            Log::warning('Webhook: Received Payment event but could not find billable user.', ['stripe_customer' => $stripeCustomerId]);
+                if ($order) {
+                    $order->update(['status' => PaymentStatusEnum::Paid->value]);
+                    SendPaymentReceiptEmail::dispatch($order, $payload['id']);
+                } else {
+                    Log::warning('Webhook: Invoice paid but no matching order found.', [
+                        'user_id' => $user->id,
+                        'payload' => $payload
+                    ]);
+                }
+            } else {
+                Log::warning('Webhook: Received Payment event but could not find billable user.', ['stripe_customer' => $stripeCustomerId]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Webhook: Error in handleInvoicePaymentSucceeded.', [
+                'error' => $e->getMessage(),
+                'payload' => $payload
+            ]);
         }
-        Log::info('Webhook: Invoice payment succeeded.', ['payload' => $payload]);
 
         return new Response('Webhook Handled', 200);
     }
@@ -219,6 +232,53 @@ class PaymentWebhookController extends CashierController
         }
 
         return new Response('Webhook Handled', 200);
+    }
+
+     /**
+     * Find the order related to an invoice, using the subscription metadata order_no.
+     * Falls back to the user's latest virtual-address (subscription) order.
+     */
+    protected function findOrderFromInvoice(array $payload, $user)
+    {
+        $invoice = $payload['data']['object'];
+        $orderNo = $invoice['subscription_details']['metadata']['order_no']
+            ?? $invoice['metadata']['order_no']
+            ?? null;
+
+        $subscriptionId = $invoice['subscription'] ?? null;
+
+        if ($subscriptionId && !$orderNo) {
+            $subscription = $user->subscriptions()->where('stripe_id', $subscriptionId)->first();
+
+            if ($subscription) {
+                try {
+                    $stripeSubscription = $subscription->asStripeSubscription();
+                    $metadata = $stripeSubscription->metadata instanceof \Stripe\StripeObject
+                        ? $stripeSubscription->metadata->toArray()
+                        : (array) $stripeSubscription->metadata;
+                    $orderNo = $metadata['order_no'] ?? null;
+                } catch (\Exception $e) {
+                    Log::warning('Webhook: Could not retrieve Stripe subscription metadata.', [
+                        'stripe_id' => $subscriptionId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        if ($orderNo) {
+            $order = Order::where('order_no', $orderNo)->first();
+            if ($order) {
+                return $order;
+            }
+        }
+
+        return $user->orders()
+            ->whereHas('orderDetails', function ($query) {
+                $query->where('product_type', \App\Enums\ProductTypeEnum::VIRTUAL_ADDRESS->value);
+            })
+            ->latest()
+            ->first();
     }
 
      /**

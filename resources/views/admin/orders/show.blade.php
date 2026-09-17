@@ -39,13 +39,13 @@
                         </p>
                     </div>
                     <div class="flex gap-2 mt-4 sm:mt-0">
-                        <form action="{{ route('admin.orders.approve', $order->order_no) }}" method="POST" class="inline">
+                        <form action="{{ route('admin.orders.approve', $order) }}" method="POST" class="inline">
                             @csrf
                             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">
                                 <i class="fas fa-check mr-1"></i> Approve
                             </button>
                         </form>
-                         <form action="{{ route('admin.orders.cancel', $order->order_no) }}" method="POST" class="inline">
+                         <form action="{{ route('admin.orders.cancel', $order) }}" method="POST" class="inline">
                             @csrf
                             <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">
                                 <i class="fas fa-times mr-1"></i> Cancel

@@ -103,8 +103,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     Route::resource('conference-rooms', ConferenceRoomController::class);
     Route::resource('plans', PlanController::class);
     Route::resource('feature-settings', FeatureSettingController::class);
-    Route::post('orders/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-    Route::post('orders/approve', [OrderController::class, 'approve'])->name('orders.approve');
+    Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::resource('orders', OrderController::class);
 
     //Route::get('plan-feature/{plan}/features/create', [PlanFeatureController::class, 'create'])->name('features.create');

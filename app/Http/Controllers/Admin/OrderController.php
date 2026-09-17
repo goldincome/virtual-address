@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Order;
+use App\Enums\PaymentStatusEnum;
+use App\Jobs\SendPaymentReceiptEmail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -66,6 +68,35 @@ class OrderController extends Controller
     {
         $order->load('orderDetails', 'user');
         return view('admin.orders.show', compact('order'));
+    }
+
+    /**
+     * Approve a manual payment order and send the payment receipt.
+     */
+    public function approve(Order $order)
+    {
+        try {
+            $order->update(['status' => PaymentStatusEnum::Paid->value]);
+            SendPaymentReceiptEmail::dispatch($order);
+
+            return back()->with('success', 'Order approved successfully. Payment receipt email has been queued.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to approve order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cancel a manual payment order.
+     */
+    public function cancel(Order $order)
+    {
+        try {
+            $order->update(['status' => PaymentStatusEnum::Cancelled->value]);
+
+            return back()->with('error', 'Order cancelled successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to cancel order: ' . $e->getMessage());
+        }
     }
 
     /**
