@@ -92,7 +92,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 mt-8">
-                    <a href="meeting-room-orders.html"
+                    <a href="{{ route('meeting-room-orders.index') }}"
                         class="w-full sm:w-auto text-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2.5 px-5 rounded-lg transition duration-300">
                         <i class="fas fa-arrow-left mr-2"></i> Back to Bookings
                     </a>

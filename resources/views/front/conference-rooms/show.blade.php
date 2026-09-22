@@ -6,10 +6,43 @@
 @endsection
 
 @section('description')
-    Conference Room bookings for large groups near Greenwich and Charlton. "{{ $conferenceRoom->name }}" is fully equipped for all your training and presentation needs. Book instantly.
+    Conference Room bookings for larger groups near Greenwich and Charlton. "{{ $conferenceRoom->name }}" is fully equipped for board meetings, presentations and client workshops. Book instantly.
 @endsection
 
-@section('keywords', "{{ $conferenceRoom->name }}, Large Conference Room, Training Venue, Presentation Space, High Capacity, Woolwich, South East London")
+@section('keywords')
+    {{ $conferenceRoom->name }}, Large Conference Room, Boardroom Hire, Presentation Space, High Capacity Meeting Room, Conference Room Woolwich, South East London
+@endsection
+
+@section('jsonld')
+    @if (isset($conferenceRoom))
+        @php
+            $props = [];
+            if ($conferenceRoom->capacity) {
+                $props[] = ['@type' => 'PropertyValue', 'name' => 'Capacity', 'value' => (string) $conferenceRoom->capacity];
+            }
+            foreach (($conferenceRoom->amenities ?? []) as $amenity) {
+                $props[] = ['@type' => 'PropertyValue', 'name' => $amenity, 'value' => true];
+            }
+        @endphp
+        <x-jsonld :schema="[
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $conferenceRoom->name . ' Hire | Conference Room in Woolwich, London',
+            'description' => ($conferenceRoom->intro ?? $conferenceRoom->description ?? '') . ' Book ' . $conferenceRoom->name . ' in Woolwich, London SE18 for board meetings, presentations, workshops and larger client groups.',
+            'image' => $conferenceRoom->conference_primary_image ?: asset('images/conference.jpg'),
+            'brand' => ['@type' => 'Brand', 'name' => 'Charlton Virtual Office'],
+            'additionalProperty' => $props,
+            'offers' => [
+                '@type' => 'Offer',
+                'url' => request()->url(),
+                'price' => number_format((float) $conferenceRoom->price, 2, '.', ''),
+                'priceCurrency' => $conferenceRoom->currency ?? 'GBP',
+                'availability' => 'https://schema.org/InStock',
+                'seller' => ['@type' => 'LocalBusiness', 'name' => 'Charlton Virtual Office'],
+            ],
+        ]" />
+    @endif
+@endsection
 
 @section('content')
     <div class="container mx-auto px-6 py-16 md:py-10 max-w-7xl">

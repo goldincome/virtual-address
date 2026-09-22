@@ -2,14 +2,14 @@
 
 
 @section('title')
-    Virtual Address, Meeting Room & Conference Room | Woolwich, Charlton, London
+    Virtual Office & Meeting Rooms in Woolwich, London SE18 | Charlton Virtual Office
 @endsection
 
 @section('description')
-    Secure your professional Virtual Address & Easy online booking for Meeting and Conference Spaces in Woolwich, Charlton, London. Start Now!
+    Professional virtual office address, registered office, mail forwarding, meeting room & conference room hire in Woolwich, London SE18. Trusted by businesses in Charlton, Greenwich and South East London.
 @endsection
 
-@section('keywords', "Virtual Address, Virtual Office, Meeting Room, Conference Room, Business Address, Mail Handling, London, Woolwich, Charlton")
+@section('keywords', "Virtual Office Woolwich, Virtual Office Charlton, Virtual Office Greenwich, Virtual Office South East London, Virtual Address, Meeting Room, Conference Room, Business Address, Mail Forwarding, Registered Office, London SE18")
 
 
 @section('content')
@@ -239,7 +239,7 @@
                 <div class="absolute inset-0 bg-black/60 rounded-lg"></div> <div class="relative z-10 p-10">
                     <p class="text-xl font-medium text-white mb-6 max-w-xl mx-auto"> Need a professional space for your next meeting? Browse our selection of fully-equipped meeting rooms available for booking.
                     </p>
-                    <a href="meeting-rooms.html" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-300 shadow-md text-lg transform hover:scale-105">
+                    <a href="{{ route('meeting-rooms.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-300 shadow-md text-lg transform hover:scale-105">
                         Explore All Meeting Rooms <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
@@ -290,10 +290,10 @@
             <div class="space-y-4">
                 <div class="faq-item p-5 rounded-lg bg-gray-50 shadow">
                     <h4 class="faq-question text-lg font-semibold text-blue-700 mb-2 flex justify-between items-center">
-                        <span>What is a virtual office address?</span>
+                        <span>Where is Charlton Virtual Office located?</span>
                         <i class="fas fa-chevron-down text-orange-500 transition-transform duration-300"></i>
                     </h4>
-                    <p class="text-gray-600 faq-answer">A virtual office address provides your business with a physical mailing address and optional services like mail handling, without the need for dedicated office space. It enhances your professional image and provides a prime business location.</p>
+                    <p class="text-gray-600 faq-answer">Our virtual office, meeting room, and conference room are based at Unit 6, Block 3, Dockyard Industrial Estate, Church Street, Woolwich, London SE18 5PQ — moments from Woolwich Arsenal station (DLR) and a short walk from Woolwich Elizabeth line, with easy access from Charlton, Greenwich, Plumstead, Abbey Wood, and Thamesmead.</p>
                 </div>
                 <div class="faq-item p-5 rounded-lg bg-gray-50 shadow">
                     <h4 class="faq-question text-lg font-semibold text-blue-700 mb-2 flex justify-between items-center">
@@ -311,10 +311,10 @@
                 </div>
                 <div class="faq-item p-5 rounded-lg bg-gray-50 shadow">
                     <h4 class="faq-question text-lg font-semibold text-blue-700 mb-2 flex justify-between items-center">
-                        <span>Can I receive mail and packages with a virtual address?</span>
+                        <span>Can I combine a virtual office address with a meeting room?</span>
                         <i class="fas fa-chevron-down text-orange-500 transition-transform duration-300"></i>
                     </h4>
-                    <p class="text-gray-600 faq-answer">Yes, our virtual office address plans include mail receiving. Depending on your chosen plan, we offer mail holding, forwarding, and scanning services for your convenience.</p>
+                    <p class="text-gray-600 faq-answer">Yes. Our virtual office packages can be combined with our Woolwich meeting room, often at a discounted rate — giving you a professional business address plus a bookable space for client meetings when you need it. Check the plan details or contact us to set it up.</p>
                 </div>
                 <div class="faq-item p-5 rounded-lg bg-gray-50 shadow">
                     <h4 class="faq-question text-lg font-semibold text-blue-700 mb-2 flex justify-between items-center">
@@ -327,13 +327,63 @@
         </div>
     </section>
 
+    <section id="guides-resources" class="py-16 md:py-24 bg-blue-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-4">
+                    <i class="fas fa-book mr-3 text-orange-500"></i>Guides &amp; Resources
+                </h2>
+                <p class="text-gray-700 max-w-2xl mx-auto">
+                    Helpful guides on using a virtual office address, registering a company and choosing the right business location in South East London.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <a href="{{ route('guides.registered-rules') }}" class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition duration-300 border border-gray-200 block">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-landmark text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-blue-700 mb-3 text-center">Can I Use a Virtual Office as a Registered Address?</h3>
+                    <p class="text-gray-600 text-center text-sm">Understand the rules for using a virtual address as your registered office and service address.</p>
+                </a>
+                <a href="{{ route('guides.company-registration') }}" class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition duration-300 border border-gray-200 block">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-building text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-blue-700 mb-3 text-center">Register a Limited Company with a Virtual Address</h3>
+                    <p class="text-gray-600 text-center text-sm">A step-by-step walkthrough of incorporating your UK limited company using a virtual address.</p>
+                </a>
+                <a href="{{ route('guides.comparison') }}" class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition duration-300 border border-gray-200 block">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-balance-scale text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-blue-700 mb-3 text-center">Virtual Office vs Serviced Office vs Coworking</h3>
+                    <p class="text-gray-600 text-center text-sm">Compare the costs and benefits of each option to find the right fit for your business.</p>
+                </a>
+                <a href="{{ route('guides.best-areas') }}" class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition duration-300 border border-gray-200 block">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-map-marked-alt text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-blue-700 mb-3 text-center">Best Areas in SE London to Register a Business</h3>
+                    <p class="text-gray-600 text-center text-sm">Discover the most credible, connected and affordable business addresses in South East London.</p>
+                </a>
+                <a href="{{ route('local.woolwich') }}" class="bg-white p-8 rounded-lg shadow hover:shadow-lg transition duration-300 border border-gray-200 block">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-map-marker-alt text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-blue-700 mb-3 text-center">Virtual Office in Woolwich, London SE18</h3>
+                    <p class="text-gray-600 text-center text-sm">Our home base: a real commercial estate minutes from Woolwich Arsenal and the Elizabeth line.</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
     <section id="need-help" class="py-16 bg-blue-700 text-white">
         <div class="container mx-auto px-6 text-center">
             <h3 class="text-3xl font-semibold mb-4">Need Help or Have Questions?</h3>
             <p class="text-blue-100 mb-8 max-w-lg mx-auto">
                 Our dedicated support team is here to assist you with any inquiries about our services or booking process. Get in touch today!
             </p>
-            <a href="contact-us.html" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg transform hover:scale-105">
+            <a href="{{ route('contact-us.index') }}" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg transform hover:scale-105">
                 Contact Support <i class="fas fa-headset ml-2"></i>
             </a>
         </div>

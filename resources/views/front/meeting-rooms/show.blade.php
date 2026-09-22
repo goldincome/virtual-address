@@ -6,10 +6,43 @@
 @endsection
 
 @section('description')
-    Book {{ $meetingRoom->name }} in Woolwich, London for your most important meetings. High-spec, premium Meeting Room designed to impress clients. 
+    Book {{ $meetingRoom->name }} in Woolwich, London for your most important meetings. High-spec, premium Meeting Room designed to impress clients.
 @endsection
 
-@section('keywords', "{{ $meetingRoom->name }}, High-Spec, Premium Venue, Boardroom, Woolwich, London, Impress Clients")
+@section('keywords')
+    {{ $meetingRoom->name }}, Meeting Room Woolwich, Business Meeting Room SE18, High-Spec Premium Venue, Room Hire Greenwich, Impress Clients, South East London
+@endsection
+
+@section('jsonld')
+    @if (isset($meetingRoom))
+        @php
+            $props = [];
+            if ($meetingRoom->capacity) {
+                $props[] = ['@type' => 'PropertyValue', 'name' => 'Capacity', 'value' => (string) $meetingRoom->capacity];
+            }
+            foreach (($meetingRoom->amenities ?? []) as $amenity) {
+                $props[] = ['@type' => 'PropertyValue', 'name' => $amenity, 'value' => true];
+            }
+        @endphp
+        <x-jsonld :schema="[
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $meetingRoom->name . ' Hire | Meeting Room in Woolwich, London',
+            'description' => ($meetingRoom->intro ?? $meetingRoom->description ?? '') . ' Book ' . $meetingRoom->name . ' in Woolwich, London SE18 for client meetings, presentations and workshops.',
+            'image' => $meetingRoom->meeting_primary_image ?: asset('images/meeting.jpg'),
+            'brand' => ['@type' => 'Brand', 'name' => 'Charlton Virtual Office'],
+            'additionalProperty' => $props,
+            'offers' => [
+                '@type' => 'Offer',
+                'url' => request()->url(),
+                'price' => number_format((float) $meetingRoom->price, 2, '.', ''),
+                'priceCurrency' => $meetingRoom->currency ?? 'GBP',
+                'availability' => 'https://schema.org/InStock',
+                'seller' => ['@type' => 'LocalBusiness', 'name' => 'Charlton Virtual Office'],
+            ],
+        ]" />
+    @endif
+@endsection
 
 @section('content')
     <div class="container mx-auto px-6 py-16 md:py-10 max-w-7xl">

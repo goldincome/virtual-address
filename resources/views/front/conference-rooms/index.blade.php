@@ -6,9 +6,9 @@
 @endsection
 
 @section('description')
-    Book a professional Conference Room near Woolwich, Greenwich, and Charlton. Ideal for corporate meetings & training. Easy online booking.
+    Book a professional Conference Room near Woolwich, Greenwich, and Charlton. Ideal for corporate meetings, presentations, and board meetings. Easy online booking.
 @endsection
-@section('keywords', "Conference Room,  Boardroom, Seminar Hall, Training Center, Business Meeting, Presentation Room, Workshop Space, Corporate Events, London Conference Rooms, Virtual Office Conference Facilities")
+@section('keywords', "Conference Room,  Boardroom, Business Meeting, Presentation Room, Workshop Space, Corporate Events, London Conference Rooms, Woolwich Conference Facilities")
 
 @section('css')
     <style>
@@ -48,7 +48,7 @@
             <div>
                 <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-6">Present, Train, and Collaborate</h2>
                 <p class="text-lg text-gray-700 mb-4 leading-relaxed">
-                   Our conference rooms are designed for larger groups and impactful events. Equipped with state-of-the-art audiovisual technology and flexible seating arrangements, they provide the ideal setting for presentations, training sessions, workshops, and board meetings.
+                   Our conference rooms are designed for larger groups and impactful events. Equipped with state-of-the-art audiovisual technology and flexible seating arrangements, they provide the ideal setting for presentations, workshops, and board meetings.
                 </p>
                 <p class="text-lg text-gray-700 mb-6 leading-relaxed">
                     Make a lasting impression with a professional environment that supports seamless communication and collaboration. Book the space you need for the duration required, with support available to ensure your event runs smoothly.
@@ -73,7 +73,7 @@
                 @foreach($conferenceRooms as $index => $conferenceRoom)
                     @if($index == 1)
                         <div class="room-package-card rounded-lg shadow-lg overflow-hidden border-2 border-orange-500"> 
-                            <img src="{{ $conferenceRoom->conference_primary_image }}" alt="{{ $conferenceRoom->name }}" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/400x250/cccccc/ffffff?text=Seminar+Hall';">
+                            <img src="{{ $conferenceRoom->conference_primary_image }}" alt="{{ $conferenceRoom->name }}" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://placehold.co/400x250/cccccc/ffffff?text=Conference+Room';">
                             <div class="p-6 flex flex-col flex-grow card-content">
                                 <h3 class="text-xl font-semibold text-orange-600 mb-3">{{ $conferenceRoom->name }}</h3>
                                 <p class="text-gray-700 text-sm mb-4">{{ $conferenceRoom->intro }}</p>
@@ -199,7 +199,7 @@
                         <span>What is the capacity of your conference rooms?</span>
                         <i class="fas fa-chevron-down text-orange-500 transition-transform duration-300"></i>
                     </h4>
-                    <p class="text-gray-600 faq-answer">Our conference rooms vary in size, typically accommodating groups from 10 up to 20 people. Please check the details for each specific room (e.g., Boardroom, Seminar Hall).</p>
+                    <p class="text-gray-600 faq-answer">Our conference rooms vary in size, typically accommodating groups from 10 up to 20 people. Please check the details for each specific room (e.g., Boardroom).</p>
                 </div>
                 <div class="faq-item p-5 rounded-lg bg-gray-50 shadow">
                     <h4 class="faq-question text-lg font-semibold text-blue-700 mb-2 flex justify-between items-center">
@@ -213,7 +213,7 @@
                         <span>Can I arrange a specific room layout?</span>
                         <i class="fas fa-chevron-down text-orange-500 transition-transform duration-300"></i>
                     </h4>
-                    <p class="text-gray-600 faq-answer">Some of our conference rooms, like the Seminar Hall and Training Center, offer flexible layouts (e.g., classroom, theatre, U-shape). Please specify your preferred layout during booking or contact us to discuss possibilities.</p>
+                    <p class="text-gray-600 faq-answer">Our conference room offers flexible layouts (e.g., boardroom, U-shape). Please specify your preferred layout during booking or contact us to discuss possibilities.</p>
                 </div>
                 <div class="faq-item p-5 rounded-lg bg-gray-50 shadow">
                     <h4 class="faq-question text-lg font-semibold text-blue-700 mb-2 flex justify-between items-center">
@@ -239,7 +239,7 @@
             <p class="text-blue-100 mb-8 max-w-lg mx-auto">
                Contact our team to discuss your conference room needs, check availability, or get assistance with booking.
             </p>
-            <a href="contact-us.html" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg transform hover:scale-105">
+            <a href="{{ route('contact-us.index') }}" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg transform hover:scale-105">
                 Contact Our Team <i class="fas fa-headset ml-2"></i>
             </a>
         </div>

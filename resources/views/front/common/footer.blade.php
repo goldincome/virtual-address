@@ -1,6 +1,6 @@
 <footer class="bg-blue-900 text-blue-200 py-12">
     <div class="container mx-auto px-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-left mb-8">
             <div>
                 <h5 class="text-lg font-semibold mb-4 text-white">Our Company</h5>
                 <ul class="space-y-2 text-sm">
@@ -14,16 +14,29 @@
                 <h5 class="text-lg font-semibold mb-4 text-white">Our Services</h5>
                  <ul class="space-y-2 text-sm">
                     <li><a href="{{ route('virtual-address.index') }}">Virtual Office Address</a></li>
+                    <li><a href="{{ route('virtual-address.registered-office') }}">Registered Office Address</a></li>
+                    <li><a href="{{ route('virtual-address.mail-forwarding') }}">Mail Forwarding &amp; Scanning</a></li>
+                    <li><a href="{{ route('virtual-address.directors-service') }}">Directors' Service Address</a></li>
                     <li><a href="{{ route('meeting-rooms.index') }}">Meeting Rooms</a></li>
                     <li><a href="{{ route('conference-rooms.index') }}">Conference Rooms</a></li>
                     <li><a href="{{ route('about-us.index') }}#faq">FAQ</a></li>
                 </ul>
             </div>
             <div>
+                <h5 class="text-lg font-semibold mb-4 text-white">Resources &amp; Guides</h5>
+                 <ul class="space-y-2 text-sm">
+                    <li><a href="{{ route('local.woolwich') }}">Virtual Office in Woolwich, SE18</a></li>
+                    <li><a href="{{ route('guides.registered-rules') }}">Can I Use a Virtual Office as a Registered Address?</a></li>
+                    <li><a href="{{ route('guides.company-registration') }}">Register a Limited Company with a Virtual Address</a></li>
+                    <li><a href="{{ route('guides.comparison') }}">Virtual Office vs Serviced Office vs Coworking</a></li>
+                    <li><a href="{{ route('guides.best-areas') }}">Best Areas in SE London to Register a Business</a></li>
+                </ul>
+            </div>
+            <div>
                  <h5 class="text-lg font-semibold mb-4 text-white">Contact Us</h5>
                  <address class="not-italic text-sm space-y-2 mb-4">
                     <p><i class="fas fa-map-marker-alt mr-2 text-orange-400"></i>Unit 6,Block 3, Dockyard Industrial Estate,<br>Church Street, Woolwich, London UK</p>
-                    <p><i class="fas fa-phone-alt mr-2 text-orange-400"></i><a href="tel:+23412345678">+44 (0) 2032474747</a></p>
+                    <p><i class="fas fa-phone-alt mr-2 text-orange-400"></i><a href="tel:+442032474747">+44 (0) 2032474747</a></p>
                     <p><i class="fas fa-envelope mr-2 text-orange-400"></i><a href="mailto:support@charltonvirtualoffice.com">support@charltonvirtualoffice.com</a></p>
                  </address>
                  <div class="flex space-x-4">

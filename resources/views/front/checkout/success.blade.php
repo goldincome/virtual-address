@@ -68,7 +68,7 @@
                 </a>
             </div>
             <p class="text-sm text-gray-500 mt-8">
-                If you have any questions, please <a href="contact-us.html" class="text-orange-500 hover:underline">contact our support team</a>.
+                If you have any questions, please <a href="{{ route('contact-us.index') }}" class="text-orange-500 hover:underline">contact our support team</a>.
             </p>
         </div>
     </main>

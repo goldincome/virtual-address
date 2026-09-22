@@ -193,7 +193,7 @@
                     <i class="fas fa-headset text-3xl text-blue-600 mb-3"></i>
                     <h3 class="text-lg font-semibold text-blue-700 mb-2">Need Assistance?</h3>
                     <p class="text-gray-600 text-sm mb-4">Have questions about the checkout process or our services? Our team is here to help!</p>
-                    <a href="contact-us.html" class="text-sm font-medium text-orange-600 hover:text-orange-700 hover:underline">Contact Support <i class="fas fa-arrow-right ml-1"></i></a>
+                    <a href="{{ route('contact-us.index') }}" class="text-sm font-medium text-orange-600 hover:text-orange-700 hover:underline">Contact Support <i class="fas fa-arrow-right ml-1"></i></a>
                 </div>
             </div>
         </div>

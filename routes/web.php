@@ -39,12 +39,32 @@ Route::post('/stripe/webhook', [PaymentWebhookController::class, 'handleWebhook'
 //sitemap
 Route::get('/sitemap.xml', [App\Http\Controllers\Front\SitemapController::class, 'index'])->name('sitemap.index');
 
+// --- 301 Redirects for legacy .html URLs ---
+Route::redirect('/contact-us.html', '/contact-us', 301);
+Route::redirect('/meeting-rooms.html', '/meeting-rooms', 301);
+Route::redirect('/conference-rooms.html', '/conference-rooms', 301);
+Route::redirect('/virtual-office-address.html', '/virtual-address', 301);
+
 Route::middleware('web')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home.index');
     Route::resource('contact-us', ContactUsController::class)->only('index','store');
     Route::get('about-us', [PageController::class, 'aboutUs'])->name('about-us.index');
     Route::get('terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service.index');
     Route::get('privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy.index');
+
+    // --- SEO intent sub-pages under /virtual-address (must precede {slug} route) ---
+    Route::view('/virtual-address/registered-office-address', 'front.virtual-address.registered-office')->name('virtual-address.registered-office');
+    Route::view('/virtual-address/mail-forwarding-scanning', 'front.virtual-address.mail-forwarding')->name('virtual-address.mail-forwarding');
+    Route::view('/virtual-address/directors-service-address', 'front.virtual-address.directors-service')->name('virtual-address.directors-service');
+
+    // --- Content silo: UK company formation guides ---
+    Route::view('/guides/can-i-use-a-virtual-office-as-registered-address', 'front.guides.registered-address-rules')->name('guides.registered-rules');
+    Route::view('/guides/virtual-office-vs-serviced-office-vs-coworking', 'front.guides.comparison')->name('guides.comparison');
+    Route::view('/guides/register-limited-company-with-virtual-address', 'front.guides.company-registration')->name('guides.company-registration');
+    Route::view('/guides/best-areas-in-se-london-to-register-a-business', 'front.guides.best-areas')->name('guides.best-areas');
+
+    // --- Dedicated local SEO landing page ---
+    Route::view('/virtual-office-woolwich-london', 'front.local.woolwich')->name('local.woolwich');
 
     Route::get('virtual-address/{slug}', [VirtualAddressController::class, 'show'])->name('virtual-address.show');
     Route::resource('virtual-address', VirtualAddressController::class)->except('show','destroy','update');

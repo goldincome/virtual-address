@@ -20,13 +20,14 @@ class Product extends Model implements HasMedia
 
     protected $fillable = [
         'name', 'type', 'price', 'slug', 'intro', 'description', 'currency', 
-        'is_active', 'main_product_image', 'is_completed'
+        'is_active', 'main_product_image', 'is_completed', 'capacity', 'amenities'
     ];
 
-    protected $casts = ['is_active' => 'boolean',
+    protected $casts = [
+        'is_active' => 'boolean',
         'type' => ProductTypeEnum::class,
         'price' => 'decimal:2',
-        'is_active' => 'boolean',
+        'amenities' => 'array',
     ];  
   
     const CONFERENCE_PRIMARY_IMAGE = 'conference_primary_image';

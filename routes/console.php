@@ -15,3 +15,7 @@ Schedule::command('queue:work --stop-when-empty --tries=3 --timeout=300')
 Schedule::command('bill:mail-usages')
     ->dailyAt('08:00')
     ->withoutOverlapping();
+
+Schedule::command('sitemap:generate')
+    ->dailyAt('02:00')
+    ->withoutOverlapping();

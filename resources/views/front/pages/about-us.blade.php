@@ -89,7 +89,7 @@
                         </div>
                          <div>
                             <h4 class="text-xl font-semibold text-orange-600 mb-2 flex items-center"><i class="fas fa-binoculars mr-2"></i> Our Vision</h4>
-                            <p class="text-gray-700 leading-relaxed">To be the leading provider of virtual office and flexible workspace solutions in Lagos, recognized for our commitment to quality, reliability, and exceptional customer support, fostering the success of the businesses we serve.</p>
+                            <p class="text-gray-700 leading-relaxed">To be the leading provider of virtual office and flexible workspace solutions in London and across South East London, recognized for our commitment to quality, reliability, and exceptional customer support, fostering the success of the businesses we serve.</p>
                         </div>
                     </div>
                 </div>

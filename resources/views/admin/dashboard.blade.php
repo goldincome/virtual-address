@@ -38,7 +38,7 @@
             <div class="mt-10 bg-white p-6 rounded-lg shadow-md border border-gray-200">
                 <h2 class="text-xl font-semibold text-blue-700 mb-4">Quick Actions</h2>
                 <div class="flex flex-wrap gap-4">
-                    <a href="new-booking.html"
+                    <a href="{{ route('admin.meeting-rooms.create') }}"
                         class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow">
                         <i class="fas fa-plus-circle mr-2"></i> Book a Room
                     </a>

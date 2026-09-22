@@ -44,7 +44,7 @@
     <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
         <div class="flex justify-between items-center mb-6 pb-4 border-b">
             <h2 class="text-2xl font-semibold text-blue-800">Virtual Address Order History</h2>
-            <a href="virtual-office-address.html"
+            <a href="{{ route('virtual-address.index') }}"
                 class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300 text-sm">
                 <i class="fas fa-plus mr-1"></i> New Virtual Address
             </a>

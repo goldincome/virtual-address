@@ -228,6 +228,48 @@
         </div>
     </section>
 
+    <section id="learn-more" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-blue-800 mb-4">Learn More About Our Virtual Office Services</h2>
+            <p class="text-center text-gray-700 max-w-2xl mx-auto mb-12">
+                Explore the individual services included in our virtual office plans, or dive into our guides to UK company formation and choosing the right address.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <a href="{{ route('virtual-address.registered-office') }}" class="bg-blue-50 p-8 rounded-lg shadow hover:shadow-lg transition duration-300 border border-blue-100 block">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-landmark text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-blue-700 mb-3 text-center">Registered Office Address</h3>
+                    <p class="text-gray-600 text-center">Use a credible London SE18 address as your Companies House registered office.</p>
+                </a>
+                <a href="{{ route('virtual-address.mail-forwarding') }}" class="bg-blue-50 p-8 rounded-lg shadow hover:shadow-lg transition duration-300 border border-blue-100 block">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-envelope-open-text text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-blue-700 mb-3 text-center">Mail Forwarding &amp; Scanning</h3>
+                    <p class="text-gray-600 text-center">Have your business mail received, scanned or forwarded anywhere in the UK.</p>
+                </a>
+                <a href="{{ route('virtual-address.directors-service') }}" class="bg-blue-50 p-8 rounded-lg shadow hover:shadow-lg transition duration-300 border border-blue-100 block">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-shield text-4xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-blue-700 mb-3 text-center">Directors' Service Address</h3>
+                    <p class="text-gray-600 text-center">Keep your home address off the public register with a directors' service address.</p>
+                </a>
+            </div>
+            <div class="bg-blue-50 rounded-lg shadow border border-blue-100 p-8 max-w-4xl mx-auto">
+                <h3 class="text-2xl font-semibold text-blue-800 mb-6 text-center">Guides &amp; Local Information</h3>
+                <ul class="space-y-3 text-gray-700">
+                    <li><i class="fas fa-book text-orange-500 mr-2"></i><a href="{{ route('guides.registered-rules') }}" class="text-blue-700 font-semibold hover:text-orange-600 hover:underline">Can I use a virtual office as a registered address?</a></li>
+                    <li><i class="fas fa-book text-orange-500 mr-2"></i><a href="{{ route('guides.company-registration') }}" class="text-blue-700 font-semibold hover:text-orange-600 hover:underline">How to register a limited company with a virtual address</a></li>
+                    <li><i class="fas fa-book text-orange-500 mr-2"></i><a href="{{ route('guides.comparison') }}" class="text-blue-700 font-semibold hover:text-orange-600 hover:underline">Virtual office vs serviced office vs coworking</a></li>
+                    <li><i class="fas fa-book text-orange-500 mr-2"></i><a href="{{ route('guides.best-areas') }}" class="text-blue-700 font-semibold hover:text-orange-600 hover:underline">Best areas in SE London to register a business</a></li>
+                    <li><i class="fas fa-map-marker-alt text-orange-500 mr-2"></i><a href="{{ route('local.woolwich') }}" class="text-blue-700 font-semibold hover:text-orange-600 hover:underline">Our virtual office in Woolwich, London SE18</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
     <section id="testimonials" class="py-16 md:py-24 bg-white">
         <div class="container mx-auto px-6 max-w-6xl">
             <h2 class="text-3xl md:text-4xl font-bold text-center text-blue-800 mb-12">What Our Customers Are Saying</h2>

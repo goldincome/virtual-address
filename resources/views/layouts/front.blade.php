@@ -23,8 +23,13 @@
     <meta name="robots" content= "index, follow">
     <meta property="og:type" content="website"/>
     <meta property="og:url" content="{{ request()->url() }}"/>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title')">
+    <meta name="twitter:description" content="@yield('description')">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @yield('og')
+    @yield('jsonld')
+    @include('front.partials.local-business-schema')
 
     <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicon.png') }}">
     <link rel="apple-touch-icon" sizes="60x60" href="{{ asset('favicon.png') }}">

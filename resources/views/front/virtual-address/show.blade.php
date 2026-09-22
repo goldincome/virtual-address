@@ -13,6 +13,24 @@
     {{ $plan->name }} Virtual Office Address, Mail Forwarding, Low Cost, Cheap, Professional Address, Woolwich, London
 @endsection
 
+@section('jsonld')
+    <x-jsonld :schema="[
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => $plan->name . ' Virtual Office Address',
+        'description' => 'Get a professional ' . $plan->name . ' virtual office address in Woolwich, London SE18 with mail handling, registered office and forwarding.',
+        'brand' => ['@type' => 'Brand', 'name' => 'Charlton Virtual Office'],
+        'offers' => [
+            '@type' => 'Offer',
+            'url' => request()->url(),
+            'price' => number_format((float) $plan->price, 2, '.', ''),
+            'priceCurrency' => 'GBP',
+            'availability' => 'https://schema.org/InStock',
+            'description' => 'Monthly subscription for a virtual office address including mail handling.',
+        ],
+    ]" />
+@endsection
+
 @section('css')
 <style>
     /* Custom styles for the fancy radio button cards */

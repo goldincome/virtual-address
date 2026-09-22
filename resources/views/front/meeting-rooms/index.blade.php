@@ -110,7 +110,7 @@
                      <div class="step-number bg-orange-500 text-white">1</div>
                      <i class="fas fa-search text-5xl text-blue-700 mb-4"></i>
                     <h3 class="text-xl font-semibold text-blue-800 mb-2">Browse Rooms</h3>
-                    <p class="text-gray-600">Explore our available meeting rooms and choose the one that fits your size and needs.</p>
+                    <p class="text-gray-600">Meet in our dedicated, fully-equipped meeting room in Woolwich — a private, distraction-free space tailored to the way your meeting runs.</p>
                 </div>
                 <div class="flex flex-col items-center p-6">
                      <div class="step-number bg-orange-500 text-white">2</div>
@@ -234,7 +234,7 @@
             <p class="text-blue-100 mb-8 max-w-lg mx-auto">
                 Our team is ready to help you find the perfect space and answer any questions you might have.
             </p>
-            <a href="contact-us.html" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg transform hover:scale-105">
+            <a href="{{ route('contact-us.index') }}" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg transform hover:scale-105">
                 Contact Us Today <i class="fas fa-headset ml-2"></i>
             </a>
         </div>
