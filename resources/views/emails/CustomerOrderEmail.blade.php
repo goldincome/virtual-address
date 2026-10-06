@@ -185,6 +185,79 @@
                 </div>
                 @endif
 
+                {{-- Person with Significant Control (PSC) Section --}}
+                @php
+                    $pscService = app(\App\Services\PscService::class);
+                    $orderHasPsc = $order->hasPsc();
+                    $orderUser = $order->user;
+                    $orderSub = $orderUser->subscribed('default') ? $orderUser->subscription('default') : null;
+                    $orderPscPlan = $orderSub ? $orderSub->plan : null;
+                    $orderPscAccess = $orderPscPlan && $orderPscPlan->allowsCompanyPsc();
+                    $orderPscAllowance = [];
+                    if ($orderSub && $orderPscAccess) {
+                        foreach (\App\Models\PscType::where('status', true)->orderBy('id')->get() as $pscTypeRow) {
+                            $orderPscAllowance[] = [
+                                'name' => $pscTypeRow->name,
+                                'billed' => $pscService->billedQuantity($orderUser, $pscTypeRow),
+                                'active' => $pscService->activePersonCount($orderUser, $pscTypeRow),
+                            ];
+                        }
+                    }
+                @endphp
+                @if($orderHasPsc || $orderPscAccess)
+                <div class="bg-gray-50 p-6 rounded-md text-left my-8 border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Person with Significant Control (PSC)</h3>
+
+                    @if($orderHasPsc)
+                        <div class="flex items-start space-x-3 p-4 rounded-md bg-green-50 border border-green-200 text-green-700 mb-4">
+                            <i class="fas fa-check-circle mt-1"></i>
+                            <div>
+                                <strong class="block">Your PSC slot purchase was successful.</strong>
+                                <span class="text-sm">You can now register Persons with Significant Control for your companies up to the number of slots you have paid for.</span>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($orderPscAccess)
+                        <p class="text-sm text-gray-600 mb-4">
+                            Your <strong>{{ $orderPscPlan->name }}</strong> plan includes Company PSC.
+                            You can manage your companies and Persons with Significant Control from the
+                            <strong>Company / PSC</strong> page in <a href="{{ route('dashboard') }}" style="color:#1d4ed8; text-decoration:underline;">your dashboard</a>.
+                        </p>
+                        @if(!empty($orderPscAllowance))
+                            <table class="w-full text-sm text-left text-gray-700 border-collapse mb-4">
+                                <thead class="bg-gray-100 text-gray-600 font-semibold">
+                                    <tr>
+                                        <th class="p-2 border-b">PSC Type</th>
+                                        <th class="p-2 border-b text-center">Registered</th>
+                                        <th class="p-2 border-b text-center">Paid Slots</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($orderPscAllowance as $pscRow)
+                                        <tr>
+                                            <td class="p-2 border-b">{{ $pscRow['name'] }}</td>
+                                            <td class="p-2 border-b text-center">{{ $pscRow['active'] }}</td>
+                                            <td class="p-2 border-b text-center">{{ $pscRow['billed'] }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                        <p class="text-sm text-gray-600">
+                            If you need more PSC slots, you can purchase additional ones from the
+                            <strong>Company / PSC</strong> page. You will be billed for the extra slots and
+                            your allowance will be increased straight after payment.
+                        </p>
+                        <div class="mt-4">
+                            <a href="{{ route('companies.index') }}" style="display:inline-block; background-color:#f97316; color:#ffffff; font-weight:600; padding:12px 24px; border-radius:8px; text-decoration:none;">
+                                Go to Company / PSC
+                            </a>
+                        </div>
+                    @endif
+                </div>
+                @endif
+
                 <div class="text-center mt-10">
                     <a href="{{ route('invoices.show', $order->order_no) }}" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md inline-block">
                         View Order Details

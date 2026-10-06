@@ -26,6 +26,10 @@ class Order extends Model
         return $this->orderDetails()->where('product_type', ProductTypeEnum::VIRTUAL_ADDRESS->value)
             ->exists();
     }
+    public function hasPsc()
+    {
+        return $this->orderDetails()->where('product_type', ProductTypeEnum::PSC->value)->exists();
+    }
     public function hasBookingRoom()
     {
         return $this->orderDetails()->where('product_type', ProductTypeEnum::CONFERENCE_ROOM->value)

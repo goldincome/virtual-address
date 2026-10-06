@@ -62,7 +62,8 @@
                     @php
                         // Calculate original subtotal and discount for this item
                         $originalPrice = $item->options->product_price ?? $item->price;
-                        $itemQty = ($item->options->type !== $productType::VIRTUAL_ADDRESS->value) ? count($item->options->booking_time_raw) : $item->qty;
+                        $isRoomItem = in_array($item->options->type, [$productType::MEETING_ROOM->value, $productType::CONFERENCE_ROOM->value]);
+                        $itemQty = $isRoomItem && $item->options->booking_time_raw ? count($item->options->booking_time_raw) : $item->qty;
                         $originalItemSubtotal = $originalPrice * $itemQty;
                         $itemDiscount = ($item->options->discount_amount ?? 0) * $itemQty;
 
@@ -88,6 +89,11 @@
                                     @foreach($item->options->booking_time_display as $timeDisplay)
                                         <p class="text-sm text-gray-500"><span class="text-blue-800">Time:</span> {{ $timeDisplay }}</p>
                                     @endforeach
+                                @elseif($item->options->type === $productType::PSC->value)
+                                    <p class="text-sm text-gray-600 mt-1">Company Person with Significant Control</p>
+                                    @if(!empty($item->options->top_up))
+                                        <p class="text-xs text-orange-600 mt-1">PSC top-up — your allowance increases after payment.</p>
+                                    @endif
                                 @endif
                             </div>
                         </div>
@@ -99,7 +105,9 @@
                                         <span class="text-gray-500">Price: </span>
                                         <span class="font-medium text-gray-800">{{ currencyFormatter($originalPrice) }}
                                             @if($item->options->type === $productType::VIRTUAL_ADDRESS->value)
-                                                 {{ $item->options->subscription_type }}
+                                                {{ $item->options->subscription_type }}
+                                            @elseif($item->options->type === $productType::PSC->value)
+                                                /person
                                             @else
                                                 /hr
                                             @endif
@@ -107,7 +115,7 @@
                                     </div>
                                     <div>
                                         <span class="text-gray-500">Qty: </span>
-                                        <span class="font-medium text-gray-800">{{ $itemQty }}{{ ($item->options->type !== $productType::VIRTUAL_ADDRESS->value) ? 'hr(s)' : 'mon' }}</span>
+                                        <span class="font-medium text-gray-800">{{ $itemQty }}{{ ($item->options->type === $productType::MEETING_ROOM->value || $item->options->type === $productType::CONFERENCE_ROOM->value) ? 'hr(s)' : (($item->options->type === $productType::PSC->value) ? ' person(s)' : ' mon') }}</span>
                                     </div>
                                     {{-- MODIFIED: Display original subtotal, discount, and final total --}}
                                     <div class="font-bold">

@@ -44,4 +44,9 @@ class OrderDetail extends Model
     {
         return $this->product_type->value === ProductTypeEnum::CONFERENCE_ROOM->value;
     }
+
+    public function isPsc()
+    {
+        return $this->product_type->value === ProductTypeEnum::PSC->value;
+    }
 }

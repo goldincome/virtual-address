@@ -18,6 +18,17 @@
         {{ request()->is('virtual-address-orders*') ? 'active' : '' }}">
             <i class="fas fa-map-marker-alt fa-fw mr-2 text-gray-500"></i>Virtual Address Plan
         </a>
+        @auth
+            @php
+                $sidebarPscPlan = auth()->user()->subscribed('default') ? auth()->user()->subscription('default')->plan : null;
+            @endphp
+            @if($sidebarPscPlan && $sidebarPscPlan->allowsCompanyPsc())
+                <a href="{{ route('companies.index') }}" class="flex items-center py-2 px-3 text-gray-700 hover:text-blue-700 rounded-md 
+                 {{ request()->is('companies*') || request()->is('dashboard/companies*') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie fa-fw mr-2 text-gray-500"></i>Company / PSC
+                </a>
+            @endif
+        @endauth
         <a href="{{ route('meeting-room-orders.index') }}" class="flex items-center py-2 px-3 text-gray-700 hover:text-blue-700 rounded-md 
          {{ request()->is('meeting-room-orders*') ? 'active' : '' }}">
             <i class="fas fa-users fa-fw mr-2 text-gray-500"></i>Meeting Room Bookings

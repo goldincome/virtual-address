@@ -26,9 +26,13 @@ use App\Http\Controllers\Front\PaymentWebhookController;
 use App\Http\Controllers\Front\VirtualAddressController;
 use App\Http\Controllers\Admin\PlanRoomDiscountController;
 use App\Http\Controllers\Front\MeetingRoomOrderController;
+use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
+use App\Http\Controllers\Admin\PscTypeController;
 use App\Http\Controllers\Admin\Auth\RegisteredUserController;
 use App\Http\Controllers\Front\ConferenceRoomOrderController;
 use App\Http\Controllers\Front\VirtualAddressOrderController;
+use App\Http\Controllers\Front\CompanyController;
+use App\Http\Controllers\Front\CompanyPscController;
 use App\Http\Controllers\Admin\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Admin\Auth\AdminAuthenticatedSessionController;
 use App\Http\Controllers\Front\MeetingRoomController as FrontMeetingRoomController;
@@ -101,6 +105,14 @@ Route::middleware('auth')->group(function () {
     Route::get('mails/download/{mail}', [UserMailController::class, 'download'])->name('mails.download');
     Route::resource('mails', UserMailController::class)->only('index', 'show', 'download');
     Route::resource('invoices', InvoiceController::class)->only('index', 'show', 'print');
+
+    // Companies & Persons with Significant Control (PSC)
+    Route::get('dashboard/companies', [CompanyController::class, 'index'])->name('companies.index');
+    Route::get('companies/create', [CompanyController::class, 'create'])->name('companies.create');
+    Route::post('companies', [CompanyController::class, 'store'])->name('companies.store');
+    Route::get('companies/{company}', [CompanyController::class, 'show'])->name('companies.show');
+    Route::post('companies/{company}/psc', [CompanyPscController::class, 'store'])->name('companies.psc.store');
+    Route::post('companies/psc/topup', [CompanyPscController::class, 'topUp'])->name('companies.psc.topup');
 });
 
 //Admin and Super Admin route
@@ -126,6 +138,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::resource('orders', OrderController::class);
+
+    // Persons with Significant Control prices (auto-synced to Stripe)
+    Route::resource('psc-types', PscTypeController::class);
+
+    // Companies and their PSCs
+    Route::get('companies', [AdminCompanyController::class, 'index'])->name('companies.index');
+    Route::get('companies/{company}', [AdminCompanyController::class, 'show'])->name('companies.show');
+    Route::post('companies/{company}/psc', [AdminCompanyController::class, 'addPsc'])->name('companies.psc');
+    Route::post('companies/{company}/suspend', [AdminCompanyController::class, 'suspend'])->name('companies.suspend');
+    Route::post('companies/{company}/activate', [AdminCompanyController::class, 'activate'])->name('companies.activate');
+    Route::post('companies/psc/{psc}/suspend', [AdminCompanyController::class, 'suspendPsc'])->name('psc.suspend');
+    Route::post('companies/psc/{psc}/activate', [AdminCompanyController::class, 'activatePsc'])->name('psc.activate');
 
     //Route::get('plan-feature/{plan}/features/create', [PlanFeatureController::class, 'create'])->name('features.create');
     //Route::post('plan-feature/{plan}/features', [PlanFeatureController::class, 'store'])->name('features.store');

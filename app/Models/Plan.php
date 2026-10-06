@@ -102,4 +102,16 @@ class Plan extends Model implements HasMedia
     {
         return $this->hasMany(PlanRoomDiscount::class);
     }
+
+    /**
+     * Only packages with mail forwarding or mail scanning can add a
+     * company and Persons with Significant Control (PSC).
+     */
+    public function allowsCompanyPsc(): bool
+    {
+        return $this->mailSettings()
+            ->where('status', true)
+            ->whereIn('mail_type', ['scanned', 'forwarded'])
+            ->exists();
+    }
 }

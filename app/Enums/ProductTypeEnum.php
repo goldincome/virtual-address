@@ -7,6 +7,7 @@ enum ProductTypeEnum: string
     case MEETING_ROOM = 'meeting_room';
     case CONFERENCE_ROOM = 'conference_room';
     case MAIL_SERVICE = 'mail_service';
+    case PSC = 'psc';
 
     public static function available(): array
     {
@@ -15,6 +16,7 @@ enum ProductTypeEnum: string
             self::MEETING_ROOM,
             self::CONFERENCE_ROOM,
             self::MAIL_SERVICE,
+            self::PSC,
         ];
     }
 
@@ -25,6 +27,7 @@ enum ProductTypeEnum: string
             self::MEETING_ROOM => 'Meeting Room',
             self::CONFERENCE_ROOM => 'Conference Room',
             self::MAIL_SERVICE => 'Mail Scanning/Forwarding',
+            self::PSC => 'Company PSC',
         };
       
     }

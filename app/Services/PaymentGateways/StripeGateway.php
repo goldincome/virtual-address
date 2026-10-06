@@ -72,11 +72,23 @@ class StripeGateway implements PaymentGatewayInterface
                     $checkout = $checkout->withMetadata(['order_no' => $paymentData['order_no']]);
                 }
                 //dd($checkout);
+                // Add Persons with Significant Control (PSC) recurring line items to the subscription
+                $pscLineItems = [];
+                foreach ($cartService->getPscItemsFromCart() as $pscItem) {
+                    if ($pscItem->options->stripe_price_id) {
+                        $pscLineItems[] = [
+                            'price' => $pscItem->options->stripe_price_id,
+                            'quantity' => (int) $pscItem->qty,
+                        ];
+                    }
+                }
+
                 // Check if there are also one-time products in the cart to add to the first invoice.
                 $oneTimeItems = $this->getOneTimeItemsFromCart();
-       
-                $checkoutItems = !empty($oneTimeItems)
-                    ? array_merge($returnUrls, ['line_items' => $oneTimeItems])
+                $extraLineItems = array_merge($pscLineItems, $oneTimeItems);
+
+                $checkoutItems = !empty($extraLineItems)
+                    ? array_merge($returnUrls, ['line_items' => $extraLineItems])
                     : $returnUrls;
                 //dd($checkoutItems);
                 $session = $checkout->checkout($checkoutItems);
@@ -85,7 +97,11 @@ class StripeGateway implements PaymentGatewayInterface
             }
 
             // --- SCENARIO 2: The cart contains ONLY non-subscription products. ---
-            $lineItems = $this->getOneTimeItemsFromCart();
+            // One-time purchases: meeting/conference rooms and PSC top-up allowances.
+            $lineItems = array_merge(
+                $this->getOneTimeItemsFromCart(),
+                $this->getPscTopUpItemsAsOneTimeFromCart()
+            );
             //dd($lineItems);
             
             if (!empty($lineItems)) {
@@ -148,6 +164,34 @@ class StripeGateway implements PaymentGatewayInterface
     }
 
     /**
+     * Format PSC top-up items (allowance purchases for an existing subscriber)
+     * as one-time Stripe line items. Regular PSC items that belong to a new
+     * subscription are billed as recurring items in SCENARIO 1 and are excluded
+     * here via the top_up flag.
+     */
+    protected function getPscTopUpItemsAsOneTimeFromCart(): array
+    {
+        $lineItems = [];
+        foreach (Cart::content() as $item) {
+            if ($item->options->type !== ProductTypeEnum::PSC->value || empty($item->options->top_up)) {
+                continue;
+            }
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => strtolower(config('cashier.currency', 'gbp')),
+                    'product_data' => [
+                        'name' => $item->name,
+                        'description' => $item->options->description ?? 'Additional PSC slot',
+                    ],
+                    'unit_amount' => (int) ($item->price * 100),
+                ],
+                'quantity' => (int) $item->qty,
+            ];
+        }
+        return $lineItems;
+    }
+
+    /**
      * Helper function to get all non-subscription items from the cart, formatted for Stripe.
      *
      * @return array
@@ -157,7 +201,11 @@ class StripeGateway implements PaymentGatewayInterface
         $lineItems = [];
         foreach (Cart::content() as $item) {
             // Assuming VIRTUAL_ADDRESS is your subscription product type.
-            if ($item->options->type !== ProductTypeEnum::VIRTUAL_ADDRESS->value) {
+            // PSC items are separate recurring line items, not one-time products.
+            if (!in_array($item->options->type, [
+                ProductTypeEnum::VIRTUAL_ADDRESS->value,
+                ProductTypeEnum::PSC->value,
+            ])) {
                 $lineItems[] = [
                     //'price'  => (int)($item->price * 100),
                     'price_data' => [

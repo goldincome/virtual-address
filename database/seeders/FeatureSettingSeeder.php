@@ -343,6 +343,33 @@ class FeatureSettingSeeder extends Seeder
             ],
         ]);
 
+        // Premium Package feature settings (added by PremiumPackageSeeder; upserted so re-runs are safe)
+        $premiumFeatureSettings = [
+            ['slug' => 'registered-office-address', 'name' => 'Registered Office Address', 'description' => 'Establish your registered office at our business address.', 'icon' => 'fas fa-building', 'status' => 1],
+            ['slug' => 'directors-service-address', 'name' => "Director's Service Address", 'description' => 'Use our address as your directors service address.', 'icon' => 'fas fa-user-tie', 'status' => 1],
+            ['slug' => 'psc-service-address', 'name' => 'PSC Service Address', 'description' => 'Use our address for Persons with Significant Control.', 'icon' => 'fas fa-user-shield', 'status' => 1],
+            ['slug' => 'public-trading-address', 'name' => 'Public Trading & Business Address', 'description' => 'Present a public trading and business address at our premises.', 'icon' => 'fas fa-store', 'status' => 1],
+            ['slug' => 'mail-acceptance-royal-mail', 'name' => 'Complete Mail & Parcel Acceptance', 'description' => 'We accept mail and parcels delivered by Royal Mail and couriers.', 'icon' => 'fas fa-inbox', 'status' => 1],
+            ['slug' => 'priority-digital-mailroom', 'name' => 'Priority Digital Mailroom', 'description' => 'Priority scanning and digital access to your incoming mail.', 'icon' => 'fas fa-envelope-open-text', 'status' => 1],
+            ['slug' => 'inclusive-mail-forwarding', 'name' => 'Inclusive Mail Forwarding', 'description' => 'Inclusive mail forwarding to your preferred address.', 'icon' => 'fas fa-shipping-fast', 'status' => 1],
+            ['slug' => 'free-mail-collection', 'name' => 'Free In-Person Mail Collection', 'description' => 'Collect your mail in person at no additional cost.', 'icon' => 'fas fa-hand-holding', 'status' => 1],
+            ['slug' => 'post-termination-mail-hold', 'name' => '30-Day Post-Termination Mail Hold', 'description' => 'We hold your mail for 30 days after your subscription ends.', 'icon' => 'fas fa-hourglass-half', 'status' => 1],
+            ['slug' => 'meeting-conference-room-access', 'name' => 'Meeting & Conference Room Access', 'description' => 'Access professional meeting and conference rooms at our premises.', 'icon' => 'fas fa-users', 'status' => 1],
+        ];
+        foreach ($premiumFeatureSettings as $setting) {
+            DB::table('feature_settings')->updateOrInsert(
+                ['slug' => $setting['slug']],
+                [
+                    'name' => $setting['name'],
+                    'description' => $setting['description'],
+                    'icon' => $setting['icon'],
+                    'status' => $setting['status'],
+                    'created_at' => now()->format('Y-m-d H:i:s'),
+                    'updated_at' => now()->format('Y-m-d H:i:s'),
+                ]
+            );
+        }
+
         // Re-enable foreign key checks
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }

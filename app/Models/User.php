@@ -89,6 +89,16 @@ class User extends Authenticatable
         return $this->hasMany(PlanSubscription::class, $this->getForeignKey())->orderBy('created_at', 'desc');
     }
 
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
+    }
+
+    public function pscSubscriptionItems(): HasMany
+    {
+        return $this->hasMany(PscSubscriptionItem::class);
+    }
+
     public function mailUsages()
     {
         return $this->hasMany(MailUsage::class);

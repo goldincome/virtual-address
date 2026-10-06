@@ -2,19 +2,22 @@
 namespace App\Services;
 
 use App\Models\Plan;
-use App\Models\{Product};
+use App\Models\User;
+use App\Models\Product;
 use App\Models\MailSetting;
+use App\Models\PscType;
 use Illuminate\Http\Request;
 use App\Enums\ProductTypeEnum;
 use App\Enums\PaymentMethodEnum;
 use App\Enums\SubscriptionTypeEnum;
+use App\Services\PscService;
 use Gloudemans\Shoppingcart\CartItem;
 use Gloudemans\Shoppingcart\Facades\Cart;
 
 class CartService
 {
 
-    public function addVirtualAddressToCart(Plan $plan, Product $product)
+    public function addVirtualAddressToCart(Plan $plan, Product $product, array $pscQuantities = [])
     {
         if ($product->type->value === ProductTypeEnum::VIRTUAL_ADDRESS->value) {
             $prodFeatures = [];
@@ -24,9 +27,9 @@ class CartService
             }
             
             //'features' => $prodFeatures ? json_encode($prodFeatures) : null,
-            // Remove any existing virtual address plan
+            // Remove any existing virtual address plan and PSC items
             foreach (Cart::content() as $item) {
-                if (isset($item->options['type']) && $item->options['type'] === ProductTypeEnum::VIRTUAL_ADDRESS->value) {
+                if (isset($item->options['type']) && in_array($item->options['type'], [ProductTypeEnum::VIRTUAL_ADDRESS->value, ProductTypeEnum::PSC->value])) {
                     Cart::remove($item->rowId);
                 }
             }
@@ -68,6 +71,42 @@ class CartService
                     'image' => $product->main_product_image ?: 'https://placehold.co/100x80/1e4ed8/ffffff?text=V-Office',
                 ]
             );
+            // Add Persons with Significant Control (PSC) quantities when the plan allows it
+            if ($plan->allowsCompanyPsc() && !empty($pscQuantities)) {
+                foreach ($pscQuantities as $pscTypeId => $quantity) {
+                    $quantity = (int) $quantity;
+                    if ($quantity < 1) {
+                        continue;
+                    }
+                    $pscType = PscType::where('status', true)->find((int) $pscTypeId);
+                    if (!$pscType) {
+                        continue;
+                    }
+                    $interval = $plan->subscription_type === SubscriptionTypeEnum::YEARLY->value ? 'year' : 'month';
+                    $pscPrice = $pscType->priceForInterval($interval);
+                    Cart::add(
+                        'psc_' . $pscType->id,
+                        'Company PSC - ' . $pscType->name,
+                        $quantity,
+                        $pscPrice,
+                        0,
+                        [
+                            'type' => ProductTypeEnum::PSC->value,
+                            'order_no' => '',
+                            'tax' => (config('cart.tax') / 100) * ($pscPrice * $quantity),
+                            'product_model_id' => $plan->product_id,
+                            'psc_type_id' => $pscType->id,
+                            'subscription_type' => $plan->subscription_type ?? null,
+                            'stripe_price_id' => $pscType->stripePriceIdForInterval($interval),
+                            'plan_id' => null,
+                            'plan' => null,
+                            'features' => null,
+                            'description' => $pscType->description ?: $pscType->name,
+                            'image' => $product->main_product_image ?: 'https://placehold.co/100x80/1e4ed8/ffffff?text=PSC',
+                        ]
+                    );
+                }
+            }
             // Update the room price if the cart has a plan and room
             $this->updateRoomPriceIfCartHasPlanAndRoom();
             return true;
@@ -204,6 +243,11 @@ class CartService
             return redirect()->route('cart.index')->with('warning', 'Virtual address plan quantity cannot be changed.');
         }
 
+        // PSC quantities cannot be updated.
+        if (isset($item->options['type']) && $item->options['type'] === ProductTypeEnum::PSC->value) {
+            return redirect()->route('cart.index')->with('warning', 'Person with Significant Control quantity cannot be changed.');
+        }
+
         Cart::update($rowId, $request->quantity);
         return redirect()->route('cart.index')->with('success', 'Cart updated successfully.');
     }
@@ -214,7 +258,17 @@ class CartService
     public function remove($rowId)
     {
         try {
+            $item = Cart::get($rowId);
+            $isPlan = $item && isset($item->options['type']) && $item->options['type'] === ProductTypeEnum::VIRTUAL_ADDRESS->value;
             Cart::remove($rowId);
+            // PSC items belong to the plan: remove them together with the plan
+            if ($isPlan) {
+                foreach (Cart::content() as $cartItem) {
+                    if (isset($cartItem->options['type']) && $cartItem->options['type'] === ProductTypeEnum::PSC->value) {
+                        Cart::remove($cartItem->rowId);
+                    }
+                }
+            }
             $this->resetRoomPriceToDefaultIfCartHasNoPlan(); // Update room prices if necessary
             return true;     
         } catch (\Exception $e) {
@@ -280,6 +334,83 @@ class CartService
             }
         }
         return null;
+    }
+
+    // Get all Persons with Significant Control (PSC) items from the cart
+    public function getPscItemsFromCart()
+    {
+        $items = collect([]);
+        foreach (Cart::content() as $item) {
+            if ($item->options->type === ProductTypeEnum::PSC->value) {
+                $items->push($item);
+            }
+        }
+        return $items;
+    }
+
+    /**
+     * Add purchased PSC allowance (top-up) items to the cart for a user who is
+     * already subscribed. Unlike addVirtualAddressToCart this does NOT add a
+     * virtual-address plan, so the cart can be paid as a one-time purchase and
+     * the allowance is applied to the existing subscription after checkout.
+     *
+     * @param array $pscQuantities [psc_type_id => quantity]
+     */
+    public function addPscTopUpToCart(User $user, array $pscQuantities = [])
+    {
+        $interval = app(PscService::class)->intervalForUser($user);
+
+        // Remove existing top-up PSC items before re-adding
+        foreach (Cart::content() as $item) {
+            if (isset($item->options['type']) && $item->options['type'] === ProductTypeEnum::PSC->value
+                && !empty($item->options['top_up'])) {
+                Cart::remove($item->rowId);
+            }
+        }
+
+        $productId = null;
+        $subscription = $user->subscription('default');
+        if ($subscription && $subscription->plan) {
+            $productId = $subscription->plan->product_id;
+        }
+        $image = Product::where('type', ProductTypeEnum::VIRTUAL_ADDRESS->value)
+            ->value('main_product_image') ?: 'https://placehold.co/100x80/1e4ed8/ffffff?text=PSC';
+
+        foreach ($pscQuantities as $pscTypeId => $quantity) {
+            $quantity = (int) $quantity;
+            if ($quantity < 1) {
+                continue;
+            }
+            $pscType = PscType::where('status', true)->find((int) $pscTypeId);
+            if (!$pscType) {
+                continue;
+            }
+            $pscPrice = $pscType->priceForInterval($interval);
+            Cart::add(
+                'psc_topup_' . $pscType->id,
+                'Company PSC - ' . $pscType->name,
+                $quantity,
+                $pscPrice,
+                0,
+                [
+                    'type' => ProductTypeEnum::PSC->value,
+                    'order_no' => '',
+                    'tax' => (config('cart.tax') / 100) * ($pscPrice * $quantity),
+                    'product_model_id' => $productId,
+                    'psc_type_id' => $pscType->id,
+                    'subscription_type' => $interval === 'year' ? SubscriptionTypeEnum::YEARLY->value : SubscriptionTypeEnum::MONTHLY->value,
+                    'stripe_price_id' => null,
+                    'plan_id' => null,
+                    'plan' => null,
+                    'top_up' => true,
+                    'features' => null,
+                    'description' => 'Additional Person with Significant Control slot (' . ($interval === 'year' ? 'billed yearly' : 'billed monthly') . ')',
+                    'image' => $image,
+                ]
+            );
+        }
+
+        return true;
     }
 
     // Get the mail price setting from the cart items

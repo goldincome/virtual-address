@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Models\Order;
+use App\Models\Plan;
 use App\Mail\NewOrderEmail;
 use Illuminate\Http\Request;
 use App\Services\CartService;
@@ -132,8 +133,28 @@ class CartController extends Controller
                 $jsonPlan = json_decode($user->orderDetails()->where('product_type', ProductTypeEnum::VIRTUAL_ADDRESS->value)->latest()->first()->plan);
             }
             $subscriptionType = SubscriptionTypeEnum::class;
-            
-            return view('front.checkout.success',compact('order','jsonPlan','subscriptionType'));
+
+            // Prompt the user to add company details when the order qualifies
+            $showCompanyPrompt = false;
+            foreach ($order->orderDetails as $orderDetail) {
+                if ($orderDetail->product_type->value === ProductTypeEnum::PSC->value) {
+                    $showCompanyPrompt = true;
+                    break;
+                }
+                if ($orderDetail->product_type->value === ProductTypeEnum::VIRTUAL_ADDRESS->value && $orderDetail->plan) {
+                    try {
+                        $planData = json_decode($orderDetail->plan, true) ?? [];
+                        $plan = Plan::find($planData['id'] ?? null);
+                        if ($plan && $plan->allowsCompanyPsc()) {
+                            $showCompanyPrompt = true;
+                        }
+                    } catch (\Throwable $e) {
+                        // ignore malformed plan snapshot
+                    }
+                }
+            }
+
+            return view('front.checkout.success',compact('order','jsonPlan','subscriptionType','showCompanyPrompt'));
         } catch (\Exception $e) {
             return redirect()->route('cart.index')->with('error', 'Order not found or an error occurred: ' . $e->getMessage());
         }

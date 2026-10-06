@@ -29,7 +29,8 @@
                         @php
                             // Calculate original subtotal and discount for this item
                             $originalPrice = $item->options->product_price ?? $item->price;
-                            $itemQty = ($item->options->type !== $productType::VIRTUAL_ADDRESS->value) ? count($item->options->booking_time_raw) : $item->qty;
+                            $isRoomItem = in_array($item->options->type, [$productType::MEETING_ROOM->value, $productType::CONFERENCE_ROOM->value]);
+                            $itemQty = $isRoomItem && $item->options->booking_time_raw ? count($item->options->booking_time_raw) : $item->qty;
                             $originalItemSubtotal = $originalPrice * $itemQty;
                             $itemDiscount = ($item->options->discount_amount ?? 0) * $itemQty;
 

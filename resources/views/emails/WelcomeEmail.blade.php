@@ -81,6 +81,22 @@
                     </div>
                 </div>
 
+                <div class="bg-gray-50 p-6 rounded-md text-left my-8 border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Company Person with Significant Control (PSC)</h3>
+                    <p class="text-sm text-gray-600 mb-2">
+                        Some of our Virtual Address plans include the ability to register Company Persons with Significant Control (PSC).
+                        Once you are subscribed to a plan that includes it, you will see a
+                        <strong>Company / PSC</strong> section in your dashboard where you can add companies and
+                        register persons for each paid PSC slot.
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        If you need more PSC slots than included with your plan, you can purchase additional ones
+                        at any time through the checkout flow, and a confirmation email will be sent to you.
+                        You can browse our plans at any time from
+                        <a href="{{ route('virtual-address.index') }}" style="color:#1d4ed8; text-decoration:underline;">our Virtual Address page</a>.
+                    </p>
+                </div>
+
                 <div class="text-center mt-10">
                     <a href="{{ route('dashboard') }}" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md inline-block">
                         Go to Dashboard

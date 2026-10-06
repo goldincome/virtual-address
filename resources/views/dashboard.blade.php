@@ -12,6 +12,23 @@
 @section('content')
     <div id="dashboard-view">
         <h1 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-6">Welcome to your Dashboard, {{ Auth::user()->name }}!</h1>
+
+        @if(!empty($showCompanyPrompt))
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-md mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <div class="flex items-start">
+                <i class="fas fa-building text-2xl text-green-600 mr-3 mt-1"></i>
+                <div>
+                    <p class="font-semibold text-green-800">Your plan includes Company &amp; PSC registration</p>
+                    <p class="text-sm text-green-700">Add your company details and Persons with Significant Control to complete your statutory compliance setup.</p>
+                </div>
+            </div>
+            <a href="{{ route('companies.create') }}"
+                class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md inline-flex items-center shrink-0">
+                <i class="fas fa-plus-circle mr-2"></i> Add Company Details
+            </a>
+        </div>
+        @endif
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
             <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300">
@@ -92,6 +109,10 @@
                 </a>
                 <a href="{{ route('profile.edit') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md transform hover:scale-105 inline-flex items-center">
                     <i class="fas fa-user-cog mr-2"></i> Update Profile
+                </a>
+
+                <a href="{{ route('companies.index') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md transform hover:scale-105 inline-flex items-center">
+                    <i class="fas fa-building mr-2"></i> My Companies
                 </a>
                 
                 @if(auth()->user()->subscriptions()->exists() && auth()->user()->subscription('default')->canceled())

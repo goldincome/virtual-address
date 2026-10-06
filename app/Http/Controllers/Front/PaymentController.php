@@ -111,6 +111,7 @@ class PaymentController extends Controller
             if ($paymentMethod === PaymentMethodEnum::DirectDebit->value) {
                 $request['payment_method'] = $paymentMethod;
                 $order = $orderService->createOrder($request->all());
+                $this->applyPscTopUpFromCartIfNeeded();
                 Cart::destroy();
                return $order;
             }
@@ -133,6 +134,7 @@ class PaymentController extends Controller
                 if ($result && $result['status'] === 'COMPLETED') {
                     $request['payment_method'] = PaymentMethodEnum::PayPal->value;
                     $order = $orderService->createOrder($request->all());
+                    $this->applyPscTopUpFromCartIfNeeded();
                     Cart::destroy();
                     return redirect()->route('checkout.success', $order->order_no)->with('success', 'Payment successful!');
                 }
@@ -162,6 +164,14 @@ class PaymentController extends Controller
                     $request['payment_method'] = $paymentMethod;
                     $request['payment_method_order_id'] = $session->id; // Store session ID for reference
                     $order = $orderService->createOrder($request->all());
+
+                    // New-subscription PSC items are registered from Stripe line items.
+                    if ($this->cartService->checkIfCartHasVirtualAddress()
+                        && $this->cartService->getPscItemsFromCart()->isNotEmpty()) {
+                        app(\App\Services\PscService::class)->registerSubscriptionItemsFromCheckout($session);
+                    }
+                    // PSC top-ups (no plan in cart) increase the paid allowance.
+                    $this->applyPscTopUpFromCartIfNeeded();
                     $orderCreated = true;
                 }
             }
@@ -181,6 +191,19 @@ class PaymentController extends Controller
     {
         //dd($request->all());
         return redirect()->route('cart.index')->with('error','Payment was cancelled.');
+    }
+
+    /**
+     * When the cart contains PSC items but no virtual-address plan, the payment
+     * is a PSC top-up: increase the user's paid allowance before the cart is destroyed.
+     */
+    protected function applyPscTopUpFromCartIfNeeded(): void
+    {
+        if (!$this->cartService->checkIfCartHasVirtualAddress()
+            && $this->cartService->getPscItemsFromCart()->isNotEmpty()
+            && auth()->check()) {
+            app(\App\Services\PscService::class)->applyTopUpFromCart(auth()->user());
+        }
     }
 
 }

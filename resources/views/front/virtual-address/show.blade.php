@@ -177,6 +177,33 @@
                             </fieldset>
                         @endif
 
+                        @if($plan->allowsCompanyPsc() && $pscTypes->isNotEmpty())
+                            <!-- Company PSC Quantity Selection -->
+                            <h4 class="text-lg font-semibold text-blue-800 mb-3">Company Person with Significant Control (PSC)</h4>
+                            <p class="text-sm text-gray-600 mb-3">
+                                Add Persons with Significant Control (PSC) to your registered company. Each PSC is billed on your subscription alongside this plan.
+                            </p>
+                            <fieldset class="space-y-4 mb-6">
+                                <legend class="sr-only">Company PSC Options</legend>
+                                @foreach($pscTypes as $pscType)
+                                    <div class="flex justify-between items-center p-4 bg-white border-2 border-gray-200 rounded-xl shadow-sm">
+                                        <div>
+                                            <span class="font-semibold text-blue-800">{{ $pscType->name }}</span>
+                                            <p class="text-sm text-gray-600 mt-1">
+                                                £{{ $pscType->price_monthly }}/month or £{{ $pscType->price_yearly }}/year per person
+                                            </p>
+                                        </div>
+                                        <div class="ml-4">
+                                            <label for="psc_{{ $pscType->id }}" class="sr-only">PSC Quantity</label>
+                                            <input type="number" id="psc_{{ $pscType->id }}" name="psc[{{ $pscType->id }}]"
+                                                value="{{ old('psc.' . $pscType->id, 0) }}" min="0" max="100"
+                                                class="block w-24 px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </fieldset>
+                        @endif
+
                         @if($subscription)
                             @if($subscription->plan->id === $plan->id)
                                 <span class="w-full bg-blue-500 hover:bg-orange-600 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow block text-center">
@@ -246,7 +273,7 @@
                     impression.
                 </p>
                 <form action="{{ route('virtual-address.store', ['plan_id' => $plan->id]) }}" method="POST">
-                    @csrf
+                    @include('front.virtual-address.partials.hidden-add-fields')
                     <button
                         class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-10 rounded-lg transition duration-300 shadow-md text-lg transform hover:scale-105">
                         Sign Up for {{ $plan->name }} <i class="fas fa-check-circle ml-2"></i>

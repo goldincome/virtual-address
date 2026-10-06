@@ -60,6 +60,16 @@
 
 
             <div class="mt-10 space-y-4 md:space-y-0 md:flex md:justify-center md:space-x-4">
+                @if(!empty($showCompanyPrompt) && auth()->check())
+                <a href="{{ route('companies.create') }}" class="block w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md text-lg">
+                    <i class="fas fa-building mr-2"></i> Add Your Company Details
+                </a>
+                @endif
+                @if(!empty($showCompanyPrompt) && auth()->check())
+                <a href="{{ route('companies.index') }}" class="block w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md text-lg">
+                    <i class="fas fa-user-tie mr-2"></i> Manage Companies & PSC
+                </a>
+                @endif
                 <a href="{{ route('dashboard') }}" class="block w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md text-lg">
                     View Full Order Details <i class="fas fa-receipt ml-2"></i>
                 </a>

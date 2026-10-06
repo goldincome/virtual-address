@@ -31,6 +31,10 @@
         {{ request()->is('admin/mails*') ? 'active' : '' }}">
         <i class="fas fa-envelope-open-text mr-3 w-5 text-center text-orange-400"></i> Mail Services
     </a>
+    <a href="{{ route('admin.companies.index') }}" class="block py-2.5 px-4 rounded-md 
+        {{ request()->is('admin/companies*') ? 'active' : '' }}">
+        <i class="fas fa-building mr-3 w-5 text-center text-orange-400"></i> Companies
+    </a>
     <a href="#bookings" class="block py-2.5 px-4 rounded-md">
         <i class="fas fa-calendar-alt mr-3 w-5 text-center text-orange-400"></i> Room Bookings
     </a>
@@ -43,6 +47,10 @@
     <a href="{{ route('admin.mail-settings.index') }}" class="block py-2.5 px-4 rounded-md
         {{ request()->is('admin/mail-settings*') ? 'active' : '' }}">
         <i class="fas fa-envelope-open-text mr-3 w-5 text-center text-orange-400"></i> Mail Prices
+    </a>
+    <a href="{{ route('admin.psc-types.index') }}" class="block py-2.5 px-4 rounded-md
+        {{ request()->is('admin/psc-types*') ? 'active' : '' }}">
+        <i class="fas fa-user-tie mr-3 w-5 text-center text-orange-400"></i> PSC Prices
     </a>
     <a href="{{ route('admin.plan-room-discounts.index') }}" class="block py-2.5 px-4 rounded-md
         {{ request()->is('admin/plan-room-discounts*') ? 'active' : '' }}">

@@ -16,10 +16,19 @@ class UserController extends Controller
         $user = auth()->user();
         $totalMeetingRoomOrderCount = $user->orderDetails()->where('product_type', ProductTypeEnum::MEETING_ROOM->value)->count() ?? 0;
         $totalConferenceRoomOrderCount = $user->orderDetails()->where('product_type', ProductTypeEnum::CONFERENCE_ROOM->value)->count() ?? 0;
-        
+
+        $showCompanyPrompt = false;
+        if ($user->subscribed('default')) {
+            $plan = $user->subscription('default')->plan;
+            if ($plan && $plan->allowsCompanyPsc() && !$user->companies()->active()->exists()) {
+                $showCompanyPrompt = true;
+            }
+        }
+
         return view('dashboard', compact(
                 'totalMeetingRoomOrderCount',
-                'totalConferenceRoomOrderCount'
+                'totalConferenceRoomOrderCount',
+                'showCompanyPrompt'
             )
         );
     }
