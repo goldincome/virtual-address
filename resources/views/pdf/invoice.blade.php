@@ -160,7 +160,7 @@
                             @endif
                         </td>
                         <td class="center">
-                            {{ $orderDetail->quantity }}{{ $orderDetail->isVirtualAddress() && $jsonPlan && $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? ' yr' : ($orderDetail->isVirtualAddress() && $jsonPlan && $jsonPlan->subscription_type === $subscriptionType::MONTHLY->value ? ' mon' : ' hr(s)') }}
+                            {{ $orderDetail->quantity }}{{ $orderDetail->qtyUnitLabel() }}
                         </td>
                         <td class="right">
                             {{ $orderDetail->discounts > 0 ? currencyFormatter(json_decode($orderDetail->discounts)->product_price) : currencyFormatter($orderDetail->price) }}

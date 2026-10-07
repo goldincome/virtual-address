@@ -50,7 +50,11 @@ class PaymentWebhookController extends CashierController
                     $order = Order::where('order_no', $metadata['order_no'])->first();
                     if($order){
                         $order->update(['status' => PaymentStatusEnum::Paid->value]);
-                        SendPaymentReceiptEmail::dispatch($order, $payload['id']);
+                        // The payment confirmation email is sent by
+                        // handleInvoicePaymentSucceeded() so each paid payment
+                        // produces exactly one receipt, even when several
+                        // subscription items (plan, mail, PSC) are purchased
+                        // in a single checkout.
                     }
                 }
                 Log::info('Webhook: New subscription created.', [ 'user_id' => $user->id, 'payload' => $payload]);

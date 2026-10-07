@@ -57,6 +57,12 @@ class PscService
         }
 
         foreach ($pscCartItems as $cartItem) {
+            // Top-up items are applied to the existing subscription by
+            // applyTopUpFromCart() and never belong to a checkout subscription.
+            if (!empty($cartItem->options['top_up'])) {
+                continue;
+            }
+
             $pscType = PscType::find($cartItem->options->psc_type_id);
             if (!$pscType) {
                 continue;
@@ -184,7 +190,8 @@ class PscService
     /**
      * Apply the PSC top-up quantities bought through the cart/checkout/payment
      * flow. Each cart PSC item increases the paid allowance (and the matching
-     * Stripe subscription item quantity) by its quantity.
+     * Stripe subscription item quantity) with proration, so Stripe collects the
+     * pro-rated amount through the subscription billing cycle.
      */
     public function applyTopUpFromCart(User $user): void
     {
@@ -205,10 +212,10 @@ class PscService
     }
 
     /**
-     * Increase the paid/billed allowance for a PSC type. The amount for this
-     * period was collected as a one-time payment through checkout, so the
-     * subscription item quantity is updated without proration; the next
-     * renewal then bills for the new quantity.
+     * Increase the paid/billed allowance for a PSC type. The PSC is a
+     * subscription item, so the quantity change is made with proration:
+     * Stripe generates and collects an invoice for the pro-rated amount of
+     * the current period and the full new quantity bills at the next renewal.
      */
     public function increaseBilledQuantity(User $user, PscType $pscType, int $quantity): void
     {
@@ -236,7 +243,7 @@ class PscService
             $newQuantity = (int) $item->quantity + $quantity;
             $this->stripe->subscriptionItems->update($item->stripe_subscription_item_id, [
                 'quantity' => $newQuantity,
-                'proration_behavior' => 'none',
+                'proration_behavior' => 'create_prorations',
             ]);
             $item->quantity = $newQuantity;
         } else {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Models\User;
+use App\Models\Plan;
 use App\Models\Product;
 use Illuminate\View\View;
 use App\Enums\ProductTypeEnum;
@@ -18,13 +19,15 @@ class HomeController extends Controller
         $virtualAddress = $product->virtual_address;
         $plans = $virtualAddress->plans()->with(['features', 'media', 'features.featureSetting'])->where('is_active', true)->get();
 
+        $planGroups = Plan::featureGroupsForListing($plans);
+
         $meetingRooms = $product->meeting_rooms;
 
         $conferenceRooms = $product->conference_rooms;
        
         //dd($user->planSubscription('pro')->canUseFeature('listings'));
 
-        return view('front.home', compact('plans', 'meetingRooms', 'conferenceRooms'));
+        return view('front.home', compact('plans', 'meetingRooms', 'conferenceRooms', 'planGroups'));
     }
     
   

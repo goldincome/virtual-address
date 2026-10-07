@@ -64,7 +64,7 @@
                         <div>
                             <p class="font-semibold text-blue-700">{{ $item->name }}</p>
                             <p class="text-sm text-gray-500">
-                                Item Ref: {{ $item->ref_no }} | Type: {{ Str::headline($item->type) }}
+                                Item Ref: {{ $item->ref_no }} | Type: {{ $item->product_type->label() }}
                             </p>
                         </div>
                         <!-- This button will trigger the modal -->
@@ -81,12 +81,15 @@
                                 <button onclick="hideItemDetails('{{ $item->ref_no }}')" class="text-gray-400 hover:text-gray-800 text-2xl font-bold">&times;</button>
                             </div>
                             <div class="p-6 overflow-y-auto">
-                                @if($item->type === \App\Enums\ProductTypeEnum::VIRTUAL_ADDRESS->value)
+                                @if($item->isVirtualAddress())
                                     {{-- Include the virtual address details view --}}
                                     @include('admin.orders.partials.virtual-address-details', ['orderDetail' => $item, 'order' => $order])
-                                @else {{-- If($item->type === 'meeting-room') --}}
+                                @elseif($item->isMeetingRoom() || $item->isConferenceRoom())
                                     {{-- Include the meeting room details view --}}
                                     @include('admin.orders.partials.meeting-room-details', ['orderDetail' => $item, 'order' => $order])
+                                @elseif($item->isPsc())
+                                    {{-- Include the PSC details view --}}
+                                    @include('admin.orders.partials.psc-details', ['orderDetail' => $item, 'order' => $order])
                                 @endif
                             </div>
                             <div class="flex justify-end p-4 bg-gray-50 border-t">

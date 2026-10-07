@@ -351,10 +351,8 @@ class FeatureSettingSeeder extends Seeder
             ['slug' => 'public-trading-address', 'name' => 'Public Trading & Business Address', 'description' => 'Present a public trading and business address at our premises.', 'icon' => 'fas fa-store', 'status' => 1],
             ['slug' => 'mail-acceptance-royal-mail', 'name' => 'Complete Mail & Parcel Acceptance', 'description' => 'We accept mail and parcels delivered by Royal Mail and couriers.', 'icon' => 'fas fa-inbox', 'status' => 1],
             ['slug' => 'priority-digital-mailroom', 'name' => 'Priority Digital Mailroom', 'description' => 'Priority scanning and digital access to your incoming mail.', 'icon' => 'fas fa-envelope-open-text', 'status' => 1],
-            ['slug' => 'inclusive-mail-forwarding', 'name' => 'Inclusive Mail Forwarding', 'description' => 'Inclusive mail forwarding to your preferred address.', 'icon' => 'fas fa-shipping-fast', 'status' => 1],
             ['slug' => 'free-mail-collection', 'name' => 'Free In-Person Mail Collection', 'description' => 'Collect your mail in person at no additional cost.', 'icon' => 'fas fa-hand-holding', 'status' => 1],
             ['slug' => 'post-termination-mail-hold', 'name' => '30-Day Post-Termination Mail Hold', 'description' => 'We hold your mail for 30 days after your subscription ends.', 'icon' => 'fas fa-hourglass-half', 'status' => 1],
-            ['slug' => 'meeting-conference-room-access', 'name' => 'Meeting & Conference Room Access', 'description' => 'Access professional meeting and conference rooms at our premises.', 'icon' => 'fas fa-users', 'status' => 1],
         ];
         foreach ($premiumFeatureSettings as $setting) {
             DB::table('feature_settings')->updateOrInsert(

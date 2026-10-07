@@ -33,10 +33,22 @@ class PremiumPackageSeeder extends Seeder
         ['slug' => 'public-trading-address', 'name' => 'Public Trading & Business Address', 'icon' => 'fas fa-store'],
         ['slug' => 'mail-acceptance-royal-mail', 'name' => 'Complete Mail & Parcel Acceptance', 'icon' => 'fas fa-inbox'],
         ['slug' => 'priority-digital-mailroom', 'name' => 'Priority Digital Mailroom', 'icon' => 'fas fa-envelope-open-text'],
-        ['slug' => 'inclusive-mail-forwarding', 'name' => 'Inclusive Mail Forwarding', 'icon' => 'fas fa-shipping-fast'],
         ['slug' => 'free-mail-collection', 'name' => 'Free In-Person Mail Collection', 'icon' => 'fas fa-hand-holding'],
         ['slug' => 'post-termination-mail-hold', 'name' => '30-Day Post-Termination Mail Hold', 'icon' => 'fas fa-hourglass-half'],
-        ['slug' => 'meeting-conference-room-access', 'name' => 'Meeting & Conference Room Access', 'icon' => 'fas fa-users'],
+    ];
+
+    /**
+     * Feature slugs that must never be attached to the Premium Package.
+     */
+    const REMOVED_FEATURE_SLUGS = [
+        'high-speed-wi-fi',
+        'capacity-up-to-8-people',
+        'comfortable-seating',
+        'power-outlets-accessible',
+        'whiteboard-markers',
+        'air-conditioned',
+        'meeting-conference-room-access',
+        'inclusive-mail-forwarding',
     ];
 
     /**
@@ -133,6 +145,7 @@ class PremiumPackageSeeder extends Seeder
         }
 
         $slugs = array_merge($sourceSlugs, array_column(self::PREMIUM_FEATURE_SETTINGS, 'slug'));
+        $slugs = array_values(array_diff($slugs, self::REMOVED_FEATURE_SLUGS));
 
         $sortOrder = 1;
         foreach ($slugs as $slug) {
@@ -204,7 +217,7 @@ class PremiumPackageSeeder extends Seeder
     protected function premiumDescription(): string
     {
         return 'Our all-inclusive Premium Package: registered office address, directors and PSC service '
-            . 'addresses, priority digital mailroom with inclusive mail forwarding, free mail collection, '
-            . 'meeting room access and a 30-day post-termination mail hold.';
+            . 'addresses, priority digital mailroom, free mail collection and a 30-day post-termination '
+            . 'mail hold.';
     }
 }

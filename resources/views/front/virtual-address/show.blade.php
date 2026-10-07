@@ -190,7 +190,8 @@
                                         <div>
                                             <span class="font-semibold text-blue-800">{{ $pscType->name }}</span>
                                             <p class="text-sm text-gray-600 mt-1">
-                                                £{{ $pscType->price_monthly }}/month or £{{ $pscType->price_yearly }}/year per person
+                                                <span class="psc-price-monthly" data-psc-price="monthly">£{{ $pscType->price_monthly }}/month per person</span>
+                                                <span class="psc-price-yearly hidden" data-psc-price="yearly">£{{ $pscType->price_yearly }}/year per person</span>
                                             </p>
                                         </div>
                                         <div class="ml-4">
@@ -524,6 +525,23 @@
                 //parentLabel.style.backgroundColor = '#7deda4'; // White background
             }
         });
+
+        // --- PSC price follows the selected subscription interval ---
+        const pscMonthly = document.querySelectorAll('.psc-price-monthly');
+        const pscYearly = document.querySelectorAll('.psc-price-yearly');
+
+        function updatePscPrices() {
+            const selected = document.querySelector('input[name="subscription_type"]:checked');
+            if (!selected) return;
+            const isYearly = selected.value === 'yearly';
+            pscMonthly.forEach(el => el.classList.toggle('hidden', isYearly));
+            pscYearly.forEach(el => el.classList.toggle('hidden', !isYearly));
+        }
+
+        document.querySelectorAll('input[name="subscription_type"]').forEach(radio => {
+            radio.addEventListener('change', updatePscPrices);
+        });
+        updatePscPrices();
 
         // --- FAQ Toggle ---
         // This script handles the expand/collapse functionality of the FAQ items.

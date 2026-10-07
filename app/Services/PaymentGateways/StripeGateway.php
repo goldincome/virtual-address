@@ -96,12 +96,21 @@ class StripeGateway implements PaymentGatewayInterface
                 return redirect()->away($session->url)->send();
             }
 
+            // --- SCENARIO 2a: PSC top-up for an existing subscriber. ---
+            // PSC is a subscription item: buying more means increasing the quantity
+            // on the user's Stripe subscription with proration. Stripe immediately
+            // generates and collects a subscription invoice for the pro-rated
+            // amount, so no one-off Checkout session is created.
+            $topUpItems = $cartService->getPscItemsFromCart()
+                ->filter(fn ($item) => !empty($item->options['top_up']));
+            if ($topUpItems->isNotEmpty()) {
+                app(\App\Services\PscService::class)->applyTopUpFromCart($user);
+                return redirect()->route('stripe.success', ['psc_topup' => '1'])->send();
+            }
+
             // --- SCENARIO 2: The cart contains ONLY non-subscription products. ---
-            // One-time purchases: meeting/conference rooms and PSC top-up allowances.
-            $lineItems = array_merge(
-                $this->getOneTimeItemsFromCart(),
-                $this->getPscTopUpItemsAsOneTimeFromCart()
-            );
+            // One-time purchases: meeting/conference rooms.
+            $lineItems = $this->getOneTimeItemsFromCart();
             //dd($lineItems);
             
             if (!empty($lineItems)) {
@@ -161,34 +170,6 @@ class StripeGateway implements PaymentGatewayInterface
             report($e);
             return false;
         }
-    }
-
-    /**
-     * Format PSC top-up items (allowance purchases for an existing subscriber)
-     * as one-time Stripe line items. Regular PSC items that belong to a new
-     * subscription are billed as recurring items in SCENARIO 1 and are excluded
-     * here via the top_up flag.
-     */
-    protected function getPscTopUpItemsAsOneTimeFromCart(): array
-    {
-        $lineItems = [];
-        foreach (Cart::content() as $item) {
-            if ($item->options->type !== ProductTypeEnum::PSC->value || empty($item->options->top_up)) {
-                continue;
-            }
-            $lineItems[] = [
-                'price_data' => [
-                    'currency' => strtolower(config('cashier.currency', 'gbp')),
-                    'product_data' => [
-                        'name' => $item->name,
-                        'description' => $item->options->description ?? 'Additional PSC slot',
-                    ],
-                    'unit_amount' => (int) ($item->price * 100),
-                ],
-                'quantity' => (int) $item->qty,
-            ];
-        }
-        return $lineItems;
     }
 
     /**

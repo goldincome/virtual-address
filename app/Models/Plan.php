@@ -114,4 +114,57 @@ class Plan extends Model implements HasMedia
             ->whereIn('mail_type', ['scanned', 'forwarded'])
             ->exists();
     }
+
+    /**
+     * Build per-plan feature display groups for the plan comparison cards.
+     *
+     * When a plan's features are a superset of another (lower) plan's, they are
+     * split into a shared "base" plan and the exclusive remainder, so cards can
+     * show "All Features in {base plan}" instead of repeating the base plan's
+     * feature list.
+     *
+     * @return array<string, array{base: Plan|null, exclusive: \Illuminate\Support\Collection}>
+     */
+    public static function featureGroupsForListing(\Illuminate\Database\Eloquent\Collection $plans): array
+    {
+        $all = $plans->values();
+        $groups = [];
+
+        foreach ($all as $plan) {
+            $planSlugs = $plan->features
+                ->map(fn ($feature) => optional($feature->featureSetting)->slug)
+                ->filter()
+                ->values();
+
+            $base = $all
+                ->filter(fn ($candidate) => $candidate->id !== $plan->id)
+                ->filter(function ($candidate) use ($planSlugs) {
+                    $candidateSlugs = $candidate->features
+                        ->map(fn ($feature) => optional($feature->featureSetting)->slug)
+                        ->filter()
+                        ->values();
+
+                    return $candidateSlugs->isNotEmpty()
+                        && $candidateSlugs->every(fn ($slug) => $planSlugs->contains($slug));
+                })
+                ->sortBy(fn ($candidate) => $candidate->level ?? 0)
+                ->last();
+
+            $groups[$plan->id] = [
+                'base' => $base,
+                'exclusive' => $base
+                    ? $plan->features->filter(function ($feature) use ($base) {
+                        $baseSlugs = $base->features
+                            ->map(fn ($feature) => optional($feature->featureSetting)->slug)
+                            ->filter()
+                            ->values();
+
+                        return ! $baseSlugs->contains(optional($feature->featureSetting)->slug);
+                    })
+                    : $plan->features,
+            ];
+        }
+
+        return $groups;
+    }
 }

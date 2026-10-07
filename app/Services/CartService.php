@@ -351,8 +351,9 @@ class CartService
     /**
      * Add purchased PSC allowance (top-up) items to the cart for a user who is
      * already subscribed. Unlike addVirtualAddressToCart this does NOT add a
-     * virtual-address plan, so the cart can be paid as a one-time purchase and
-     * the allowance is applied to the existing subscription after checkout.
+     * virtual-address plan: at checkout the PSC subscription item quantity is
+     * increased with proration, so the charge is collected by Stripe through the
+     * user's existing subscription rather than as a one-off payment.
      *
      * @param array $pscQuantities [psc_type_id => quantity]
      */
@@ -404,7 +405,7 @@ class CartService
                     'plan' => null,
                     'top_up' => true,
                     'features' => null,
-                    'description' => 'Additional Person with Significant Control slot (' . ($interval === 'year' ? 'billed yearly' : 'billed monthly') . ')',
+                    'description' => 'Additional Person with Significant Control slot (billed via your subscription and pro-rated for the current period)',
                     'image' => $image,
                 ]
             );

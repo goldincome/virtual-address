@@ -75,7 +75,7 @@
                                                 @endforeach
                                             @endif
                                         </td>
-                                        <td class="p-3 text-center">{{ $item->quantity }}{{ $item->isVirtualAddress()  ?  $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? ' yr' : ' mon' : 'hr(s)' }}</td>
+                                        <td class="p-3 text-center">{{ $item->quantity }}{{ $item->qtyUnitLabel() }}</td>
                                         <td class="p-3 text-right">{{ $item->discounts > 0 ? currencyFormatter(json_decode($item->discounts)->product_price) : currencyFormatter($item->price) }} </td>
                                         <td class="p-3 text-right">{{ $item->discounts > 0 ? currencyFormatter(json_decode($item->discounts)->product_price *  $item->quantity) : currencyFormatter($item->sub_total) }}</td>
                                     </tr>

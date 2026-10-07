@@ -22,8 +22,10 @@ class VirtualAddressController extends Controller
         $virtualAddress = app(Product::class)->virtual_address;
         $plans = $virtualAddress->plans()->with(['features', 'media', 'features.featureSetting'])
             ->where('is_active', true)->get();
-        
-        return view('front.virtual-address.index', compact('plans'));
+
+        $planGroups = Plan::featureGroupsForListing($plans);
+
+        return view('front.virtual-address.index', compact('plans', 'planGroups'));
     }
 
     /**

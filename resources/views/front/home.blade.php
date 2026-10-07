@@ -153,7 +153,16 @@
                                 </div>
 
                                 <ul class="space-y-2 text-gray-700 mb-8 text-sm">
-                                    @foreach($plan->features as $index => $feature)
+                                    @php
+                                        $group = $planGroups[$plan->id] ?? null;
+                                        $listFeatures = $group && $group['base'] ? $group['exclusive'] : $plan->features;
+                                    @endphp
+                                    @if($group && $group['base'])
+                                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                            All Features in {{ $group['base']->name }}
+                                        </li>
+                                    @endif
+                                    @foreach($listFeatures as $feature)
                                         <li class="flex items-center"><i class="{{ $feature->is_activated ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-400' }} mr-2"></i>
                                             {{ $feature->featureSetting->name }}
                                         </li>
@@ -183,7 +192,16 @@
                                 </div>
 
                                 <ul class="space-y-2 text-gray-600 mb-8 text-sm">
-                                    @foreach($plan->features as $index => $feature)
+                                    @php
+                                        $group = $planGroups[$plan->id] ?? null;
+                                        $listFeatures = $group && $group['base'] ? $group['exclusive'] : $plan->features;
+                                    @endphp
+                                    @if($group && $group['base'])
+                                        <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                            All Features in {{ $group['base']->name }}
+                                        </li>
+                                    @endif
+                                    @foreach($listFeatures as $feature)
                                         <li class="flex items-center"><i class="{{ $feature->is_activated ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-400' }} mr-2"></i>
                                             {{ $feature->featureSetting->name }}
                                         </li>

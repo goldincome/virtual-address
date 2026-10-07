@@ -4,14 +4,17 @@ namespace Tests\Feature;
 
 use App\Models\Plan;
 use App\Models\Product;
+use App\Models\Feature;
 use App\Models\PscType;
 use App\Models\User;
 use App\Models\MailSetting;
+use App\Models\FeatureSetting;
 use App\Enums\ProductTypeEnum;
 use App\Enums\MailTypeEnum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use App\Actions\CalculateCartTotalDiscount;
+use Database\Seeders\PremiumPackageSeeder;
 use Tests\TestCase;
 
 class PscCartTest extends TestCase
@@ -165,5 +168,207 @@ class PscCartTest extends TestCase
 
         // Must not throw count() TypeError now that PSC items sit in the cart
         $this->assertSame(0.0, (float) app(CalculateCartTotalDiscount::class)->execute());
+    }
+
+    public function test_premium_card_lists_all_features_in_package_two_instead_of_repeating_them(): void
+    {
+        $product = Product::create([
+            'name' => 'Virtual Address',
+            'type' => ProductTypeEnum::VIRTUAL_ADDRESS->value,
+            'intro' => 'A professional London business address',
+            'price' => 0,
+            'is_active' => true,
+        ]);
+
+        $sharedOne = FeatureSetting::withoutEvents(fn () => FeatureSetting::create([
+            'name' => 'Shared Feature One',
+            'slug' => 'shared-feature-one',
+            'icon' => 'fa-check',
+            'description' => '',
+            'status' => true,
+        ]));
+        $sharedTwo = FeatureSetting::withoutEvents(fn () => FeatureSetting::create([
+            'name' => 'Shared Feature Two',
+            'slug' => 'shared-feature-two',
+            'icon' => 'fa-check',
+            'description' => '',
+            'status' => true,
+        ]));
+        $premiumOnly = FeatureSetting::withoutEvents(fn () => FeatureSetting::create([
+            'name' => 'Premium Exclusive Feature',
+            'slug' => 'premium-exclusive-feature',
+            'icon' => 'fa-check',
+            'description' => '',
+            'status' => true,
+        ]));
+
+        $packageTwo = Plan::withoutEvents(fn () => $product->plans()->create([
+            'name' => 'Package Two',
+            'slug' => 'package-two',
+            'description' => 'Second tier',
+            'is_active' => true,
+            'price' => '25.00',
+            'yearly_monthly_price' => '250.00',
+            'signup_fee' => '0.00',
+            'currency' => 'gbp',
+            'trial_period' => 0,
+            'trial_interval' => 'month',
+            'invoice_period' => 1,
+            'invoice_interval' => 'month',
+            'grace_period' => 0,
+            'grace_interval' => 'day',
+            'level' => 1,
+        ]));
+
+        $premium = Plan::withoutEvents(fn () => $product->plans()->create([
+            'name' => 'Premium Package',
+            'slug' => 'premium-package',
+            'description' => 'Test premium plan',
+            'is_active' => true,
+            'price' => '35.00',
+            'yearly_monthly_price' => '350.00',
+            'signup_fee' => '0.00',
+            'currency' => 'gbp',
+            'trial_period' => 0,
+            'trial_interval' => 'month',
+            'invoice_period' => 1,
+            'invoice_interval' => 'month',
+            'grace_period' => 0,
+            'grace_interval' => 'day',
+            'level' => 2,
+        ]));
+
+        foreach ([[$packageTwo, [$sharedOne, $sharedTwo]], [$premium, [$sharedOne, $sharedTwo, $premiumOnly]]] as [$plan, $settings]) {
+            foreach ($settings as $index => $setting) {
+                Feature::withoutEvents(fn () => Feature::create([
+                    'plan_id' => $plan->id,
+                    'product_id' => $product->id,
+                    'feature_setting_id' => $setting->id,
+                    'description' => '',
+                    'sort_order' => $index + 1,
+                    'is_activated' => true,
+                ]));
+            }
+        }
+
+        $response = $this->get(route('virtual-address.index'));
+
+        $response->assertOk()
+            ->assertSee('All Features in Package Two')
+            ->assertSee('Premium Exclusive Feature');
+
+        $html = $response->getContent();
+
+        // Shared features stay on the Package Two card (appears in the Packages
+        // and Our Plans sections) but are no longer repeated on the Premium card.
+        $this->assertSame(2, substr_count($html, 'Shared Feature One'));
+        $this->assertSame(2, substr_count($html, 'Shared Feature Two'));
+    }
+
+    public function test_premium_attach_features_skips_removed_feature_slugs(): void
+    {
+        $this->assertSame([
+            'high-speed-wi-fi',
+            'capacity-up-to-8-people',
+            'comfortable-seating',
+            'power-outlets-accessible',
+            'whiteboard-markers',
+            'air-conditioned',
+            'meeting-conference-room-access',
+            'inclusive-mail-forwarding',
+        ], PremiumPackageSeeder::REMOVED_FEATURE_SLUGS);
+
+        $product = Product::create([
+            'name' => 'Virtual Address',
+            'type' => ProductTypeEnum::VIRTUAL_ADDRESS->value,
+            'intro' => 'A professional London business address',
+            'price' => 0,
+            'is_active' => true,
+        ]);
+
+        $packageTwo = Plan::withoutEvents(fn () => $product->plans()->create([
+            'name' => 'Package Two',
+            'slug' => 'package-two',
+            'description' => 'Second tier',
+            'is_active' => true,
+            'price' => '25.00',
+            'yearly_monthly_price' => '250.00',
+            'signup_fee' => '0.00',
+            'currency' => 'gbp',
+            'trial_period' => 0,
+            'trial_interval' => 'month',
+            'invoice_period' => 1,
+            'invoice_interval' => 'month',
+            'grace_period' => 0,
+            'grace_interval' => 'day',
+            'level' => 1,
+        ]));
+
+        $premium = Plan::withoutEvents(fn () => $product->plans()->create([
+            'name' => 'Premium Package',
+            'slug' => 'premium-package',
+            'description' => 'Test premium plan',
+            'is_active' => true,
+            'price' => '35.00',
+            'yearly_monthly_price' => '350.00',
+            'signup_fee' => '0.00',
+            'currency' => 'gbp',
+            'trial_period' => 0,
+            'trial_interval' => 'month',
+            'invoice_period' => 1,
+            'invoice_interval' => 'month',
+            'grace_period' => 0,
+            'grace_interval' => 'day',
+            'level' => 2,
+        ]));
+
+        $removedOne = FeatureSetting::withoutEvents(fn () => FeatureSetting::create([
+            'name' => 'High-Speed Wi-Fi',
+            'slug' => 'high-speed-wi-fi',
+            'icon' => 'fa-wifi',
+            'description' => '',
+            'status' => true,
+        ]));
+        $removedTwo = FeatureSetting::withoutEvents(fn () => FeatureSetting::create([
+            'name' => 'Air Conditioned',
+            'slug' => 'air-conditioned',
+            'icon' => 'fa-air',
+            'description' => '',
+            'status' => true,
+        ]));
+        $kept = FeatureSetting::withoutEvents(fn () => FeatureSetting::create([
+            'name' => 'Business Address',
+            'slug' => 'business-address',
+            'icon' => 'fa-building',
+            'description' => '',
+            'status' => true,
+        ]));
+
+        // Package Two holds the two removed slugs plus one kept slug, mirroring how
+        // the Premium Package inherits the Package Two feature set by cloning.
+        foreach ([$removedOne, $removedTwo, $kept] as $index => $setting) {
+            Feature::withoutEvents(fn () => Feature::create([
+                'plan_id' => $packageTwo->id,
+                'product_id' => $product->id,
+                'feature_setting_id' => $setting->id,
+                'description' => '',
+                'sort_order' => $index + 1,
+                'is_activated' => true,
+            ]));
+        }
+
+        (new \ReflectionMethod(PremiumPackageSeeder::class, 'attachFeatures'))
+            ->invoke(new PremiumPackageSeeder(), $premium, $product);
+
+        $slugs = Feature::where('plan_id', $premium->id)
+            ->with('featureSetting')
+            ->get()
+            ->pluck('featureSetting.slug');
+
+        $this->assertContains('business-address', $slugs);
+        $this->assertNotContains('high-speed-wi-fi', $slugs);
+        $this->assertNotContains('air-conditioned', $slugs);
+        $this->assertNotContains('meeting-conference-room-access', $slugs);
+        $this->assertNotContains('inclusive-mail-forwarding', $slugs);
     }
 }
