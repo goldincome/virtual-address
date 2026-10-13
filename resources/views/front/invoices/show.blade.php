@@ -27,6 +27,7 @@
                         <p><strong>Date:</strong> {{ $invoice->created_at->format('F j, Y, g:i a') }}</p>
                         <p><strong>Client Name:</strong> {{ $invoice->user->name }}</p>
                         <p><strong>Client Email:</strong> {{ $invoice->user->email }}</p>
+                        <p><strong>Customer Number:</strong> {{ $invoice->user->customer_number ?? 'N/A' }}</p>
                         <p><strong>Payment Status:</strong> 
 
                                 @if($invoice->status === $orderStatuses::PENDING->value )
@@ -107,17 +108,52 @@
                 <div class="bg-gray-50 p-6 rounded-md text-left my-8 border border-gray-200">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Subscription Details</h3>
                     <div class="space-y-2 text-gray-700">
-                        <p><strong>Plan Type:</strong> {{ auth()->user()->subscription('default')->plan->name }} ({{  $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? 'Billed Yearly' : 'Billed Monthly'  }})</p>
-                        <p><strong>Activation Date:</strong> {{ auth()->user()->subscription('default')->created_at->format('D, M j, Y') }}</p>
-                        <p><strong>Next Renewal Date:</strong> {{ auth()->user()->subscription('default')->created_at->addYear(1)->format('D, M j, Y')}}</p>
+                        <p><strong>Plan Type:</strong> {{ $jsonPlan->name }} ({{  $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? 'Billed Yearly' : 'Billed Monthly'  }})</p>
+                        <p><strong>Activation Date:</strong> {{ optional(auth()->user()->subscription('default'))->created_at?->format('D, M j, Y') ?? $invoice->created_at->format('D, M j, Y') }}</p>
+                        <p><strong>Next Renewal Date:</strong> {{ (optional(auth()->user()->subscription('default'))->created_at ?? $invoice->created_at)->copy()->addYear(1)->format('D, M j, Y')}}</p>
+                        @if(!empty($jsonPlan->mail_settings) && !empty($jsonPlan->mail_type))
+                            @php($mailType = \App\Enums\MailTypeEnum::tryFrom($jsonPlan->mail_type))
+                            @if($mailType)
+                                <p><strong>Mail Delivery Type:</strong> {{ $mailType->label() }} ({{ $mailType->deliveryDescription() }})</p>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                @php($pscDetails = $invoice->pscDetails())
+                @if($pscDetails->isNotEmpty())
+                <div class="bg-gray-50 p-6 rounded-md text-left my-8 border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Persons with Significant Control (PSC)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700 border-collapse">
+                            <thead class="bg-gray-100 text-gray-600 font-semibold">
+                                <tr>
+                                    <th class="p-2 border-b">PSC Type</th>
+                                    <th class="p-2 border-b text-center">Slots</th>
+                                    <th class="p-2 border-b text-right">Price</th>
+                                    <th class="p-2 border-b text-right">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($pscDetails as $pscDetail)
+                                    <tr>
+                                        <td class="p-2 border-b">{{ $pscDetail->name }}</td>
+                                        <td class="p-2 border-b text-center">{{ $pscDetail->quantity }}{{ $pscDetail->qtyUnitLabel() }}</td>
+                                        <td class="p-2 border-b text-right">{{ currencyFormatter($pscDetail->price) }}</td>
+                                        <td class="p-2 border-b text-right">{{ currencyFormatter($pscDetail->sub_total) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 @endif
                 
                 <div class="text-center mt-10 print:hidden">
-                    <button type="button" onclick="window.print()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md inline-block">
-                        <i class="fas fa-print mr-2"></i> Print Invoice
-                    </button>
+                    <a href="{{ route('invoices.download', $invoice->order_no) }}" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 shadow-md inline-block">
+                        <i class="fas fa-file-pdf mr-2"></i> Download / Print Invoice (PDF)
+                    </a>
                 </div>
             </div>
            

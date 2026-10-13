@@ -30,6 +30,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'user_type',
+        'customer_number',
     ];
 
     /**
@@ -53,6 +54,31 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (empty($user->customer_number)) {
+                $user->customer_number = static::generateUniqueCustomerNumber();
+            }
+        });
+    }
+
+    /**
+     * Generate a unique random 8 digit customer number.
+     */
+    public static function generateUniqueCustomerNumber(): string
+    {
+        for ($attempt = 0; $attempt < 50; $attempt++) {
+            $number = (string) random_int(10000000, 99999999);
+
+            if (! static::where('customer_number', $number)->exists()) {
+                return $number;
+            }
+        }
+
+        throw new \RuntimeException('Unable to generate a unique customer number.');
     }
 
     public function isAdmin(): bool

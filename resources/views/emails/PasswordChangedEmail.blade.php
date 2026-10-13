@@ -71,6 +71,7 @@
                     <p class="text-gray-600 mt-2">Hello {{ $user->name }},</p>
                     <p class="text-gray-600 mt-2">The password for your Charlton Virtual Office account was just changed.</p>
                     <p class="text-gray-600 mt-2">If this was you, no further action is needed. If you did not make this change, please contact support immediately.</p>
+                    <p class="text-gray-600 mt-2"><strong>Customer Number:</strong> {{ $user->customer_number }}</p>
                 </div>
 
                 <div class="text-center mt-10">

@@ -91,9 +91,6 @@
                                     @endforeach
                                 @elseif($item->options->type === $productType::PSC->value)
                                     <p class="text-sm text-gray-600 mt-1">Company Person with Significant Control</p>
-                                    @if(!empty($item->options->top_up))
-                                        <p class="text-xs text-orange-600 mt-1">PSC top-up — your allowance increases after payment.</p>
-                                    @endif
                                 @endif
                             </div>
                         </div>

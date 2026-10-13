@@ -17,6 +17,14 @@ enum MailTypeEnum: string
         };
       
     }
+
+    public function deliveryDescription(): string
+    {
+        return match ($this) {
+            self::Scanned => 'All your mails will be scanned to you',
+            self::Forwarded => 'All your mails will be forwarded to you',
+        };
+    }
   public static function toArray(): array
   {
     return array_column(self::cases(), 'value');

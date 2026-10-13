@@ -41,4 +41,12 @@ class Order extends Model
         return $this->orderDetails()->where('product_type', ProductTypeEnum::CONFERENCE_ROOM->value)
             ->orWhere('product_type', ProductTypeEnum::MEETING_ROOM->value);
     }
+
+    /**
+     * Order lines for paid Persons with Significant Control slots.
+     */
+    public function pscDetails()
+    {
+        return $this->orderDetails->filter(fn (OrderDetail $detail) => $detail->isPsc());
+    }
 }

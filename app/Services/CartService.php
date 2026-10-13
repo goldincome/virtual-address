@@ -359,6 +359,10 @@ class CartService
      */
     public function addPscTopUpToCart(User $user, array $pscQuantities = [])
     {
+        // PSC top-ups live on their own cart instance so they never mix with the
+        // regular cart (rooms, plans) or get destroyed when that cart is cleared.
+        Cart::instance('psc_topup');
+
         $interval = app(PscService::class)->intervalForUser($user);
 
         // Remove existing top-up PSC items before re-adding
@@ -410,6 +414,8 @@ class CartService
                 ]
             );
         }
+
+        Cart::instance('default');
 
         return true;
     }

@@ -92,6 +92,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <a href="{{ route('invoices.show', $order->order_no) }}" class="text-blue-600 hover:text-orange-600">View Details</a>
+                                        <a href="{{ route('invoices.download', $order->order_no) }}" class="ml-3 text-orange-600 hover:text-orange-700">Download PDF</a>
                                     </td>
                                 </tr>
                             @endforeach

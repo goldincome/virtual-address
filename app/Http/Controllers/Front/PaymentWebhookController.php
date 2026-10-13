@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Front;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Order;
+use App\Services\PscService;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Cashier;
 use App\Enums\PaymentStatusEnum;
-use App\Jobs\SendPaymentReceiptEmail;
+use App\Services\OrderService;
+use App\Jobs\SendSubscriptionCancelledEmail;
 use Illuminate\Support\Facades\Log;
 use Stripe\Subscription as StripeSubscription;
 use Symfony\Component\HttpFoundation\Response;
@@ -88,8 +90,11 @@ class PaymentWebhookController extends CashierController
                 $order = $this->findOrderFromInvoice($payload, $user);
 
                 if ($order) {
-                    $order->update(['status' => PaymentStatusEnum::Paid->value]);
-                    SendPaymentReceiptEmail::dispatch($order, $payload['id']);
+                    // Confirm against the *invoice* id so this is idempotent with
+                    // the success-redirect path when the webhook and the browser
+                    // redirect race each other.
+                    $invoiceId = $payload['data']['object']['id'] ?? null;
+                    app(OrderService::class)->confirmPayment($order, $invoiceId);
                 } else {
                     Log::warning('Webhook: Invoice paid but no matching order found.', [
                         'user_id' => $user->id,
@@ -158,12 +163,10 @@ class PaymentWebhookController extends CashierController
             $user = Cashier::findBillable($stripeCustomerId);
 
             if ($user) {
-                //$subscription = $this->updateOrderFromMetadata($payload, $user);
-              // $subscription = $this->updateSubscriptionEndDate($payload, $user);
+                $this->applyScheduledChangeIfTransitioned($user);
 
                 Log::info('Webhook: Subscription updated.', [
                     'user_id' => $user->id,
-                    //'subscription' => $subscription ?? null,
                     'payload' => $payload
                 ]);
             }
@@ -175,6 +178,42 @@ class PaymentWebhookController extends CashierController
         }
 
         return $response;
+    }
+
+    /**
+     * When a scheduled downgrade reaches its phase change, Stripe swaps the
+     * plan and fires customer.subscription.updated. This reconciles the local
+     * state: it clears the pending-change marker and, when the new plan no
+     * longer includes Company/PSC, suspends the user's companies and stops
+     * their PSC billing.
+     */
+    protected function applyScheduledChangeIfTransitioned(User $user): void
+    {
+        $subscription = $user->subscription('default');
+
+        if (! $subscription || ! $subscription->subscription_schedule_id || ! $subscription->scheduled_plan_id) {
+            return;
+        }
+
+        $subscription->refresh();
+        $activePlan = $subscription->plan;
+
+        if (! $activePlan || (int) $activePlan->id !== (int) $subscription->scheduled_plan_id) {
+            return;
+        }
+
+        if (! $activePlan->allowsCompanyPsc()) {
+            foreach ($user->companies()->where('status', 'active')->get() as $company) {
+                app(PscService::class)->suspendCompany($company);
+            }
+        }
+
+        $subscription->forceFill([
+            'subscription_schedule_id' => null,
+            'scheduled_plan_id' => null,
+            'scheduled_change_at' => null,
+            'scheduled_change_type' => null,
+        ])->save();
     }
 
     /**
@@ -192,7 +231,14 @@ class PaymentWebhookController extends CashierController
             $user = Cashier::findBillable($stripeCustomerId);
 
             if ($user) {
-              
+                $data = $payload['data']['object'];
+                $endsAt = isset($data['ended_at'])
+                    ? Carbon::createFromTimestamp($data['ended_at'])
+                    : (isset($data['current_period_end']) ? Carbon::createFromTimestamp($data['current_period_end']) : null);
+
+                // Second cancellation email, sent when the subscription actually ends.
+                SendSubscriptionCancelledEmail::dispatch($user, $endsAt, 'ended');
+
                 Log::info('Webhook: Subscription canceled.', [
                     'user_id' => $user->id,
                     'stripe_customer' => $stripeCustomerId,
@@ -238,9 +284,12 @@ class PaymentWebhookController extends CashierController
         return new Response('Webhook Handled', 200);
     }
 
-     /**
+    /**
      * Find the order related to an invoice, using the subscription metadata order_no.
-     * Falls back to the user's latest virtual-address (subscription) order.
+     *
+     * Only an explicit `order_no` match is accepted: blindly falling back to the
+     * user's latest virtual-address order could attach a payment (and its receipt)
+     * to the wrong order for returning customers.
      */
     protected function findOrderFromInvoice(array $payload, $user)
     {
@@ -271,12 +320,11 @@ class PaymentWebhookController extends CashierController
         }
 
         if ($orderNo) {
-            $order = Order::where('order_no', $orderNo)->first();
-            if ($order) {
-                return $order;
-            }
+            return Order::where('order_no', $orderNo)->first();
         }
 
+        // Fallback for upgrade invoices (no explicit order_no in metadata):
+        // attach the receipt/contract to the user's most recent VA order.
         return $user->orders()
             ->whereHas('orderDetails', function ($query) {
                 $query->where('product_type', \App\Enums\ProductTypeEnum::VIRTUAL_ADDRESS->value);

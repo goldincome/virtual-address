@@ -35,7 +35,7 @@
                     <div>
                         <h2 class="text-2xl font-bold text-blue-800">Order #{{ $order->order_no }}</h2>
                         <p class="text-sm text-gray-500">
-                            Customer: {{ $order->user->name }} | Placed on: {{ $order->created_at->format('M j, Y') }}
+                            Customer: {{ $order->user->name }} | Customer #: {{ $order->user->customer_number ?? 'N/A' }} | Placed on: {{ $order->created_at->format('M j, Y') }}
                         </p>
                     </div>
                     <div class="flex gap-2 mt-4 sm:mt-0">

@@ -25,7 +25,7 @@
             <div>
                 <h5 class="text-lg font-semibold mb-4 text-white">Resources &amp; Guides</h5>
                  <ul class="space-y-2 text-sm">
-                    <li><a href="{{ route('local.woolwich') }}">Virtual Office in Woolwich, SE18</a></li>
+                    <li><a href="{{ route('local.woolwich') }}">Virtual Office in Woolwich, SE18 5PQ</a></li>
                     <li><a href="{{ route('guides.registered-rules') }}">Can I Use a Virtual Office as a Registered Address?</a></li>
                     <li><a href="{{ route('guides.company-registration') }}">Register a Limited Company with a Virtual Address</a></li>
                     <li><a href="{{ route('guides.comparison') }}">Virtual Office vs Serviced Office vs Coworking</a></li>
@@ -35,9 +35,9 @@
             <div>
                  <h5 class="text-lg font-semibold mb-4 text-white">Contact Us</h5>
                  <address class="not-italic text-sm space-y-2 mb-4">
-                    <p><i class="fas fa-map-marker-alt mr-2 text-orange-400"></i>Unit 6,Block 3, Dockyard Industrial Estate,<br>Church Street, Woolwich, London UK</p>
+                    <p><i class="fas fa-map-marker-alt mr-2 text-orange-400"></i><a href="{{route('contact-us.index')}}">Send us a message</a></p>
                     <p><i class="fas fa-phone-alt mr-2 text-orange-400"></i><a href="tel:+442032474747">+44 (0) 2032474747</a></p>
-                    <p><i class="fas fa-envelope mr-2 text-orange-400"></i><a href="mailto:support@charltonvirtualoffice.com">support@charltonvirtualoffice.com</a></p>
+                    <p><i class="fas fa-envelope mr-2 text-orange-400"></i><a href="mailto:info@charltonvirtualoffice.com">info@charltonvirtualoffice.com</a></p>
                  </address>
                  <div class="flex space-x-4">
                     <a href="#" aria-label="LinkedIn" class="social-icon text-xl hover:text-orange-300 transition duration-300"><i class="fab fa-linkedin"></i></a>

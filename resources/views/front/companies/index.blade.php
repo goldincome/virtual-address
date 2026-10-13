@@ -1,29 +1,25 @@
-@extends('layouts.front')
+@extends('layouts.app')
 
 @section('title')
     My Companies - Charlton Virtual Office
 @endsection
 
+@section('page_title')
+    My Companies
+@endsection
+
+@section('page_intro')
+    Manage your registered companies and Persons with Significant Control (PSC).
+@endsection
+
 @section('content')
-    <section class="hero-bg-virtual text-white relative"
-        style="background-image: url('{{ asset('images/virtual-office-address.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="absolute inset-0 bg-black opacity-60"></div>
-        <div class="container mx-auto px-6 py-16 relative z-10 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2">My Companies</h1>
-            <p class="text-blue-100">Manage your registered companies and Persons with Significant Control (PSC).</p>
-        </div>
-    </section>
-
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        @include('front.common.error-and-message')
-
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8">
-            <h2 class="text-2xl font-bold text-blue-800 mb-4 sm:mb-0">Your Companies</h2>
-            <a href="{{ route('companies.create') }}"
-                class="inline-flex items-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md">
-                <i class="fas fa-plus-circle mr-2"></i> Add Company
-            </a>
-        </div>
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8">
+        <h2 class="text-2xl font-bold text-blue-800 mb-4 sm:mb-0">Your Companies</h2>
+        <a href="{{ route('companies.create') }}"
+            class="inline-flex items-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md">
+            <i class="fas fa-plus-circle mr-2"></i> Add Company
+        </a>
+    </div>
 
         @include('front.companies.partials.psc-allowance')
 
@@ -75,5 +71,4 @@
                 <div class="mt-8">{{ $companies->links() }}</div>
             @endif
         @endif
-    </main>
 @endsection

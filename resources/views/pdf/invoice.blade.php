@@ -130,7 +130,8 @@
                 </td>
                 <td>
                     <strong>Client Name:</strong> {{ $order->user->name }}<br>
-                    <strong>Client Email:</strong> {{ $order->user->email }}
+                    <strong>Client Email:</strong> {{ $order->user->email }}<br>
+                    <strong>Customer Number:</strong> {{ $order->user->customer_number ?? 'N/A' }}
                 </td>
             </tr>
         </table>
@@ -186,6 +187,11 @@
 
         @if ($order->hasSubscription() && $jsonPlan)
             <div class="info-block">
+                <h3>Virtual Office Address Information</h3>
+                <p><strong>Virtual Office Address:</strong> Unit 6, Block 3, Dockyard Industrial Estate, Charlton, London. SE18 5PQ</p>
+                <p><strong>Email Address:</strong> info@charltonvirtualoffice.com (Our official business email address for communication)</p>
+                <p><strong>Website:</strong> <a href="https://charltonvirtualoffice.com">https://charltonvirtualoffice.com </a></p>
+                </br>
                 <h3>Subscription Details</h3>
                 <p><strong>Plan:</strong> {{ $jsonPlan->name ?? $order->user->subscription('default')->plan->name }}</p>
                 <p><strong>Billing:</strong> {{ $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? 'Yearly' : 'Monthly' }}</p>
@@ -196,6 +202,27 @@
                         ? \Carbon\Carbon::parse($order->created_at)->addYear(1)->format('D, M j, Y')
                         : \Carbon\Carbon::parse($order->created_at)->addMonth(1)->format('D, M j, Y') }}
                 </p>
+                @if(!empty($jsonPlan->mail_settings) && !empty($jsonPlan->mail_type))
+                    @php($mailType = \App\Enums\MailTypeEnum::tryFrom($jsonPlan->mail_type))
+                    @if($mailType)
+                        <p><strong>Mail Delivery Type:</strong> {{ $mailType->label() }} ({{ $mailType->deliveryDescription() }})</p>
+                    @endif
+                @endif
+            </div>
+        @endif
+
+        @php($pscDetails = $order->pscDetails())
+        @if($pscDetails->isNotEmpty())
+            <div class="info-block">
+                <h3>Persons with Significant Control (PSC)</h3>
+                @foreach($pscDetails as $pscDetail)
+                    <p>
+                        <strong>{{ $pscDetail->name }}:</strong>
+                        {{ $pscDetail->quantity }}{{ $pscDetail->qtyUnitLabel() }}
+                        &times; {{ currencyFormatter($pscDetail->price) }}
+                        = {{ currencyFormatter($pscDetail->sub_total) }}
+                    </p>
+                @endforeach
             </div>
         @endif
 

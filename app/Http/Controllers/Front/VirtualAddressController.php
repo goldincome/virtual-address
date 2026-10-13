@@ -11,6 +11,7 @@ use App\Services\CartService;
 use App\Enums\ProductTypeEnum;
 use App\Enums\SubscriptionTypeEnum;
 use App\Http\Controllers\Controller;
+use App\Services\SubscriptionChangeService;
 
 class VirtualAddressController extends Controller
 {
@@ -53,6 +54,46 @@ class VirtualAddressController extends Controller
             return redirect()->back()->with('error', 'Virtual Address plan not found.')->withInput();
         }
         $plan['subscription_type'] = $request->subscription_type;
+
+        // A user with a live subscription must never buy a second subscription.
+        // Route every plan submission through the in-place change service
+        // instead (upgrade = immediate, downgrade = scheduled at period end).
+        $existingSubscription = $request->user()?->subscription('default');
+        if ($existingSubscription && $existingSubscription->active() && $existingSubscription->plan) {
+            if ($existingSubscription->onGracePeriod()) {
+                return redirect()->route('dashboard')->with('info', 'Your subscription is cancelled and ends on ' . optional($existingSubscription->ends_at)->format('F j, Y') . '. Resume it to change plans.');
+            }
+
+            $targetPlan = Plan::where('is_active', true)->find($request->plan_id);
+
+            if (! $targetPlan) {
+                return redirect()->back()->with('error', 'Virtual Address plan not found.')->withInput();
+            }
+
+            if ((int) $existingSubscription->plan->id === (int) $targetPlan->id) {
+                return redirect()->route('dashboard')->with('info', 'You are already subscribed to the ' . $targetPlan->name . ' plan.');
+            }
+
+            try {
+                $result = app(SubscriptionChangeService::class)->changePlan($request->user(), $targetPlan, $request->subscription_type);
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage())->withInput();
+            }
+
+            if (! empty($result['redirect_url'])) {
+                return redirect()->away($result['redirect_url']);
+            }
+
+            if ($result['type'] === 'downgrade') {
+                return redirect()->route('dashboard')->with('success', 'Your plan change to ' . $targetPlan->name . ' has been scheduled for the end of your billing period.');
+            }
+
+            if (! empty($result['order'])) {
+                return redirect()->route('checkout.success', $result['order']->order_no)->with('success', 'Your plan has been upgraded successfully.');
+            }
+
+            return redirect()->route('dashboard')->with('success', 'Your plan has been upgraded successfully.');
+        }
         
         $product = $plan->product;
         if($plan->mailSettings->isNotEmpty()) {

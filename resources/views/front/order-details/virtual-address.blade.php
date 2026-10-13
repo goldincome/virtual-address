@@ -85,10 +85,14 @@
                 </div>
                 
                 <div class="flex flex-col sm:flex-row gap-4 mt-8">
-                   
-                    <button type="button" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-lg transition duration-300">
-                        <i class="fas fa-print mr-2"></i> View/Print Invoice
-                    </button>
+                    @if($invoiceOrder)
+                        <a href="{{ route('invoices.download', $invoiceOrder->order_no) }}" class="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-lg transition duration-300">
+                            <i class="fas fa-file-pdf mr-2"></i> View/Print Invoice
+                        </a>
+                        <a href="{{ route('invoices.agreement', $invoiceOrder->order_no) }}" class="w-full sm:w-auto text-center bg-gray-700 hover:bg-gray-800 text-white font-medium py-2.5 px-5 rounded-lg transition duration-300">
+                            <i class="fas fa-file-contract mr-2"></i> View/Print Service Agreement
+                        </a>
+                    @endif
                      {{--<button type="button" class="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-lg transition duration-300">
                         <i class="fas fa-times-circle mr-2"></i> Cancel Subscription
                     </button> --}}

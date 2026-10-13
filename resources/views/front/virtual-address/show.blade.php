@@ -83,8 +83,9 @@
                         <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Access to meeting rooms & mail handling</li>
                     </ul>
                     
-                    <form action="{{ route('virtual-address.store', ['plan_id' => $plan->id]) }}" method="POST">
+                    <form action="{{ ($subscription && $subscription->plan && $subscription->plan->id !== $plan->id && $subscription->active() && ! $subscription->onGracePeriod()) ? route('subscription.change') : route('virtual-address.store', ['plan_id' => $plan->id]) }}" method="POST">
                         @csrf
+                        <input type="hidden" name="plan_id" value="{{ $plan->id }}">
                         @include('front.common.error-and-message')
 
                         <!-- Subscription Type Selection -->
@@ -205,18 +206,41 @@
                             </fieldset>
                         @endif
 
-                        @if($subscription)
+                        @if($subscription && $subscription->plan)
+                            @if($subscription->onGracePeriod())
+                                <div class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 text-center">
+                                    Your subscription is cancelled and ends on
+                                    <strong>{{ $subscription->ends_at?->format('F j, Y') }}</strong>.
+                                    <a href="{{ route('dashboard') }}" class="font-semibold underline">Resume it</a> to change plans.
+                                </div>
+                                <a href="{{ route('dashboard') }}" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow block text-center">
+                                    Go to Dashboard
+                                </a>
+                            @else
+                                @if($subscription->hasScheduledChange())
+                                <div class="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800 text-center">
+                                    A change to the <strong>{{ optional($subscription->scheduledPlan)->name }}</strong> plan is scheduled
+                                    for <strong>{{ $subscription->scheduled_change_at?->format('F j, Y') }}</strong>.
+                                    Choosing a new plan below will replace that scheduled change.
+                                </div>
+                            @endif
                             @if($subscription->plan->id === $plan->id)
                                 <span class="w-full bg-blue-500 hover:bg-orange-600 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow block text-center">
                                     You are currently subscribed to this Plan
                                 </span>
-                            @endif
-                            @if( $plan->level > $subscription->plan->level)
+                            @elseif($plan->level > $subscription->plan->level)
                                  <button type="submit"
                                     class="w-full bg-orange-500 hover:bg-orange-600 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow">
                                     Upgrade To this Plan Now
                                 </button>
+                                <p class="text-sm text-gray-600 mt-3 text-center">Upgrades apply immediately. We credit the unused part of your current billing period.</p>
                             @else
+                                <button type="submit"
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 px-6 rounded-lg transition duration-300 shadow">
+                                    Downgrade To this Plan
+                                </button>
+                                <p class="text-sm text-gray-600 mt-3 text-center">Downgrades take effect at the end of your current billing period. You keep your current plan until then.</p>
+
                                 @foreach ($allPlans as $dplan)
                                     @if($dplan->level > $subscription->plan->level)
                                         <hr class="my-6 border-t border-gray-300">
@@ -227,6 +251,7 @@
                                         <div class="text-center text-gray-700">Enjoy upto 16% Special Discount</div>
                                     @endif
                                 @endforeach
+                            @endif
                             @endif
                         @else
                             <button type="submit"

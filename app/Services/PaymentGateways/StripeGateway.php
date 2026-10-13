@@ -96,18 +96,6 @@ class StripeGateway implements PaymentGatewayInterface
                 return redirect()->away($session->url)->send();
             }
 
-            // --- SCENARIO 2a: PSC top-up for an existing subscriber. ---
-            // PSC is a subscription item: buying more means increasing the quantity
-            // on the user's Stripe subscription with proration. Stripe immediately
-            // generates and collects a subscription invoice for the pro-rated
-            // amount, so no one-off Checkout session is created.
-            $topUpItems = $cartService->getPscItemsFromCart()
-                ->filter(fn ($item) => !empty($item->options['top_up']));
-            if ($topUpItems->isNotEmpty()) {
-                app(\App\Services\PscService::class)->applyTopUpFromCart($user);
-                return redirect()->route('stripe.success', ['psc_topup' => '1'])->send();
-            }
-
             // --- SCENARIO 2: The cart contains ONLY non-subscription products. ---
             // One-time purchases: meeting/conference rooms.
             $lineItems = $this->getOneTimeItemsFromCart();

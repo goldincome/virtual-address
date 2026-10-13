@@ -80,6 +80,7 @@
                         <p><strong>Date:</strong> {{ $order->created_at->format('F j, Y, g:i a') }}</p>
                         <p><strong>Client Name:</strong> {{ $order->user->name }}</p>
                         <p><strong>Client Email:</strong> {{ $order->user->email }}</p>
+                        <p><strong>Customer Number:</strong> {{ $order->user->customer_number }}</p>
                     </div>
 
                     {{-- Order Items Table --}}
@@ -152,9 +153,17 @@
                 <div class="bg-gray-50 p-6 rounded-md text-left my-8 border border-gray-200">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Subscription Details</h3>
                     <div class="space-y-2 text-gray-700">
-                        <p><strong>Plan Type:</strong> {{ $order->user->subscription('default')->plan->name }} ({{  $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? 'Billed Yearly' : 'Billed Monthly'  }})</p>
-                        <p><strong>Activation Date:</strong> {{ $order->user->subscription('default')->created_at->format('D, M j, Y') }}</p>
-                        <p><strong>Next Renewal Date:</strong> {{ $order->user->subscription('default')->created_at->addYear(1)->format('D, M j, Y')}}</p>
+                        <p><strong>Plan Type:</strong> {{ $jsonPlan->name }} ({{  $jsonPlan->subscription_type === $subscriptionType::YEARLY->value ? 'Billed Yearly' : 'Billed Monthly'  }})</p>
+                        <p><strong>Activation Date:</strong> {{ optional($order->user->subscription('default'))->created_at?->format('D, M j, Y') ?? $order->created_at->format('D, M j, Y') }}</p>
+                        <p><strong>Next Renewal Date:</strong> {{ (optional($order->user->subscription('default'))->created_at ?? $order->created_at)->copy()->addYear(1)->format('D, M j, Y')}}</p>
+                        @if(!empty($jsonPlan->mail_settings) && !empty($jsonPlan->mail_type))
+                            @php
+                                $mailType = \App\Enums\MailTypeEnum::tryFrom($jsonPlan->mail_type);
+                            @endphp
+                            @if($mailType)
+                                <p><strong>Mail Delivery Type:</strong> {{ $mailType->label() }} ({{ $mailType->deliveryDescription() }})</p>
+                            @endif
+                        @endif
                     </div>
                 </div>
                 @endif
@@ -216,6 +225,17 @@
                                 <span class="text-sm">You can now register Persons with Significant Control for your companies up to the number of slots you have paid for.</span>
                             </div>
                         </div>
+                        @php($orderPscDetails = $order->pscDetails())
+                        @if($orderPscDetails->isNotEmpty())
+                            <div class="mb-4">
+                                <strong class="block text-gray-700 mb-1">Slots purchased on this order:</strong>
+                                @foreach($orderPscDetails as $pscDetail)
+                                    <span class="text-sm text-gray-600 block">
+                                        {{ $pscDetail->quantity }}{{ $pscDetail->qtyUnitLabel() }} &times; {{ $pscDetail->name }} ({{ currencyFormatter($pscDetail->sub_total) }})
+                                    </span>
+                                @endforeach
+                            </div>
+                        @endif
                     @endif
 
                     @if($orderPscAccess)

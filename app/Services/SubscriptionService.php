@@ -19,13 +19,8 @@ class SubscriptionService
         $plan = null;
         // Check if the subscription exists and is active
         if ($subscription && $subscription->active()) {
-            // Get the Stripe Price ID from the subscription item
-            $stripePriceId = $subscription->stripe_price;
-
-            // Find the plan in your 'plans' table that matches the Stripe Price ID
-            $plan = Plan::where('stripe_price_id_monthly', $stripePriceId)
-                        ->orWhere('stripe_price_id_yearly', $stripePriceId)
-                        ->first();
+            // Resolve the plan from any of the subscription's Stripe price IDs
+            $plan = $subscription->plan;
         }
         return $plan;
     }

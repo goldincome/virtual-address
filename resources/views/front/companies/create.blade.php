@@ -1,24 +1,20 @@
-@extends('layouts.front')
+@extends('layouts.app')
 
 @section('title')
     Add Company - Charlton Virtual Office
 @endsection
 
+@section('page_title')
+    Add Your Company
+@endsection
+
+@section('page_intro')
+    Register your company details for statutory compliance and PSC filings.
+@endsection
+
 @section('content')
-    <section class="hero-bg-virtual text-white relative"
-        style="background-image: url('{{ asset('images/virtual-office-address.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="absolute inset-0 bg-black opacity-60"></div>
-        <div class="container mx-auto px-6 py-16 relative z-10 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2">Add Your Company</h1>
-            <p class="text-blue-100">Register your company details for statutory compliance and PSC filings.</p>
-        </div>
-    </section>
-
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md border border-gray-200">
-            @include('front.common.error-and-message')
-
-            <form action="{{ route('companies.store') }}" method="POST">
+    <div class="max-w-2xl bg-white p-8 rounded-lg shadow-md border border-gray-200">
+        <form action="{{ route('companies.store') }}" method="POST">
                 @csrf
 
                 <div class="space-y-4">
@@ -83,6 +79,5 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </main>
+    </div>
 @endsection

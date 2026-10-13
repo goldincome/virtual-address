@@ -1,27 +1,23 @@
-@extends('layouts.front')
+@extends('layouts.app')
 
 @section('title')
     {{ $company->company_name }} - Charlton Virtual Office
 @endsection
 
+@section('page_title')
+    {{ $company->company_name }}
+@endsection
+
+@section('page_intro')
+    Company details and Persons with Significant Control (PSC).
+@endsection
+
 @section('content')
-    <section class="hero-bg-virtual text-white relative"
-        style="background-image: url('{{ asset('images/virtual-office-address.jpg') }}'); background-size: cover; background-position: center;">
-        <div class="absolute inset-0 bg-black opacity-60"></div>
-        <div class="container mx-auto px-6 py-16 relative z-10 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2">{{ $company->company_name }}</h1>
-            <p class="text-blue-100">Company details and Persons with Significant Control (PSC).</p>
-        </div>
-    </section>
-
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        @include('front.common.error-and-message')
-
-        <div class="mb-6">
-            <a href="{{ route('companies.index') }}" class="text-gray-600 hover:text-gray-800 font-medium">
-                <i class="fas fa-arrow-left mr-1"></i> Back to My Companies
-            </a>
-        </div>
+    <div class="mb-6">
+        <a href="{{ route('companies.index') }}" class="text-gray-600 hover:text-gray-800 font-medium">
+            <i class="fas fa-arrow-left mr-1"></i> Back to My Companies
+        </a>
+    </div>
 
         @include('front.companies.partials.psc-allowance')
 
@@ -155,5 +151,5 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 @endsection

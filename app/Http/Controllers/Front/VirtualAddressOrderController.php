@@ -25,9 +25,10 @@ class VirtualAddressOrderController extends Controller
         //get mail type customer ordered(scan or forwarding)
         $mailType = null;
         if(count($jsonPlan->mail_settings) > 0){
-            $mailType = $jsonPlan->mail_type === MailTypeEnum::Scanned->value 
-                ? MailTypeEnum::Scanned->label().'(All your mails will be scanned to you)' 
-                : MailTypeEnum::Forwarded->label().'All your mails will be forwarded to you';
+            $mailTypeEnum = MailTypeEnum::tryFrom($jsonPlan->mail_type);
+            $mailType = $mailTypeEnum
+                ? $mailTypeEnum->label().'('.$mailTypeEnum->deliveryDescription().')'
+                : null;
         }
         //get subscription type (yearly or monthly)
         $subscriptionInterval = $jsonPlan->subscription_type;
@@ -37,9 +38,18 @@ class VirtualAddressOrderController extends Controller
         $plan->load('features', 'features.featureSetting');
         $subscriptionType = SubscriptionTypeEnum::class;
 
+        // Latest order containing this virtual address plan, used for the
+        // invoice and service agreement PDF downloads.
+        $invoiceOrder = $user->orders()
+            ->whereHas('orderDetails', function ($query) {
+                $query->where('product_type', ProductTypeEnum::VIRTUAL_ADDRESS->value);
+            })
+            ->latest()
+            ->first();
+
         return view(
             'front.order-details.virtual-address',
-            compact( 'plan', 'subscription', 'mailType', 'subscriptionType', 'subscriptionInterval')
+            compact( 'plan', 'subscription', 'mailType', 'subscriptionType', 'subscriptionInterval', 'invoiceOrder')
         );
     }
 

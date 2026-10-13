@@ -72,6 +72,13 @@
             @endif
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="customer_number">Customer Number</label>
+            <input id="customer_number" name="customer_number" type="text" readonly disabled
+                               class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600 sm:text-sm"
+                               value="{{ $user->customer_number ?? 'N/A' }}">
+        </div>
+
         <div class="flex items-center gap-4">
            <button type="submit" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-500 active:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
                 Update Profile

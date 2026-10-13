@@ -37,11 +37,11 @@ class UserController extends Controller
     {
         $user = $request->user();
 
-        //if ($user->subscription('default')->onGracePeriod()) {
-          //  $user->subscription('default')->resume();
-       // }
-       
-        return redirect()->route('dashboard')->with('success', 'Subscription renewed!');
+        if (app(\App\Services\SubscriptionChangeService::class)->resume($user)) {
+            return redirect()->route('dashboard')->with('success', 'Subscription resumed successfully!');
+        }
+
+        return redirect()->route('dashboard')->with('error', 'There is no cancelled subscription to resume.');
     }
     /**
      * Show the form for creating a new resource.

@@ -3,7 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Order;
-use App\Models\UserBilling;
+use App\Services\ServiceAgreementService;
 use Illuminate\Bus\Queueable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Enums\ProductTypeEnum;
@@ -97,26 +97,7 @@ class PaymentReceiptEmail extends Mailable
     protected function agreementData(): array
     {
         $data = $this->sharedViewData();
-        $jsonPlan = $data['jsonPlan'];
 
-        $isYearly = $jsonPlan && $jsonPlan->subscription_type === SubscriptionTypeEnum::YEARLY->value;
-
-        $agreementDate = now();
-        $durationType = $isYearly ? 'Yearly' : 'Monthly';
-        $expiryDate = $isYearly ? $agreementDate->copy()->addYear() : $agreementDate->copy()->addMonth();
-
-        $billing = UserBilling::where('user_id', $this->order->user_id)->orderByDesc('id')->first();
-        $clientAddress = $billing
-            ? trim(implode(', ', array_filter([$billing->company_name, $billing->billing_address, $billing->postal_code])))
-            : '';
-
-        return [
-            'order' => $this->order,
-            'clientName' => $this->order->user->name,
-            'clientAddress' => $clientAddress ?: '-',
-            'agreementDate' => $agreementDate->format('F j, Y'),
-            'durationType' => $durationType,
-            'expiryDate' => $expiryDate->format('F j, Y'),
-        ];
+        return app(ServiceAgreementService::class)->forOrder($this->order, $data['jsonPlan']);
     }
 }

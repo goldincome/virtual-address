@@ -37,11 +37,12 @@
                     <i class="fas fa-map-marker-alt text-3xl text-orange-400"></i>
                 </div>
                 <div class="flex justify-between items-center">
+                    @php($dashboardPlan = auth()->user()->subscribed('default') ? auth()->user()->subscription('default')->plan : null)
                     <p class="text-2xl font-bold text-blue-800">
-                        @if(auth()->user()->subscribed('default') && auth()->user()->subscription('default')->plan->name) 
-                            <a href="{{ route('virtual-address-orders.index') }}">{{ auth()->user()->subscription('default')->plan->name}} </a> 
+                        @if($dashboardPlan)
+                            <a href="{{ route('virtual-address-orders.index') }}">{{ $dashboardPlan->name }} </a>
                         @else
-                            No Plan 
+                            No Plan
                         @endif
 
                     </p>
@@ -64,11 +65,43 @@
                 </p>
                 
                 @if(auth()->user()->subscriptions()->exists())
-                    @if(!auth()->user()->subscription('default')->active())
+                    @php($dashSub = auth()->user()->subscription('default'))
+                    @if($dashSub && $dashSub->onGracePeriod())
+                        <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                            Your subscription is cancelled and will end on
+                            <strong>{{ $dashSub->ends_at?->format('F j, Y') }}</strong>.
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <form action="{{ route('subscription.resume') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md inline-flex items-center text-sm">
+                                    <i class="fas fa-sync-alt mr-2"></i> Resume Subscription
+                                </button>
+                            </form>
+                        </div>
+                    @elseif($dashSub && $dashSub->active())
+                        @if($dashSub->hasScheduledChange())
+                            <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                                Changing to the <strong>{{ optional($dashSub->scheduledPlan)->name }}</strong> plan on
+                                <strong>{{ $dashSub->scheduled_change_at?->format('F j, Y') }}</strong>.
+                            </div>
+                        @endif
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <a href="{{ route('virtual-address.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md inline-flex items-center text-sm">
+                                <i class="fas fa-exchange-alt mr-2"></i> Change Plan
+                            </a>
+                            <form action="{{ route('subscription.cancel') }}" method="POST" onsubmit="return confirm('Cancel your subscription? It will stay active until the end of your billing period.');">
+                                @csrf
+                                <button type="submit" class="text-sm text-gray-400 hover:text-gray-600 underline bg-transparent border-0 p-0 cursor-pointer">
+                                    Cancel Subscription
+                                </button>
+                            </form>
+                        </div>
+                    @else
                         <div class="mt-4">
-                            <a href="{{ route('subscription.renew') }}" 
-                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md transform hover:scale-105 inline-flex items-center text-sm">
-                                <i class="fas fa-sync-alt mr-2"></i> Renew Subscription
+                            <a href="{{ route('virtual-address.index') }}" 
+                               class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow-md transform hover:scale-105 inline-flex items-center text-sm">
+                                <i class="fas fa-sync-alt mr-2"></i> Subscribe Again
                             </a>
                         </div>
                     @endif
@@ -115,10 +148,13 @@
                     <i class="fas fa-building mr-2"></i> My Companies
                 </a>
                 
-                @if(auth()->user()->subscriptions()->exists() && auth()->user()->subscription('default')->canceled())
-                    <a href="{{ route('subscription.renew') }}" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md transform hover:scale-105 inline-flex items-center">
-                        <i class="fas fa-sync-alt mr-2"></i> Renew Subscription
-                    </a>
+                @if(auth()->user()->subscriptions()->exists() && auth()->user()->subscription('default')->onGracePeriod())
+                    <form action="{{ route('subscription.resume') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md transform hover:scale-105 inline-flex items-center">
+                            <i class="fas fa-sync-alt mr-2"></i> Resume Subscription
+                        </button>
+                    </form>
                  @elseif(!auth()->user()->subscribed('default'))
                     <a href="{{ route('virtual-address.index') }}" class="bg-orangen-600 hover:bg-orange-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md transform hover:scale-105 inline-flex items-center">
                         <i class="fas fa-sync-alt mr-2"></i> Subscribe To Virtual Address Plan

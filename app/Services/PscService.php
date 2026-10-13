@@ -317,8 +317,10 @@ class PscService
 
         try {
             $plan = $subscription->plan;
-            $stripePriceId = $subscription->items->first()->stripe_price ?? null;
-            if ($plan && $stripePriceId && $stripePriceId === $plan->stripe_price_id_yearly) {
+            $yearlyPriceId = $plan->stripe_price_id_yearly ?? null;
+            $subscribedYearly = $yearlyPriceId
+                && $subscription->items->pluck('stripe_price')->contains($yearlyPriceId);
+            if ($plan && $subscribedYearly) {
                 return 'year';
             }
         } catch (\Exception $e) {

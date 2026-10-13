@@ -33,6 +33,7 @@ use App\Http\Controllers\Front\ConferenceRoomOrderController;
 use App\Http\Controllers\Front\VirtualAddressOrderController;
 use App\Http\Controllers\Front\CompanyController;
 use App\Http\Controllers\Front\CompanyPscController;
+use App\Http\Controllers\Front\SubscriptionController;
 use App\Http\Controllers\Admin\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Admin\Auth\AdminAuthenticatedSessionController;
 use App\Http\Controllers\Front\MeetingRoomController as FrontMeetingRoomController;
@@ -88,6 +89,9 @@ Route::middleware('web')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/renew', [UserController::class, 'renew'])->name('subscription.renew');
+    Route::post('/subscription/change', [SubscriptionController::class, 'change'])->name('subscription.change');
+    Route::post('/subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+    Route::post('/subscription/resume', [SubscriptionController::class, 'resume'])->name('subscription.resume');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -104,7 +108,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('conference-room-orders', ConferenceRoomOrderController::class);
     Route::get('mails/download/{mail}', [UserMailController::class, 'download'])->name('mails.download');
     Route::resource('mails', UserMailController::class)->only('index', 'show', 'download');
-    Route::resource('invoices', InvoiceController::class)->only('index', 'show', 'print');
+    Route::get('invoices/download/{invoice_no}', [InvoiceController::class, 'download'])->name('invoices.download');
+    Route::get('invoices/agreement/{invoice_no}', [InvoiceController::class, 'agreement'])->name('invoices.agreement');
+    Route::resource('invoices', InvoiceController::class)->only('index', 'show');
 
     // Companies & Persons with Significant Control (PSC)
     Route::get('dashboard/companies', [CompanyController::class, 'index'])->name('companies.index');
@@ -113,6 +119,9 @@ Route::middleware('auth')->group(function () {
     Route::get('companies/{company}', [CompanyController::class, 'show'])->name('companies.show');
     Route::post('companies/{company}/psc', [CompanyPscController::class, 'store'])->name('companies.psc.store');
     Route::post('companies/psc/topup', [CompanyPscController::class, 'topUp'])->name('companies.psc.topup');
+    Route::get('companies/psc/topup/checkout', [CompanyPscController::class, 'topUpCheckout'])->name('companies.psc.topup.checkout');
+    Route::post('companies/psc/topup/pay', [CompanyPscController::class, 'topUpPay'])->name('companies.psc.topup.pay');
+    Route::post('companies/psc/topup/cancel', [CompanyPscController::class, 'topUpCancel'])->name('companies.psc.topup.cancel');
 });
 
 //Admin and Super Admin route

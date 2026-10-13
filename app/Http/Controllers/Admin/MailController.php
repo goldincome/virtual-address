@@ -83,6 +83,7 @@ class MailController extends Controller
             $users = User::where('name', 'LIKE', "%{$query}%")
                          ->orWhere('email', 'LIKE', "%{$query}%")
                         ->orWhere('phone', 'LIKE', "%{$query}%")
+                        ->orWhere('customer_number', 'LIKE', "%{$query}%")
                          ->limit(20)
                          ->get();
         }

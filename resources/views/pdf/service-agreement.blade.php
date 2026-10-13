@@ -109,6 +109,8 @@
                 <td>
                     <span class="label">Client's Name</span>
                     <span class="value">{{ $clientName }}</span>
+                    <span class="label" style="margin-top:8px;">Customer Number</span>
+                    <span class="value">{{ $clientCustomerNumber ?? 'N/A' }}</span>
                     <span class="label" style="margin-top:8px;">Client's Address</span>
                     <span class="value">{{ $clientAddress }}</span>
                 </td>
