@@ -63,6 +63,7 @@ class PscTopUpTest extends TestCase
             'grace_period' => 0,
             'grace_interval' => 'day',
             'level' => 1,
+            'allows_company_psc' => true,
         ]));
 
         MailSetting::withoutEvents(fn () => MailSetting::create([
@@ -165,7 +166,7 @@ class PscTopUpTest extends TestCase
         ]);
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('used all 1 paid');
+        $this->expectExceptionMessage('used all of your available');
 
         app(PscService::class)->addPerson($company, $pscType, [
             'first_name' => 'John',
@@ -185,7 +186,7 @@ class PscTopUpTest extends TestCase
         $company = $user->companies()->create(['company_name' => 'ABC Ltd', 'status' => 'active']);
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('not purchased any');
+        $this->expectExceptionMessage('used all of your available');
 
         app(PscService::class)->addPerson($company, $pscType, [
             'first_name' => 'John',

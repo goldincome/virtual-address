@@ -80,6 +80,37 @@ Never create a second subscription for an existing subscriber.
 - After changing any of this, restart `queue:work` (see above) and re-run
   `php artisan test` (new tests: `SubscriptionChangeTest`, `SubscriptionWebhookTest`).
 
+## Company & PSC allowances (Premium Package only)
+
+Only plans where `Plan::allowsCompanyPsc()` is true (mail forwarding/scanning, i.e.
+the Premium Package) may register a Company and Persons with Significant Control.
+The Premium Package includes **1 company + 1 PSC for free** via
+`plans.included_companies` / `plans.included_pscs` (no DB rows are written for the
+included allowance; it is derived from the subscription's plan, so it applies
+immediately on new subscriptions and upgrades).
+
+- Effective allowance = `included_*` + billed quantity
+  (`psc_subscription_items` / `company_subscription_items`). Adding is blocked
+  when active >= effective (`PscService::assertAllowance`,
+  `CompanyService::assertCanAddCompany`); existing rows above the allowance stay
+  valid.
+- Extra PSC (existing `PscType`, prices £4.99/mo, £39.99/yr) and extra Company
+  (new `CompanyType`, "Additional Company", £9.99/mo, £59/yr) are sold as
+  **subscription items**: the top-up only increases the Stripe subscription item
+  quantity with `proration_behavior=create_prorations`, so Stripe collects the
+  pro-rated amount and the full quantity bills at renewal. There is no card form.
+- Top-ups live on their own cart instances (`psc_topup`, `company_topup`) and are
+  applied by `PscService::applyTopUpFromCart` /
+  `CompanyService::applyCompanyTopUpFromCart` before a local paid order is created.
+- `CompanyTypeObserver` (queued) creates/archives the Stripe product & prices when
+  a `CompanyType` changes — edit the record in the admin **Company Prices** page
+  (`admin/company-types`, mirror of PSC Prices) and let the queue sync; never run
+  a Stripe sync `--force` twice for the same record.
+- Seeders: `CompanyTypeSeeder` (default company price) and
+  `PremiumPackageSeeder` (plan prices £35/£350 + included allowances). Both touch
+  Stripe only through queued observer jobs — process them with `queue:work`.
+- Tests: `PscTopUpTest`, `PremiumAllowanceTest`.
+
 ## Email templates
 
 `resources/views/emails/CustomerOrderEmail.blade.php` is shared by the order

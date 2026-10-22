@@ -18,9 +18,16 @@ class PremiumPackageSeeder extends Seeder
      * Placeholder prices. Update these in the admin panel afterwards –
      * the Plan/Observer will archive and recreate the Stripe prices.
      */
-    const PLAN_MONTHLY_PRICE = '35.00';
-    const PLAN_YEARLY_PRICE = '350.00';
+    const PLAN_MONTHLY_PRICE = '14.99';
+    const PLAN_YEARLY_PRICE = '149.00';
     const MAIL_ADDON_PRICE = '1.00';
+
+    /**
+     * Included (free) allowances for the Premium Package: one company and one
+     * Person with Significant Control. Anything beyond these is billed.
+     */
+    const INCLUDED_COMPANIES = 1;
+    const INCLUDED_PSCS = 1;
 
     /**
      * Feature settings used exclusively by the Premium Package.
@@ -102,10 +109,22 @@ class PremiumPackageSeeder extends Seeder
                     'grace_interval' => 'day',
                     'level' => (Plan::max('level') ?? 0) + 1,
                     'interval' => 'month',
+                    'included_companies' => self::INCLUDED_COMPANIES,
+                    'included_pscs' => self::INCLUDED_PSCS,
                     'discount_duration_in_months' => 10,
                     'discount_amount' => $discountAmount,
                     'discount_percent' => $discountPercent,
                 ]);
+            }
+
+            // Keep included allowances in sync on an existing plan (no Stripe
+            // price change, so the observer will not recreate prices).
+            $plan->fill([
+                'included_companies' => self::INCLUDED_COMPANIES,
+                'included_pscs' => self::INCLUDED_PSCS,
+            ]);
+            if ($plan->isDirty()) {
+                $plan->save();
             }
 
             // 2. Upsert premium feature settings (by slug, idempotent)

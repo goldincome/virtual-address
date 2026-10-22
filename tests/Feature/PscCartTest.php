@@ -47,6 +47,7 @@ class PscCartTest extends TestCase
             'grace_period' => 0,
             'grace_interval' => 'day',
             'level' => 1,
+            'allows_company_psc' => true,
         ]));
 
         MailSetting::withoutEvents(fn () => MailSetting::create([
@@ -218,6 +219,7 @@ class PscCartTest extends TestCase
             'grace_period' => 0,
             'grace_interval' => 'day',
             'level' => 1,
+            'allows_company_psc' => false,
         ]));
 
         $premium = Plan::withoutEvents(fn () => $product->plans()->create([
@@ -236,6 +238,7 @@ class PscCartTest extends TestCase
             'grace_period' => 0,
             'grace_interval' => 'day',
             'level' => 2,
+            'allows_company_psc' => true,
         ]));
 
         foreach ([[$packageTwo, [$sharedOne, $sharedTwo]], [$premium, [$sharedOne, $sharedTwo, $premiumOnly]]] as [$plan, $settings]) {
@@ -302,6 +305,7 @@ class PscCartTest extends TestCase
             'grace_period' => 0,
             'grace_interval' => 'day',
             'level' => 1,
+            'allows_company_psc' => false,
         ]));
 
         $premium = Plan::withoutEvents(fn () => $product->plans()->create([
@@ -320,6 +324,7 @@ class PscCartTest extends TestCase
             'grace_period' => 0,
             'grace_interval' => 'day',
             'level' => 2,
+            'allows_company_psc' => true,
         ]));
 
         $removedOne = FeatureSetting::withoutEvents(fn () => FeatureSetting::create([

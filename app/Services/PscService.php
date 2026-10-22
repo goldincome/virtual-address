@@ -173,16 +173,23 @@ class PscService
     /**
      * Guard: a user may only add/reactivate PSCs within the quantity they paid for.
      */
-    protected function assertAllowance(User $user, PscType $pscType): void
+    public function assertAllowance(User $user, PscType $pscType): void
     {
-        $billed = $this->billedQuantity($user, $pscType);
-        $active = $this->activePersonCount($user, $pscType);
+        $active_total = CompanyPsc::whereHas('company', function ($query) use ($user) {
+            $query->where('user_id', $user->id)->where('status', 'active');
+        })
+            ->where('status', 'active')
+            ->count();
 
-        if ($active >= $billed) {
+        $sub = $user->subscription('default');
+        $included = $sub && $sub->plan ? (int) $sub->plan->included_pscs : 0;
+        $billed_total = (int) PscSubscriptionItem::where('user_id', $user->id)->sum('quantity');
+
+        $effective = $included + $billed_total;
+
+        if ($active_total >= $effective) {
             throw new \Exception(
-                $billed > 0
-                    ? "You have used all {$billed} paid Person with Significant Control slot(s). Please purchase more PSC slots before adding another."
-                    : 'You have not purchased any Person with Significant Control slots yet. Please purchase PSC slots before adding one.'
+                'You have used all of your available Person with Significant Control slots. Please purchase additional PSC slots before adding another.'
             );
         }
     }

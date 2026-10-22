@@ -20,6 +20,7 @@
     </div>
 
         @include('front.companies.partials.psc-allowance')
+        @include('front.companies.partials.company-allowance')
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {{-- Company details --}}

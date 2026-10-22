@@ -16,8 +16,11 @@ class DatabaseSeeder extends Seeder
 
        $this->call([
             //UserSeeder::class,
-            FeatureSettingSeeder::class,
-            OpeningDaysSeeder::class,
+            //FeatureSettingSeeder::class,
+           //OpeningDaysSeeder::class,
+           CompanyTypeSeeder::class,
+           PremiumPackageSeeder::class,
+           PscSeeder::class,
         ]);
     }
 }

@@ -182,7 +182,13 @@
                             <!-- Company PSC Quantity Selection -->
                             <h4 class="text-lg font-semibold text-blue-800 mb-3">Company Person with Significant Control (PSC)</h4>
                             <p class="text-sm text-gray-600 mb-3">
-                                Add Persons with Significant Control (PSC) to your registered company. Each PSC is billed on your subscription alongside this plan.
+                                @if(($plan->included_companies ?? 0) > 0 || ($plan->included_pscs ?? 0) > 0)
+                                    This plan includes <strong>{{ (int) ($plan->included_companies ?? 0) }} company</strong>
+                                    and <strong>{{ (int) ($plan->included_pscs ?? 0) }} PSC</strong> at no extra cost.
+                                    Add more below and each additional PSC is billed on your subscription.
+                                @else
+                                    Add Persons with Significant Control (PSC) to your registered company. Each PSC is billed on your subscription alongside this plan.
+                                @endif
                             </p>
                             <fieldset class="space-y-4 mb-6">
                                 <legend class="sr-only">Company PSC Options</legend>

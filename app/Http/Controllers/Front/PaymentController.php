@@ -168,6 +168,12 @@ class PaymentController extends Controller
                         app(\App\Services\PscService::class)->registerSubscriptionItemsFromCheckout($session);
                     }
 
+                    // New-subscription additional-company items are registered from Stripe line items.
+                    if ($this->cartService->checkIfCartHasVirtualAddress()
+                        && $this->cartService->getCompanyItemsFromCart()->isNotEmpty()) {
+                        app(\App\Services\CompanyService::class)->registerSubscriptionItemsFromCheckout($session);
+                    }
+
                     // Confirm the payment here as well. Stripe fires
                     // `invoice.payment_succeeded` the moment the charge succeeds,
                     // which can be before this order row exists. confirmPayment()

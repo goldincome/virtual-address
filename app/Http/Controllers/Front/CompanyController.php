@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Models\Company;
 use App\Services\PscService;
+use App\Services\CompanyService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -16,8 +17,9 @@ class CompanyController extends Controller
             ->paginate(10);
 
         $pscAllowance = $this->pscAllowanceData();
+        $companyAllowance = $this->companyAllowanceData();
 
-        return view('front.companies.index', compact('companies', 'pscAllowance'));
+        return view('front.companies.index', compact('companies', 'pscAllowance', 'companyAllowance'));
     }
 
     public function create()
@@ -39,6 +41,12 @@ class CompanyController extends Controller
             'description' => 'nullable|string|max:2000',
         ]);
 
+        try {
+            app(CompanyService::class)->assertCanAddCompany(auth()->user());
+        } catch (\Exception $e) {
+            return redirect()->route('companies.index')->with('error', $e->getMessage());
+        }
+
         $company = auth()->user()->companies()->create($request->only([
             'company_name',
             'address',
@@ -58,8 +66,9 @@ class CompanyController extends Controller
         $company->load('companyPscs.pscType');
         $pscTypes = \App\Models\PscType::where('status', true)->orderBy('id')->get();
         $pscAllowance = $this->pscAllowanceData();
+        $companyAllowance = $this->companyAllowanceData();
 
-        return view('front.companies.show', compact('company', 'pscTypes', 'pscAllowance'));
+        return view('front.companies.show', compact('company', 'pscTypes', 'pscAllowance', 'companyAllowance'));
     }
 
     protected function ensureEligible(): void
@@ -98,9 +107,10 @@ class CompanyController extends Controller
 
         $service = app(PscService::class);
         $interval = $service->intervalForUser($user);
+        $included = (int) ($plan->included_pscs ?? 0);
 
         return \App\Models\PscType::where('status', true)->orderBy('id')->get()
-            ->map(function ($type) use ($user, $service, $interval) {
+            ->map(function ($type) use ($user, $service, $interval, $included) {
                 $billed = $service->billedQuantity($user, $type);
                 $active = $service->activePersonCount($user, $type);
                 return [
@@ -110,7 +120,47 @@ class CompanyController extends Controller
                     'interval' => $interval,
                     'billed' => $billed,
                     'active' => $active,
-                    'remaining' => max(0, $billed - $active),
+                    'included' => $included,
+                    'remaining' => max(0, ($included + $billed) - $active),
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * Company allowance (included + paid vs used) for the current user, or null
+     * when the user's plan does not include Company PSC.
+     *
+     * @return array|null
+     */
+    protected function companyAllowanceData(): ?array
+    {
+        $user = auth()->user();
+        if (!$user || !$user->subscribed('default')) {
+            return null;
+        }
+        $plan = $user->subscription('default')->plan;
+        if (!$plan || !$plan->allowsCompanyPsc()) {
+            return null;
+        }
+
+        $service = app(CompanyService::class);
+        $interval = app(PscService::class)->intervalForUser($user);
+        $included = $service->includedCompanies($user);
+        $active = $service->activeCompanyCount($user);
+
+        return \App\Models\CompanyType::where('status', true)->orderBy('id')->get()
+            ->map(function ($type) use ($user, $service, $interval, $included, $active) {
+                $billed = $service->billedCompanyQuantity($user, $type);
+                return [
+                    'id' => $type->id,
+                    'name' => $type->name,
+                    'price' => $type->priceForInterval($interval),
+                    'interval' => $interval,
+                    'billed' => $billed,
+                    'active' => $active,
+                    'included' => $included,
+                    'remaining' => max(0, ($included + $billed) - $active),
                 ];
             })
             ->all();

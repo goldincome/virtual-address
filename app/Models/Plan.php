@@ -41,6 +41,9 @@ class Plan extends Model implements HasMedia
         'payment_price_id',
         'interval',
         'level',
+        'included_companies',
+        'included_pscs',
+        'allows_company_psc',
     ];
     
     public $registerMediaConversionsUsingModelInstance = true;
@@ -104,15 +107,12 @@ class Plan extends Model implements HasMedia
     }
 
     /**
-     * Only packages with mail forwarding or mail scanning can add a
-     * company and Persons with Significant Control (PSC).
+     * Only plans with the explicit allows_company_psc flag may register
+     * companies and Persons with Significant Control.
      */
     public function allowsCompanyPsc(): bool
     {
-        return $this->mailSettings()
-            ->where('status', true)
-            ->whereIn('mail_type', ['scanned', 'forwarded'])
-            ->exists();
+        return (bool) $this->allows_company_psc;
     }
 
     /**

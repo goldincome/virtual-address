@@ -35,6 +35,7 @@ class StoreVirtualAddressRequest extends FormRequest
             ],
             'is_active' => 'required|boolean',
             //'yearly_monthly_price' => 'required|numeric|min:0|gte:price',
+            'allows_company_psc' => 'nullable|boolean',
             'main_product_image' => 'required|image|mimes:jpeg,jpg,png,gif,svg,webp|max:2048',
             'additional_images' => 'nullable|array|max:5',
             'additional_images.*' => 'nullable|image|mimes:png,jpg,jpeg,gif,svg,webp|max:2048',

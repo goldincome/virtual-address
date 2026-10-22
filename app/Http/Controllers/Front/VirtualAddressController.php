@@ -49,7 +49,7 @@ class VirtualAddressController extends Controller
             'psc.*' => 'nullable|integer|min:0|max:100',
         ]);
 
-        $plan = Plan::select('id','name','price', 'yearly_monthly_price', 'product_id', 'stripe_price_id_yearly', 'stripe_price_id_monthly','payment_price_id')->where('id', $request->plan_id)->first();
+        $plan = Plan::with('mailSettings')->where('id', $request->plan_id)->first();
         if (!$plan) {
             return redirect()->back()->with('error', 'Virtual Address plan not found.')->withInput();
         }

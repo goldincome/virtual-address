@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\MailSetting;
 use App\Models\PscType;
+use App\Models\CompanyType;
 use Illuminate\Http\Request;
 use App\Enums\ProductTypeEnum;
 use App\Enums\PaymentMethodEnum;
@@ -71,13 +72,27 @@ class CartService
                     'image' => $product->main_product_image ?: 'https://placehold.co/100x80/1e4ed8/ffffff?text=V-Office',
                 ]
             );
-            // Add Persons with Significant Control (PSC) quantities when the plan allows it
+            // Add Persons with Significant Control (PSC) quantities when the plan allows it.
+            // The plan includes a number of free PSC slots; only the quantity
+            // beyond the included allowance is billed and added to the cart.
             if ($plan->allowsCompanyPsc() && !empty($pscQuantities)) {
+                $includedPscs = (int) ($plan->included_pscs ?? 0);
+                $remainingIncluded = $includedPscs;
+
                 foreach ($pscQuantities as $pscTypeId => $quantity) {
                     $quantity = (int) $quantity;
                     if ($quantity < 1) {
                         continue;
                     }
+
+                    // Consume the included allowance first; bill only the excess.
+                    $consumedIncluded = min($remainingIncluded, $quantity);
+                    $remainingIncluded -= $consumedIncluded;
+                    $billableQuantity = $quantity - $consumedIncluded;
+                    if ($billableQuantity < 1) {
+                        continue;
+                    }
+
                     $pscType = PscType::where('status', true)->find((int) $pscTypeId);
                     if (!$pscType) {
                         continue;
@@ -87,13 +102,13 @@ class CartService
                     Cart::add(
                         'psc_' . $pscType->id,
                         'Company PSC - ' . $pscType->name,
-                        $quantity,
+                        $billableQuantity,
                         $pscPrice,
                         0,
                         [
                             'type' => ProductTypeEnum::PSC->value,
                             'order_no' => '',
-                            'tax' => (config('cart.tax') / 100) * ($pscPrice * $quantity),
+                            'tax' => (config('cart.tax') / 100) * ($pscPrice * $billableQuantity),
                             'product_model_id' => $plan->product_id,
                             'psc_type_id' => $pscType->id,
                             'subscription_type' => $plan->subscription_type ?? null,
@@ -348,6 +363,18 @@ class CartService
         return $items;
     }
 
+    // Get all additional-company items from the cart
+    public function getCompanyItemsFromCart()
+    {
+        $items = collect([]);
+        foreach (Cart::content() as $item) {
+            if (($item->options->type ?? null) === ProductTypeEnum::COMPANY->value) {
+                $items->push($item);
+            }
+        }
+        return $items;
+    }
+
     /**
      * Add purchased PSC allowance (top-up) items to the cart for a user who is
      * already subscribed. Unlike addVirtualAddressToCart this does NOT add a
@@ -420,7 +447,74 @@ class CartService
         return true;
     }
 
-    // Get the mail price setting from the cart items
+    /**
+     * Add additional-company allowance (top-up) items to the cart for a user
+     * who is already subscribed. Mirrors addPscTopUpToCart: at checkout the
+     * company subscription item quantity is increased with proration, so the
+     * charge is collected by Stripe through the existing subscription.
+     *
+     * @param array $companyQuantities [company_type_id => quantity]
+     */
+    public function addCompanyTopUpToCart(User $user, array $companyQuantities = [])
+    {
+        Cart::instance('company_topup');
+
+        $interval = app(PscService::class)->intervalForUser($user);
+
+        // Remove existing top-up company items before re-adding
+        foreach (Cart::content() as $item) {
+            if (isset($item->options['type']) && $item->options['type'] === ProductTypeEnum::COMPANY->value
+                && !empty($item->options['top_up'])) {
+                Cart::remove($item->rowId);
+            }
+        }
+
+        $productId = null;
+        $subscription = $user->subscription('default');
+        if ($subscription && $subscription->plan) {
+            $productId = $subscription->plan->product_id;
+        }
+        $image = Product::where('type', ProductTypeEnum::VIRTUAL_ADDRESS->value)
+            ->value('main_product_image') ?: 'https://placehold.co/100x80/1e4ed8/ffffff?text=Company';
+
+        foreach ($companyQuantities as $companyTypeId => $quantity) {
+            $quantity = (int) $quantity;
+            if ($quantity < 1) {
+                continue;
+            }
+            $companyType = CompanyType::where('status', true)->find((int) $companyTypeId);
+            if (!$companyType) {
+                continue;
+            }
+            $companyPrice = $companyType->priceForInterval($interval);
+            Cart::add(
+                'company_topup_' . $companyType->id,
+                'Additional Company - ' . $companyType->name,
+                $quantity,
+                $companyPrice,
+                0,
+                [
+                    'type' => ProductTypeEnum::COMPANY->value,
+                    'order_no' => '',
+                    'tax' => (config('cart.tax') / 100) * ($companyPrice * $quantity),
+                    'product_model_id' => $productId,
+                    'company_type_id' => $companyType->id,
+                    'subscription_type' => $interval === 'year' ? SubscriptionTypeEnum::YEARLY->value : SubscriptionTypeEnum::MONTHLY->value,
+                    'stripe_price_id' => null,
+                    'plan_id' => null,
+                    'plan' => null,
+                    'top_up' => true,
+                    'features' => null,
+                    'description' => 'Additional company (billed via your subscription and pro-rated for the current period)',
+                    'image' => $image,
+                ]
+            );
+        }
+
+        Cart::instance('default');
+
+        return true;
+    }
     // This method is used to retrieve the mail price setting associated with the virtual address in the
     public function getMailPriceSettingFromCart()
     {

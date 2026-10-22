@@ -28,11 +28,13 @@ use App\Http\Controllers\Admin\PlanRoomDiscountController;
 use App\Http\Controllers\Front\MeetingRoomOrderController;
 use App\Http\Controllers\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Admin\PscTypeController;
+use App\Http\Controllers\Admin\CompanyTypeController;
 use App\Http\Controllers\Admin\Auth\RegisteredUserController;
 use App\Http\Controllers\Front\ConferenceRoomOrderController;
 use App\Http\Controllers\Front\VirtualAddressOrderController;
 use App\Http\Controllers\Front\CompanyController;
 use App\Http\Controllers\Front\CompanyPscController;
+use App\Http\Controllers\Front\CompanyTopUpController;
 use App\Http\Controllers\Front\SubscriptionController;
 use App\Http\Controllers\Admin\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Admin\Auth\AdminAuthenticatedSessionController;
@@ -122,6 +124,12 @@ Route::middleware('auth')->group(function () {
     Route::get('companies/psc/topup/checkout', [CompanyPscController::class, 'topUpCheckout'])->name('companies.psc.topup.checkout');
     Route::post('companies/psc/topup/pay', [CompanyPscController::class, 'topUpPay'])->name('companies.psc.topup.pay');
     Route::post('companies/psc/topup/cancel', [CompanyPscController::class, 'topUpCancel'])->name('companies.psc.topup.cancel');
+
+    // Additional (paid) companies
+    Route::post('companies/company/topup', [CompanyTopUpController::class, 'topUp'])->name('companies.company.topup');
+    Route::get('companies/company/topup/checkout', [CompanyTopUpController::class, 'topUpCheckout'])->name('companies.company.topup.checkout');
+    Route::post('companies/company/topup/pay', [CompanyTopUpController::class, 'topUpPay'])->name('companies.company.topup.pay');
+    Route::post('companies/company/topup/cancel', [CompanyTopUpController::class, 'topUpCancel'])->name('companies.company.topup.cancel');
 });
 
 //Admin and Super Admin route
@@ -150,6 +158,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
 
     // Persons with Significant Control prices (auto-synced to Stripe)
     Route::resource('psc-types', PscTypeController::class);
+
+    // Additional company prices (auto-synced to Stripe)
+    Route::resource('company-types', CompanyTypeController::class);
 
     // Companies and their PSCs
     Route::get('companies', [AdminCompanyController::class, 'index'])->name('companies.index');

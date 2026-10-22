@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use App\Actions\CalculateCartTotalDiscount;
 use Illuminate\Database\UniqueConstraintViolationException;
-use Symfony\Component\Mailer\Messenger\SendEmailMessage;
+use Laravel\Cashier\Cashier;
+use Laravel\Cashier\SubscriptionItem;
 
 class OrderService
 {
@@ -135,8 +136,145 @@ class OrderService
             'plan' => json_encode($planSnapshot),
             'discounts' => null,
         ]);
+return $order;
+    }
 
-        return $order;
+    /**
+     * Sync a subscription from Stripe for an order that was paid but missed the webhook.
+     * Only syncs subscriptions with 'active' status that match the order's plan price IDs.
+     *
+     * @param Order $order
+     * @return \App\Models\PlanSubscription|null The synced subscription or null if not found
+     * @throws \Exception if Stripe API error occurs
+     */
+    public function syncSubscriptionFromStripe(Order $order): ?\App\Models\PlanSubscription
+    {
+        $order->load('user', 'orderDetails');
+        $user = $order->user;
+
+        // Find the virtual address order detail
+        $vaDetail = $order->orderDetails
+            ->where('product_type', ProductTypeEnum::VIRTUAL_ADDRESS->value)
+            ->first();
+
+        if (!$vaDetail || !$vaDetail->plan) {
+            return null;
+        }
+
+        $planData = json_decode($vaDetail->plan, true);
+        if (!$planData || !isset($planData['id'])) {
+            return null;
+        }
+
+        $plan = Plan::find($planData['id']);
+        if (!$plan) {
+            return null;
+        }
+
+        // Get plan price IDs (monthly and yearly)
+        $priceIds = array_filter([$plan->stripe_price_id_monthly, $plan->stripe_price_id_yearly]);
+        if (empty($priceIds)) {
+            return null;
+        }
+
+        // Get Stripe customer ID - use user's stripe_id or search by email
+        $customerId = $user->stripe_id;
+        if (!$customerId) {
+            try {
+                $stripe = \Laravel\Cashier\Cashier::stripe();
+                $result = $stripe->customers->search([
+                    'query' => "email:'{$user->email}'",
+                ]);
+                $customerId = $result->data[0]->id ?? null;
+                if ($customerId) {
+                    $user->update(['stripe_id' => $customerId]);
+                }
+            } catch (\Exception $e) {
+                \Log::warning('OrderService: Could not find Stripe customer by email', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+                return null;
+            }
+        }
+
+        if (!$customerId) {
+            return null;
+        }
+
+        try {
+            // Query Stripe for active subscriptions
+            $stripe = \Laravel\Cashier\Cashier::stripe();
+            $subscriptions = $stripe->subscriptions->all([
+                'customer' => $customerId,
+                'status' => 'active',  // Only active subscriptions
+                'limit' => 100,
+                'expand' => ['data.items.data.price'],
+            ]);
+
+            // Find subscription with matching plan price
+            foreach ($subscriptions->data as $stripeSub) {
+                foreach ($stripeSub->items->data as $item) {
+                    if (in_array($item->price->id, $priceIds, true)) {
+                        // Found matching subscription - sync it locally
+                        return $this->createLocalSubscriptionFromStripe($user, $stripeSub, $plan);
+                    }
+                }
+            }
+
+            return null;
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            \Log::error('OrderService: Stripe API error syncing subscription', [
+                'order_id' => $order->id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \Exception('Failed to sync subscription from Stripe: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create/update local subscription and items from Stripe subscription object.
+     * Mirrors Cashier's WebhookController::handleCustomerSubscriptionCreated pattern.
+     *
+     * @param User $user
+     * @param \Stripe\Subscription $stripeSub
+     * @param Plan $plan
+     * @return \App\Models\PlanSubscription
+     */
+    protected function createLocalSubscriptionFromStripe(User $user, \Stripe\Subscription $stripeSub, Plan $plan): \App\Models\PlanSubscription
+    {
+        // Find or create local subscription
+        $subscription = $user->subscriptions()->firstOrNew(['stripe_id' => $stripeSub->id]);
+
+        $isSinglePrice = count($stripeSub->items->data) === 1;
+        $firstItem = $stripeSub->items->data[0] ?? null;
+
+        $subscription->type = 'default';
+        $subscription->stripe_id = $stripeSub->id;
+        $subscription->stripe_status = $stripeSub->status;
+        $subscription->stripe_price = $isSinglePrice ? ($firstItem['price']['id'] ?? null) : null;
+        $subscription->quantity = $isSinglePrice && isset($firstItem['quantity']) ? $firstItem['quantity'] : null;
+
+        if (isset($stripeSub->trial_end)) {
+            $subscription->trial_ends_at = \Carbon\Carbon::createFromTimestamp($stripeSub->trial_end);
+        }
+
+        $subscription->save();
+
+        // Sync subscription items (plan, PSC, metered mail add-ons)
+        foreach ($stripeSub->items->data as $item) {
+            SubscriptionItem::updateOrCreate(
+                ['subscription_id' => $subscription->id, 'stripe_id' => $item->id],
+                [
+                    'stripe_product' => $item['price']['product'] ?? null,
+                    'stripe_price' => $item['price']['id'],
+                    'quantity' => $item['quantity'] ?? null,
+                ]
+            );
+        }
+
+        return $subscription;
     }
 
 

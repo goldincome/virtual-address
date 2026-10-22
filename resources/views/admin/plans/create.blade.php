@@ -155,6 +155,22 @@
                                 @enderror
                             </div>
                         </div>
+
+                        <div>
+                            <label for="allows_company_psc"
+                                class="block text-sm font-medium text-gray-700 mb-2">Allows Company & PSC?</label>
+                            <div class="relative">
+                                <select id="allows_company_psc" name="allows_company_psc"
+                                        class="w-full px-4 py-2 border @error('allows_company_psc') border-red-500 @else border-gray-300 @enderror rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 transition duration-150 ease-in-out">
+                                    <option value="1" {{ old('allows_company_psc', '0') == '1' ? 'selected' : '' }}>Yes</option>
+                                    <option value="0" {{ old('allows_company_psc') == '0' ? 'selected' : '' }}>No</option>
+                                </select>
+                                @error('allows_company_psc')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Enable Company and Persons with Significant Control for this plan.</p>
+                        </div>
                     </div>
 
                     <div class="border-t pt-6">

@@ -22,6 +22,7 @@
     </div>
 
         @include('front.companies.partials.psc-allowance')
+        @include('front.companies.partials.company-allowance')
 
         @if($companies->isEmpty())
             <div class="bg-white p-10 rounded-lg shadow-md text-center">

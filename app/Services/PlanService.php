@@ -28,7 +28,7 @@ class PlanService
             'discount_amount' => $planData['discount_amount'] ?? 0.00,
             'discount_percent' => $planData['discount_percent'] ?? 0.00,
             'currency' => config('cashier.currency'),
-            // ... other fields
+            'allows_company_psc' => $planData['allows_company_psc'] ?? false,
         ]);
         if($product->type->value === ProductTypeEnum::VIRTUAL_ADDRESS->value){
             // Primary image
@@ -94,6 +94,7 @@ class PlanService
                 'discount_percent' => $planData['discount_percent'] ?? null,
                 'is_active' => $planData['is_active'] ?? false,
                 'level' => $planData['level'] ?? 0,
+                'allows_company_psc' => $planData['allows_company_psc'] ?? false,
             ]);
 
             // Handle main image update

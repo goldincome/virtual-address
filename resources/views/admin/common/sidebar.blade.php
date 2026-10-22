@@ -52,6 +52,10 @@
         {{ request()->is('admin/psc-types*') ? 'active' : '' }}">
         <i class="fas fa-user-tie mr-3 w-5 text-center text-orange-400"></i> PSC Prices
     </a>
+    <a href="{{ route('admin.company-types.index') }}" class="block py-2.5 px-4 rounded-md
+        {{ request()->is('admin/company-types*') ? 'active' : '' }}">
+        <i class="fas fa-building mr-3 w-5 text-center text-orange-400"></i> Company Prices
+    </a>
     <a href="{{ route('admin.plan-room-discounts.index') }}" class="block py-2.5 px-4 rounded-md
         {{ request()->is('admin/plan-room-discounts*') ? 'active' : '' }}">
         <i class="fas fa-tags mr-3 w-5 text-center text-orange-400"></i> Plan Room Discounts

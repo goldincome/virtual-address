@@ -19,10 +19,15 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-4">
-                            <div class="text-sm text-gray-600">
-                                <span class="font-semibold {{ $allowance['remaining'] > 0 ? 'text-green-600' : 'text-orange-600' }}">
-                                    {{ $allowance['active'] }} / {{ $allowance['billed'] }}
-                                </span> used
+                            <div class="text-sm text-gray-600 text-right">
+                                <div>
+                                    <span class="font-semibold {{ $allowance['remaining'] > 0 ? 'text-green-600' : 'text-orange-600' }}">
+                                        {{ $allowance['active'] }} / {{ ($allowance['included'] ?? 0) + $allowance['billed'] }}
+                                    </span> used
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    Included: {{ $allowance['included'] ?? 0 }} &middot; Paid: {{ $allowance['billed'] }} &middot; Remaining: {{ $allowance['remaining'] }}
+                                </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="number" name="psc[{{ $allowance['id'] }}]" min="0" max="100" value="0"
@@ -36,9 +41,9 @@
                         </div>
                     </div>
 
-                    @if($allowance['remaining'] <= 0 && $allowance['billed'] > 0)
+                    @if($allowance['remaining'] <= 0 && (($allowance['included'] ?? 0) + $allowance['billed']) > 0)
                         <p class="px-6 pb-3 -mt-1 text-xs text-orange-600">
-                            You have used all {{ $allowance['billed'] }} paid slot(s). Buy more to register additional Persons with Significant Control.
+                            You have used all {{ ($allowance['included'] ?? 0) + $allowance['billed'] }} available slot(s). Buy more to register additional Persons with Significant Control.
                         </p>
                     @endif
                 @endforeach
