@@ -13,6 +13,41 @@
     <div id="dashboard-view">
         <h1 class="text-2xl sm:text-3xl font-bold text-blue-800 mb-6">Welcome to your Dashboard, {{ Auth::user()->name }}!</h1>
 
+        @php($dashFailedSub = auth()->user()->subscription('default'))
+        @if($dashFailedSub && in_array($dashFailedSub->stripe_status, ['past_due', 'unpaid', 'incomplete', 'incomplete_expired']))
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-2xl text-red-600 mr-3 mt-1"></i>
+                <div>
+                    <p class="font-semibold text-red-800">Payment Failed - Action Required</p>
+                    <p class="text-sm text-red-700">Your subscription payment failed. Please update your payment method to avoid service interruption.</p>
+                </div>
+            </div>
+            <a href="{{ route('invoices.index') }}"
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md inline-flex items-center shrink-0">
+                <i class="fas fa-file-invoice mr-2"></i> View Invoices
+            </a>
+        </div>
+        @endif
+        @if($dashFailedSub && auth()->user()->subscribed('metered'))
+            @php($meteredSub = auth()->user()->subscription('metered'))
+            @if($meteredSub && in_array($meteredSub->stripe_status, ['past_due', 'unpaid', 'incomplete', 'incomplete_expired']))
+            <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-md mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <div class="flex items-start">
+                    <i class="fas fa-envelope text-2xl text-orange-600 mr-3 mt-1"></i>
+                    <div>
+                        <p class="font-semibold text-orange-800">Mail Service Payment Failed</p>
+                        <p class="text-sm text-orange-700">Payment for mail forwarding/scanning failed. Please update your payment method to restore mail services.</p>
+                    </div>
+                </div>
+                <a href="{{ route('invoices.index') }}"
+                    class="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 shadow-md inline-flex items-center shrink-0">
+                    <i class="fas fa-file-invoice mr-2"></i> View Invoices
+                </a>
+            </div>
+            @endif
+        @endif
+
         @if(!empty($showCompanyPrompt))
         <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-md mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div class="flex items-start">

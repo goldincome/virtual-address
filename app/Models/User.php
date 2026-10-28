@@ -31,6 +31,7 @@ class User extends Authenticatable
         'password',
         'user_type',
         'customer_number',
+        'status',
     ];
 
     /**

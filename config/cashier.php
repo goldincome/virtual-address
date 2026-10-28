@@ -50,6 +50,8 @@ return [
         'events' => array_merge(WebhookCommand::DEFAULT_EVENTS, [
             'subscription_schedule.updated',
             'subscription_schedule.released',
+            'invoice.payment_failed',
+            'invoice.payment_action_required',
         ]),
     ],
 

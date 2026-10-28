@@ -11,7 +11,9 @@ use Laravel\Cashier\Cashier;
 use App\Enums\PaymentStatusEnum;
 use App\Services\OrderService;
 use App\Jobs\SendSubscriptionCancelledEmail;
+use App\Mail\InvoicePaymentFailedMail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Stripe\Subscription as StripeSubscription;
 use Symfony\Component\HttpFoundation\Response;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierController;
@@ -87,13 +89,28 @@ class PaymentWebhookController extends CashierController
             $user = Cashier::findBillable($stripeCustomerId);
 
             if ($user) {
+                $invoice = $payload['data']['object'] ?? [];
+                $invoiceId = $invoice['id'] ?? null;
+                $billingReason = $invoice['billing_reason'] ?? null;
+
                 $order = $this->findOrderFromInvoice($payload, $user);
+
+                // Renewal cycles (including the monthly mail forwarding /
+                // scanning item) have no local order yet. Create one from the
+                // Stripe invoice lines so the customer can see exactly what was
+                // billed in their panel and receives a receipt for it.
+                if ($invoiceId && (! $order || $order->stripe_invoice_id !== $invoiceId)
+                    && in_array($billingReason, ['subscription_cycle', 'subscription_threshold'], true)) {
+                    $renewalOrder = app(OrderService::class)->createOrderFromInvoice($user, $invoiceId);
+                    if ($renewalOrder) {
+                        $order = $renewalOrder;
+                    }
+                }
 
                 if ($order) {
                     // Confirm against the *invoice* id so this is idempotent with
                     // the success-redirect path when the webhook and the browser
                     // redirect race each other.
-                    $invoiceId = $payload['data']['object']['id'] ?? null;
                     app(OrderService::class)->confirmPayment($order, $invoiceId);
                 } else {
                     Log::warning('Webhook: Invoice paid but no matching order found.', [
@@ -126,16 +143,31 @@ class PaymentWebhookController extends CashierController
             $user = Cashier::findBillable($stripeCustomerId);
 
             if ($user) {
+                $invoice = $payload['data']['object'] ?? [];
                 // Update order status if metadata exists
-                $order = $this->updateOrderFromMetadata($payload, $user);
+                $order = $this->findOrderFromInvoice($payload, $user);
+                if (! $order) {
+                    $order = $this->updateOrderFromMetadata($payload, $user);
+                }
                 if ($order) {
                     $order->update(['status' => PaymentStatusEnum::Failed->value]);
                 }
+
+                $invoiceId = $invoice['id'] ?? null;
+                $amountDue = isset($invoice['amount_due']) ? ((float)$invoice['amount_due']) / 100 : null;
+                $hostedInvoiceUrl = $invoice['hosted_invoice_url'] ?? null;
+                $attemptCount = $invoice['attempt_count'] ?? null;
+
+                try {
+                    Mail::to($user->email)->queue(new InvoicePaymentFailedMail($user, $invoiceId, $amountDue, $hostedInvoiceUrl, $attemptCount));
+                } catch (\Exception $e) {
+                    report($e);
+                }
+
                 Log::warning('Webhook: Invoice payment failed.', [
                     'user_id' => $user->id,
-                    //'order' => $order,
-                    //'amount' => $payload['data']['object']['amount_due'],
-                    'payload' => $payload
+                    'invoice_id' => $invoiceId,
+                    'amount_due' => $amountDue,
                 ]);
             }
         } catch (\Exception $e) {
@@ -146,6 +178,50 @@ class PaymentWebhookController extends CashierController
         }
 
         return new Response('Webhook Handled', 200);
+    }
+
+    public function handleInvoicePaymentActionRequired(array $payload): Response
+    {
+        $response = parent::handleInvoicePaymentActionRequired($payload);
+
+        try {
+            $stripeCustomerId = $payload['data']['object']['customer'];
+            $user = Cashier::findBillable($stripeCustomerId);
+
+            if ($user) {
+                $invoice = $payload['data']['object'] ?? [];
+                $order = $this->findOrderFromInvoice($payload, $user);
+                if (! $order) {
+                    $order = $this->updateOrderFromMetadata($payload, $user);
+                }
+                if ($order) {
+                    $order->update(['status' => PaymentStatusEnum::Failed->value]);
+                }
+
+                $invoiceId = $invoice['id'] ?? null;
+                $amountDue = isset($invoice['amount_due']) ? ((float)$invoice['amount_due']) / 100 : null;
+                $hostedInvoiceUrl = $invoice['hosted_invoice_url'] ?? null;
+                $attemptCount = $invoice['attempt_count'] ?? null;
+
+                try {
+                    Mail::to($user->email)->queue(new InvoicePaymentFailedMail($user, $invoiceId, $amountDue, $hostedInvoiceUrl, $attemptCount));
+                } catch (\Exception $e) {
+                    report($e);
+                }
+
+                Log::warning('Webhook: Invoice payment action required.', [
+                    'user_id' => $user->id,
+                    'invoice_id' => $invoiceId,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Webhook: Error in handleInvoicePaymentActionRequired.', [
+                'error' => $e->getMessage(),
+                'payload' => $payload
+            ]);
+        }
+
+        return $response;
     }
 
         /**

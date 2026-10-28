@@ -26,7 +26,6 @@ class Order extends Model
         'prorated_total',
         'proration_breakdown',
     ];
-
     protected $casts = [
         'proration_breakdown' => 'array',
     ];

@@ -175,14 +175,14 @@
         </table>
 
         <div class="totals">
-            <p><strong>Subtotal:</strong> {{ currencyFormatter($order->discount > 0 ? $order->sub_total + $order->discount : $order->sub_total) }}</p>
+            <p><strong>Subtotal:</strong> {{ currencyFormatter($order->prorated_sub_total ?? ($order->discount > 0 ? $order->sub_total + $order->discount : $order->sub_total)) }}</p>
             @if (isset($order->discount) && $order->discount > 0)
                 <p class="discount"><strong>Discount:</strong> -{{ currencyFormatter($order->discount) }}</p>
             @endif
             @if ($order->tax > 0)
-                <p><strong>Tax:</strong> {{ currencyFormatter($order->tax) }}</p>
+                <p><strong>Tax:</strong> {{ currencyFormatter($order->prorated_tax ?? $order->tax) }}</p>
             @endif
-            <p class="total"><strong>Total:</strong> {{ currencyFormatter($order->total) }}</p>
+            <p class="total"><strong>Total:</strong> {{ currencyFormatter($order->prorated_total ?? $order->total) }}</p>
         </div>
 
         @if ($order->hasSubscription() && $jsonPlan)

@@ -96,6 +96,12 @@ class OrderDetail extends Model
             return $isYearly ? ' yr' : ' mon';
         }
 
+        // Mail forwarding/scanning and additional companies are always billed
+        // monthly, regardless of the main plan's interval.
+        if (in_array($this->product_type, [ProductTypeEnum::MAIL_SERVICE, ProductTypeEnum::COMPANY], true)) {
+            return ' mon';
+        }
+
         return 'hr(s)';
     }
 }

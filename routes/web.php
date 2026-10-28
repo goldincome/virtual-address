@@ -9,6 +9,8 @@ use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Front\PageController;
 use App\Http\Controllers\Front\UserController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\OffDayController;
 use App\Http\Controllers\Front\InvoiceController;
 use App\Http\Controllers\Front\PaymentController;
@@ -135,6 +137,8 @@ Route::middleware('auth')->group(function () {
 //Admin and Super Admin route
 Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
@@ -162,7 +166,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     // Additional company prices (auto-synced to Stripe)
     Route::resource('company-types', CompanyTypeController::class);
 
-    // Companies and their PSCs
+    // Customers
+    Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
+    Route::resource('customers', CustomerController::class)->except(['create', 'store', 'destroy']);
+    Route::post('customers/{customer}/suspend', [CustomerController::class, 'suspend'])->name('customers.suspend');
+    Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])->name('customers.activate');
     Route::get('companies', [AdminCompanyController::class, 'index'])->name('companies.index');
     Route::get('companies/{company}', [AdminCompanyController::class, 'show'])->name('companies.show');
     Route::post('companies/{company}/psc', [AdminCompanyController::class, 'addPsc'])->name('companies.psc');

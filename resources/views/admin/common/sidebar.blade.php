@@ -31,7 +31,11 @@
         {{ request()->is('admin/mails*') ? 'active' : '' }}">
         <i class="fas fa-envelope-open-text mr-3 w-5 text-center text-orange-400"></i> Mail Services
     </a>
-    <a href="{{ route('admin.companies.index') }}" class="block py-2.5 px-4 rounded-md 
+    <a href="{{ route('admin.customers.index') }}" class="block py-2.5 px-4 rounded-md
+        {{ request()->is('admin/customers*') ? 'active' : '' }}">
+        <i class="fas fa-users mr-3 w-5 text-center text-orange-400"></i> Customers
+    </a>
+    <a href="{{ route('admin.companies.index') }}" class="block py-2.5 px-4 rounded-md
         {{ request()->is('admin/companies*') ? 'active' : '' }}">
         <i class="fas fa-building mr-3 w-5 text-center text-orange-400"></i> Companies
     </a>
@@ -68,10 +72,10 @@
         {{ request()->is('admin/off-days*') ? 'active' : '' }}">
         <i class="fas fa-calendar-times mr-3 w-5 text-center text-orange-400"></i> Off Days
     </a>
-    <a href="#profile" class="block py-2.5 px-4 rounded-md">
-        <i class="fas fa-user-edit mr-3 w-5 text-center text-orange-400"></i> User Profile
+    <a href="{{ route('admin.profile.edit') }}" class="block py-2.5 px-4 rounded-md {{ request()->routeIs('admin.profile.edit') ? 'active' : '' }}">
+        <i class="fas fa-user-edit mr-3 w-5 text-center text-orange-400"></i> Admin Profile
     </a>
-    <a href="#change-password" class="block py-2.5 px-4 rounded-md">
+    <a href="{{ route('admin.profile.edit') }}#change-password" class="block py-2.5 px-4 rounded-md">
         <i class="fas fa-key mr-3 w-5 text-center text-orange-400"></i> Change Password
     </a>
 

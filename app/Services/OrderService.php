@@ -104,9 +104,144 @@ class OrderService
         return true;
     }
 
-    public function syncProrationFromInvoiceId(Order $order, string $invoiceId): void
+    /**
+     * Create (or return) a local order for a Stripe invoice that has no local
+     * order yet — used for renewal cycles (including monthly mail
+     * forwarding/scanning invoices) so the customer can see exactly what was
+     * billed in the user panel and admin, and receives a receipt.
+     *
+     * Idempotent per Stripe invoice id.
+     */
+    public function createOrderFromInvoice(User $user, string $invoiceId): ?Order
     {
-        if (empty($invoiceId) || str_starts_with($invoiceId, 'order-')) {
+        $existing = Order::where('stripe_invoice_id', $invoiceId)->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        try {
+            $stripe = \Laravel\Cashier\Cashier::stripe();
+            $invoice = $stripe->invoices->retrieve($invoiceId, [
+                'expand' => ['lines.data', 'lines.data.price', 'lines.data.price.product'],
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+
+            return null;
+        }
+
+        $currency = strtolower($invoice->currency ?? config('cashier.currency', 'gbp'));
+        $isZeroDecimal = in_array($currency, ['bif', 'clp', 'djf', 'gnf', 'jpy', 'kmf', 'krw', 'mga', 'pyg', 'rwf', 'ugx', 'vnd', 'vuv', 'xaf', 'xof', 'xpf']);
+        $divisor = $isZeroDecimal ? 1 : 100;
+
+        $lines = $invoice->lines->data ?? [];
+        if (empty($lines)) {
+            return null;
+        }
+
+        $orderNo = generateOrderNumber();
+        $subtotal = ((float) ($invoice->subtotal_excluding_tax ?? $invoice->subtotal ?? 0)) / $divisor;
+        $tax = ((float) ($invoice->tax ?? 0)) / $divisor;
+        $total = ((float) ($invoice->total ?? $invoice->amount_due ?? 0)) / $divisor;
+
+        try {
+            DB::beginTransaction();
+
+            $order = Order::create([
+                'user_id' => $user->id,
+                'order_no' => $orderNo,
+                'payment_method' => 'stripe',
+                'payment_method_order_id' => $invoice->payment_intent ?? null,
+                'stripe_invoice_id' => $invoiceId,
+                'prorated_sub_total' => round($subtotal, 2),
+                'prorated_tax' => round($tax, 2),
+                'prorated_discount' => 0,
+                'prorated_total' => round($total, 2),
+                'proration_breakdown' => $this->normalizeInvoiceLines($invoice),
+                'total' => round($subtotal + $tax, 2),
+                'sub_total' => round($subtotal, 2),
+                'tax' => round($tax, 2),
+                'discount' => 0,
+                'currency' => strtoupper($currency),
+                'status' => PaymentStatusEnum::Pending->value,
+            ]);
+
+            foreach ($lines as $line) {
+                $amount = ((float) ($line->amount ?? 0)) / $divisor;
+                $quantity = (int) ($line->quantity ?? 1) ?: 1;
+                $unitPrice = $amount / $quantity;
+                [$productType, $planId] = $this->resolveLineProduct($line);
+
+                $order->orderDetails()->create([
+                    'user_id' => $user->id,
+                    'name' => $line->description ?: 'Subscription charge',
+                    'ref_no' => generateOrderNumber(),
+                    'order_id' => $order->id,
+                    'product_id' => null,
+                    'product_type' => $productType,
+                    'quantity' => $quantity,
+                    'price' => round($unitPrice, 2),
+                    'sub_total' => round($amount, 2),
+                    'plan_id' => $planId,
+                    'features' => null,
+                    'plan' => null,
+                    'discounts' => null,
+                ]);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            report($e);
+
+            return null;
+        }
+
+        return $order;
+    }
+
+    /**
+     * Map a Stripe invoice line to a local product type (and plan when known).
+     *
+     * @return array{0: string, 1: int|null}
+     */
+    protected function resolveLineProduct($line): array
+    {
+        $priceId = $line->price->id ?? null;
+
+        if ($priceId) {
+            $plan = Plan::where('stripe_price_id_monthly', $priceId)
+                ->orWhere('stripe_price_id_yearly', $priceId)
+                ->first();
+            if ($plan) {
+                return [ProductTypeEnum::VIRTUAL_ADDRESS->value, $plan->id];
+            }
+
+            $mail = \App\Models\MailSetting::where('stripe_price_id', $priceId)->first();
+            if ($mail) {
+                return [ProductTypeEnum::MAIL_SERVICE->value, $mail->plan_id];
+            }
+
+            $psc = \App\Models\PscType::where('stripe_price_id_monthly', $priceId)
+                ->orWhere('stripe_price_id_yearly', $priceId)
+                ->first();
+            if ($psc) {
+                return [ProductTypeEnum::PSC->value, null];
+            }
+
+            $company = \App\Models\CompanyType::where('stripe_price_id_monthly', $priceId)
+                ->orWhere('stripe_price_id_yearly', $priceId)
+                ->first();
+            if ($company) {
+                return [ProductTypeEnum::COMPANY->value, null];
+            }
+        }
+
+        return [ProductTypeEnum::MAIL_SERVICE->value, null];
+    }
+
+    public function syncProrationFromInvoiceId(Order $order, string $invoiceId): void
+    {        if (empty($invoiceId) || str_starts_with($invoiceId, 'order-')) {
             return;
         }
 
