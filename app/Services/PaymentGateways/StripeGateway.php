@@ -183,7 +183,7 @@ class StripeGateway implements PaymentGatewayInterface
                             'name' => $item->name,
                             'description' => $item->options->description ?? $item->name,
                         ],
-                        'unit_amount'  => (int)($item->price * 100),
+                        'unit_amount'  => (int) round($item->price * 100),
                     ],
                     'quantity'   => $item->qty,
                 ];
@@ -199,7 +199,7 @@ class StripeGateway implements PaymentGatewayInterface
                     'product_data' => [
                         'name' => 'VAT (' . config('cart.tax') . "%)",
                     ],
-                    'unit_amount'  => (int)(Cart::tax() * 100),
+                    'unit_amount'  => (int) round(Cart::tax() * 100),
                 ],
                 'quantity'   => 1,
             ];

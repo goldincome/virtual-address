@@ -104,24 +104,66 @@
             <!-- Payment Summary -->
             <div class="p-6 bg-gray-50 border-t">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">Payment Summary</h3>
+                @php
+                    $sub = $order->prorated_sub_total !== null ? $order->prorated_sub_total : $order->sub_total;
+                    $tax = $order->prorated_tax !== null ? $order->prorated_tax : $order->tax;
+                    $disc = $order->prorated_discount !== null ? $order->prorated_discount : $order->discount;
+                    $total = $order->prorated_total !== null ? $order->prorated_total : $order->total;
+                    $breakdown = $order->proration_breakdown ?? [];
+                @endphp
                 <div class="max-w-sm ml-auto space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Subtotal:</span>
-                        <span class="font-medium text-gray-800">${{ number_format($order->subtotal, 2) }}</span>
+                        <span class="font-medium text-gray-800">{{ currencyFormatter($sub) }}</span>
                     </div>
+                    @if($disc > 0)
+                        <div class="flex justify-between text-sm text-green-600">
+                            <span>Discount:</span>
+                            <span>-{{ currencyFormatter($disc) }}</span>
+                        </div>
+                    @endif
+                    @if($tax > 0)
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Tax:</span>
+                            <span class="font-medium text-gray-800">{{ currencyFormatter($tax) }}</span>
+                        </div>
+                    @endif
                     <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Tax:</span>
-                        <span class="font-medium text-gray-800">${{ number_format($order->tax, 2) }}</span>
-                    </div>
-                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Payment Method:</span>
                         <span class="font-medium text-gray-800">{{ ucfirst($order->payment_method) }}</span>
                     </div>
                     <div class="flex justify-between text-lg font-bold pt-2 border-t text-blue-800">
-                        <span>Total Paid:</span>
-                        <span>${{ number_format($order->total, 2) }}</span>
+                        <span>Total {{ $order->prorated_total !== null ? '(Prorated)' : '' }}:</span>
+                        <span>{{ currencyFormatter($total) }}</span>
                     </div>
                 </div>
+
+                @if(!empty($breakdown))
+                    <div class="mt-6 max-w-2xl ml-auto">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Proration breakdown (Stripe)</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs text-left text-gray-600 border">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="p-2 border">Description</th>
+                                        <th class="p-2 border text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($breakdown as $line)
+                                        <tr>
+                                            <td class="p-2 border">{{ $line['description'] ?? '—' }}</td>
+                                            <td class="p-2 border text-right {{ ($line['amount'] ?? 0) < 0 ? 'text-green-600' : '' }}">
+                                                {{ currencyFormatter($line['amount'] ?? 0) }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Negative amounts are credits for unused time on your previous plan.</p>
+                    </div>
+                @endif
             </div>
         </div>
     </main>

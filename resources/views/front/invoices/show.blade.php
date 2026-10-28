@@ -87,20 +87,50 @@
 
                     {{-- Totals Section --}}
                     <div class="mt-6 space-y-2 text-gray-700 text-right">
-                        <p><strong>Subtotal:</strong> {{ currencyFormatter($invoice->discount > 0 ? $invoice->sub_total + $invoice->discount : $invoice->sub_total) }}</p>
+                        @php
+                            $sub = $invoice->prorated_sub_total !== null ? $invoice->prorated_sub_total : ($invoice->discount > 0 ? $invoice->sub_total + $invoice->discount : $invoice->sub_total);
+                            $tax = $invoice->prorated_tax !== null ? $invoice->prorated_tax : $invoice->tax;
+                            $disc = $invoice->prorated_discount !== null ? $invoice->prorated_discount : $invoice->discount;
+                            $total = $invoice->prorated_total !== null ? $invoice->prorated_total : $invoice->total;
+                            $breakdown = $invoice->proration_breakdown ?? [];
+                        @endphp
+                        <p><strong>Subtotal:</strong> {{ currencyFormatter($sub) }}</p>
                         
                         {{-- Discount Information --}}
-                        @if($invoice->discount > 0)
+                        @if($disc > 0)
                             <p class="text-green-600">
                                 <strong>Discount:</strong> 
-                                -{{ currencyFormatter($invoice->discount) }}
+                                -{{ currencyFormatter($disc) }}
                             </p>
                         @endif
-                        @if($invoice->tax > 0)
-                            <p><strong>Tax ({{ $invoice->tax }}%):</strong> {{ currencyFormatter($invoice->tax_amount) }}</p>
+                        @if($tax > 0)
+                            <p><strong>Tax{{ is_numeric($tax) && $tax > 0 && $invoice->prorated_tax === null && isset($invoice->tax) && is_numeric($invoice->tax) && $invoice->tax < 100 ? ' ('.$invoice->tax.'%)' : '' }}:</strong> {{ $invoice->prorated_tax !== null ? currencyFormatter($tax) : currencyFormatter($invoice->tax_amount) }}</p>
                         @endif
-                        <p class="text-lg font-semibold text-blue-800"><strong>Total:</strong> {{ currencyFormatter($invoice->total) }}</p>
+                        <p class="text-lg font-semibold text-blue-800"><strong>Total {{ $invoice->prorated_total !== null ? '(Prorated)' : '' }}:</strong> {{ currencyFormatter($total) }}</p>
                     </div>
+
+                    @if(!empty($breakdown))
+                        <div class="mt-8 bg-gray-50 p-6 rounded-md border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Proration details</h3>
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-2">Description</th>
+                                        <th class="text-right py-2">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($breakdown as $line)
+                                        <tr class="border-b last:border-b-0">
+                                            <td class="py-2">{{ $line['description'] ?? '—' }}</td>
+                                            <td class="py-2 text-right {{ ($line['amount'] ?? 0) < 0 ? 'text-green-600' : '' }}">{{ currencyFormatter($line['amount'] ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <p class="text-xs text-gray-500 mt-2">Negative amounts are credits for unused time on your previous plan.</p>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- This section will only show if the invoice has event booking details --}}

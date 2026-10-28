@@ -127,24 +127,54 @@
 
                     {{-- Totals Section --}}
                     <div class="mt-6 space-y-2 text-gray-700 text-right">
-                        <p><strong>Subtotal: </strong>{{ currencyFormatter($order->discount > 0 ? $order->sub_total + $order->discount : $order->sub_total) }}</p>
+                        @php
+                            $sub = $order->prorated_sub_total !== null ? $order->prorated_sub_total : ($order->discount > 0 ? $order->sub_total + $order->discount : $order->sub_total);
+                            $tax = $order->prorated_tax !== null ? $order->prorated_tax : $order->tax;
+                            $disc = $order->prorated_discount !== null ? $order->prorated_discount : ($order->discount ?? 0);
+                            $total = $order->prorated_total !== null ? $order->prorated_total : $order->total;
+                            $breakdown = $order->proration_breakdown ?? [];
+                        @endphp
+                        <p><strong>Subtotal: </strong>{{ currencyFormatter($sub) }}</p>
                         
                         {{-- Discount Information --}}
-                        @if(isset($order->discount) && $order->discount > 0)
+                        @if(isset($disc) && $disc > 0)
                             <p class="text-green-600">
                                 <strong>Discount 
                                 @if(isset($order->discount_percentage))
                                     ({{ $order->discount_percentage }}%)
                                 @endif
                                 :</strong> 
-                                -{{ currencyFormatter($order->discount) }}
+                                -{{ currencyFormatter($disc) }}
                             </p>
                         @endif
-                        @if($order->tax > 0)
-                            <p><strong>Tax:</strong> {{ currencyFormatter($order->tax) }}</p>
+                        @if($tax > 0)
+                            <p><strong>Tax:</strong> {{ currencyFormatter($tax) }}</p>
                         @endif
-                        <p class="text-lg font-semibold text-blue-800"><strong>Total:</strong> {{ currencyFormatter($order->total) }}</p>
+                        <p class="text-lg font-semibold text-blue-800"><strong>Total {{ $order->prorated_total !== null ? '(Prorated)' : '' }}:</strong> {{ currencyFormatter($total) }}</p>
                     </div>
+
+                    @if(!empty($breakdown))
+                        <div class="mt-6 bg-white p-4 rounded-md border border-blue-200">
+                            <h4 class="text-md font-semibold text-blue-800 mb-2">Proration details</h4>
+                            <table class="w-full text-xs text-left text-gray-700">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="py-1">Description</th>
+                                        <th class="py-1 text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($breakdown as $line)
+                                        <tr class="border-b last:border-b-0">
+                                            <td class="py-1">{{ $line['description'] ?? '—' }}</td>
+                                            <td class="py-1 text-right {{ ($line['amount'] ?? 0) < 0 ? 'text-green-600' : '' }}">{{ currencyFormatter($line['amount'] ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <p class="text-[11px] text-gray-500 mt-1">Negative amounts are credits for unused time on your previous plan.</p>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Subscription Details Section --}}

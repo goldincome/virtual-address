@@ -3,14 +3,33 @@
 namespace App\Models;
 
 use App\Enums\ProductTypeEnum;
-use App\Models\User;
 use Illuminate\Database\Eloquent\{Model, Relations\BelongsTo, Relations\HasMany};
 
 
 class Order extends Model
 {
-    protected $fillable = ['user_id', 'total', 'status', 'sub_total', 'tax', 
-    'currency', 'payment_method', 'order_no', 'discount'];
+    protected $fillable = [
+        'user_id',
+        'total',
+        'status',
+        'sub_total',
+        'tax',
+        'currency',
+        'payment_method',
+        'order_no',
+        'discount',
+        'payment_method_order_id',
+        'stripe_invoice_id',
+        'prorated_sub_total',
+        'prorated_tax',
+        'prorated_discount',
+        'prorated_total',
+        'proration_breakdown',
+    ];
+
+    protected $casts = [
+        'proration_breakdown' => 'array',
+    ];
 
     public function user(): BelongsTo
     {

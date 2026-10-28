@@ -15,9 +15,10 @@
     <div class="bg-white p-6 md:p-8 rounded-lg shadow-md">
         <div class="flex justify-between items-center mb-6 pb-4 border-b">
             <h2 class="text-2xl font-semibold text-blue-800">Virtual Address Plan Details</h2>
+            @php($vaSub = auth()->user()->subscription('default'))
             @if(auth()->user()->subscribed('default'))
                 
-            @elseif(auth()->user()->subscription('default')->canceled())
+            @elseif($vaSub && $vaSub->canceled())
                 <a href="{{ route('virtual-address.show', $plan->slug) }}"
                     class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300 text-sm">
                     <i class="fas fa-plus mr-1"></i> Renew Your Subscription
@@ -39,7 +40,7 @@
                     </div>
                     @if(auth()->user()->subscribed('default'))
                         <span class="text-xs font-semibold text-white bg-green-500 px-3 py-1 rounded-full">Active</span>
-                    @elseif(auth()->user()->subscription('default')->canceled() )
+                    @elseif($vaSub && $vaSub->canceled() )
                         <span class="text-xs font-semibold text-white bg-red-500 px-3 py-1 rounded-full">Canceled</span>
                     @else
                         <span class="text-xs font-semibold text-white bg-red-500 px-3 py-1 rounded-full">Expired</span>
@@ -77,12 +78,14 @@
                     </div>
                 </div>
              
+                @if(!empty($mailType))
                 <div class="mb-8">
                     <h3 class="text-lg font-semibold text-blue-700 mb-3">Mail Delivery Type</h3>
                     <div class="text-sm text-gray-700 space-y-1">
                         <p><strong>{{ $mailType}}</strong></p>
                     </div>
                 </div>
+                @endif
                 
                 <div class="flex flex-col sm:flex-row gap-4 mt-8">
                     @if($invoiceOrder)

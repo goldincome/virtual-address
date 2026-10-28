@@ -2,22 +2,40 @@
 
 namespace App\Models;
 
-use App\Models\Order;
 use App\Enums\ProductTypeEnum;
 use App\Enums\SubscriptionTypeEnum;
 use App\Services\PscService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\User;
 
 class OrderDetail extends Model
 {
-    protected $fillable = ['name', 'order_id', 'product_id', 'quantity', 'price',
-    'product_type', 'plan_id', 'features', 'plan', 'sub_total', 'booked_date',
-    'all_booked_time', 'ref_no', 'discounts', 'user_id'];
-    
+    protected $fillable = [
+        'name',
+        'order_id',
+        'product_id',
+        'quantity',
+        'price',
+        'product_type',
+        'plan_id',
+        'features',
+        'plan',
+        'sub_total',
+        'booked_date',
+        'all_booked_time',
+        'ref_no',
+        'discounts',
+        'user_id',
+        'original_price',
+        'original_sub_total',
+        'prorated_price',
+        'prorated_sub_total',
+        'proration_line_meta',
+    ];
+
     protected $casts = [
         'product_type' => ProductTypeEnum::class,
+        'proration_line_meta' => 'array',
     ];
 
     public function order(): BelongsTo

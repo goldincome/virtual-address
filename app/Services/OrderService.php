@@ -68,6 +68,14 @@ class OrderService
     */
     public function confirmPayment(Order $order, ?string $stripeInvoiceId = null): bool
     {
+        if ($stripeInvoiceId) {
+            try {
+                $this->syncProrationFromInvoiceId($order, $stripeInvoiceId);
+            } catch (\Exception $e) {
+                report($e);
+            }
+        }
+
         $key = $stripeInvoiceId ?: 'order-' . $order->id;
 
         try {
@@ -83,9 +91,148 @@ class OrderService
 
         $order->update(['status' => PaymentStatusEnum::Paid->value]);
 
+        try {
+            if ($order->hasSubscription() && ! $order->user->subscription('default')) {
+                $this->syncSubscriptionFromStripe($order);
+            }
+        } catch (\Exception $e) {
+            report($e);
+        }
+
         SendPaymentReceiptEmail::dispatch($order, $key);
 
         return true;
+    }
+
+    public function syncProrationFromInvoiceId(Order $order, string $invoiceId): void
+    {
+        if (empty($invoiceId) || str_starts_with($invoiceId, 'order-')) {
+            return;
+        }
+
+        try {
+            $stripe = \Laravel\Cashier\Cashier::stripe();
+            $invoice = $stripe->invoices->retrieve($invoiceId, [
+                'expand' => ['lines.data', 'lines.data.price', 'lines.data.price.product'],
+            ]);
+            $this->applyProrationToOrder($order, $invoice);
+        } catch (\Exception $e) {
+            report($e);
+        }
+    }
+
+    protected function applyProrationToOrder(Order $order, $invoice): void
+    {
+        $currency = strtolower($invoice->currency ?? config('cashier.currency', 'gbp'));
+        $isZeroDecimal = in_array($currency, ['bif', 'clp', 'djf', 'gnf', 'jpy', 'kmf', 'krw', 'mga', 'pyg', 'rwf', 'ugx', 'vnd', 'vuv', 'xaf', 'xof', 'xpf']);
+        $divisor = $isZeroDecimal ? 1 : 100;
+
+        $amountDueRaw = (float) ($invoice->amount_due ?? 0);
+        $subtotalRaw = (float) ($invoice->subtotal_excluding_tax ?? $invoice->subtotal ?? $amountDueRaw);
+        $taxRaw = (float) ($invoice->tax ?? 0);
+
+        // Stripe amounts are in smallest currency unit; but be defensive in case they come as pounds
+        if (! $isZeroDecimal && $amountDueRaw > 1000 && $amountDueRaw == round($amountDueRaw)) {
+            $amountDue = $amountDueRaw / $divisor;
+        } elseif (! $isZeroDecimal && $amountDueRaw > 0 && $amountDueRaw < 10000 && strpos((string)$amountDueRaw, '.') === false && $amountDueRaw % 100 == 0 && $amountDueRaw >= 100) {
+            $amountDue = $amountDueRaw / $divisor;
+        } else {
+            $amountDue = $amountDueRaw / $divisor;
+        }
+
+        $subtotal = $subtotalRaw / $divisor;
+        $tax = $taxRaw / $divisor;
+        $totalDiscount = 0;
+
+        if (isset($invoice->total_discount_amounts)) {
+            foreach ($invoice->total_discount_amounts as $disc) {
+                $discountRaw = (float) ($disc->amount ?? 0);
+                $totalDiscount += abs($discountRaw / $divisor);
+            }
+        }
+
+        $updateData = [
+            'stripe_invoice_id' => $invoice->id ?? $order->stripe_invoice_id,
+            'prorated_sub_total' => round($subtotal, 2),
+            'prorated_tax' => round($tax, 2),
+            'prorated_discount' => round($totalDiscount, 2),
+            'prorated_total' => round($amountDue, 2),
+            'proration_breakdown' => $this->normalizeInvoiceLines($invoice),
+        ];
+
+        if ($order->prorated_total === null || abs((float) $amountDue - (float) ($order->prorated_total ?? 0)) > 0.00001 || empty($order->proration_breakdown)) {
+            $updateData['sub_total'] = round($subtotal, 2);
+            $updateData['tax'] = round($tax, 2);
+            $updateData['discount'] = round($totalDiscount, 2);
+            $updateData['total'] = round($amountDue, 2);
+        }
+
+        $order->update($updateData);
+        $this->applyProrationToPlanDetail($order, $invoice, $divisor);
+    }
+
+    protected function normalizeInvoiceLines($invoice): array
+    {
+        $currency = strtolower($invoice->currency ?? config('cashier.currency', 'gbp'));
+        $isZeroDecimal = in_array($currency, ['bif', 'clp', 'djf', 'gnf', 'jpy', 'kmf', 'krw', 'mga', 'pyg', 'rwf', 'ugx', 'vnd', 'vuv', 'xaf', 'xof', 'xpf']);
+        $divisor = $isZeroDecimal ? 1 : 100;
+        $lines = [];
+        if (isset($invoice->lines->data)) {
+            foreach ($invoice->lines->data as $line) {
+                $lines[] = [
+                    'id' => $line->id ?? null,
+                    'description' => $line->description ?? null,
+                    'amount' => ((float) ($line->amount ?? 0)) / $divisor,
+                    'quantity' => $line->quantity ?? null,
+                    'proration' => $line->proration ?? false,
+                    'period' => isset($line->period) ? [
+                        'start' => $line->period->start ?? null,
+                        'end' => $line->period->end ?? null,
+                    ] : null,
+                    'price_id' => $line->price->id ?? null,
+                ];
+            }
+        }
+
+        return $lines;
+    }
+
+    protected function applyProrationToPlanDetail(Order $order, $invoice, int $divisor = 100): void
+    {
+        $detail = $order->orderDetails()->first();
+        if (! $detail || ! $detail->isVirtualAddress()) {
+            return;
+        }
+
+        $planLines = [];
+        if (isset($invoice->lines->data)) {
+            foreach ($invoice->lines->data as $line) {
+                if ($line->proration ?? false) {
+                    $planLines[] = ((float) ($line->amount ?? 0)) / $divisor;
+                }
+            }
+        }
+
+        if (! empty($planLines)) {
+            $netProrated = array_sum($planLines);
+            $detail->update([
+                'prorated_price' => round($netProrated, 2),
+                'prorated_sub_total' => round($netProrated, 2),
+                'proration_line_meta' => $planLines,
+                'price' => round($netProrated, 2),
+                'sub_total' => round($netProrated, 2),
+            ]);
+
+            return;
+        }
+
+        $amountDue = ((float) ($invoice->amount_due ?? 0)) / $divisor;
+        $detail->update([
+            'prorated_price' => round($amountDue, 2),
+            'prorated_sub_total' => round($amountDue, 2),
+            'price' => round($amountDue, 2),
+            'sub_total' => round($amountDue, 2),
+        ]);
     }
 
     /**

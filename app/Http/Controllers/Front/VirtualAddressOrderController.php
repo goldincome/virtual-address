@@ -21,10 +21,16 @@ class VirtualAddressOrderController extends Controller
             return to_route('virtual-address-orders.show','646');
         }
         //get the current vitual address plan order detail and json decode it
-        $jsonPlan = json_decode($user->orderDetails()->where('product_type', ProductTypeEnum::VIRTUAL_ADDRESS->value)->latest()->first()->plan);
+        $orderDetail = $user->orderDetails()->where('product_type', ProductTypeEnum::VIRTUAL_ADDRESS->value)->latest()->first();
+        $jsonPlan = $orderDetail && $orderDetail->plan ? json_decode($orderDetail->plan) : null;
         //get mail type customer ordered(scan or forwarding)
         $mailType = null;
-        if(count($jsonPlan->mail_settings) > 0){
+        if ($jsonPlan && ! empty($jsonPlan->mail_settings) && isset($jsonPlan->mail_type)) {
+            $mailTypeEnum = MailTypeEnum::tryFrom($jsonPlan->mail_type);
+            $mailType = $mailTypeEnum
+                ? $mailTypeEnum->label().'('.$mailTypeEnum->deliveryDescription().')'
+                : null;
+        } elseif ($jsonPlan && isset($jsonPlan->mail_type)) {
             $mailTypeEnum = MailTypeEnum::tryFrom($jsonPlan->mail_type);
             $mailType = $mailTypeEnum
                 ? $mailTypeEnum->label().'('.$mailTypeEnum->deliveryDescription().')'

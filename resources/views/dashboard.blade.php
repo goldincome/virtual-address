@@ -46,14 +46,13 @@
                         @endif
 
                     </p>
-                    @if(auth()->user()->subscriptions()->exists())
-                        @if(auth()->user()->subscribed('default'))
-                            <span class="text-xs font-semibold text-white bg-green-500 px-3 py-1 rounded-full">Active</span>
-                        @elseif(auth()->user()->subscription('default')->canceled() )
-                            <span class="text-xs font-semibold text-white bg-red-500 px-3 py-1 rounded-full">Canceled</span>
-                        @else
-                            <span class="text-xs font-semibold text-white bg-red-500 px-3 py-1 rounded-full">Expired</span>
-                        @endif
+                    @php($dashSub2 = auth()->user()->subscription('default'))
+                    @if(auth()->user()->subscribed('default'))
+                        <span class="text-xs font-semibold text-white bg-green-500 px-3 py-1 rounded-full">Active</span>
+                    @elseif($dashSub2 && $dashSub2->canceled() )
+                        <span class="text-xs font-semibold text-white bg-red-500 px-3 py-1 rounded-full">Canceled</span>
+                    @elseif(auth()->user()->subscriptions()->exists())
+                        <span class="text-xs font-semibold text-white bg-red-500 px-3 py-1 rounded-full">Expired</span>
                     @else
                         <span class="text-xs font-semibold text-white bg-gray-500 px-3 py-1 rounded-full">No Subscription</span>
                     @endif
