@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Customers Management')
+@section('title', 'Subscribers Management')
 
 @section('content')
 <div class="min-h-screen bg-gray-50">
@@ -19,7 +19,7 @@
         <div class="bg-white shadow-xl rounded-lg overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                    <h2 class="text-2xl font-bold text-blue-800">Customers Management</h2>
+                    <h2 class="text-2xl font-bold text-blue-800">Subscribers Management</h2>
 
                     <form method="GET" action="{{ route('admin.customers.index') }}" class="flex flex-wrap items-center gap-2">
                         <select name="subscription_status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500">
@@ -39,7 +39,7 @@
 
                         <div class="relative flex-1 sm:flex-initial">
                             <input type="text" name="search" value="{{ $search ?? '' }}"
-                                   placeholder="Search name, email, #..."
+                                   placeholder="Search name, email, phone..."
                                    class="w-full sm:w-60 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 text-sm">
                         </div>
 
@@ -75,18 +75,17 @@
 
             @if($customers->isEmpty())
                 <div class="p-6 text-center text-gray-500">
-                    No customers found matching your criteria.
+                    No subscribers found matching your criteria.
                 </div>
             @else
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Customer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Subscriber</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Subscription Plan</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Subscription Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Companies / PSCs</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Account Status</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase">Actions</th>
                             </tr>
                         </thead>
@@ -106,7 +105,7 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $customer->name }}</div>
-                                        <div class="text-xs text-gray-500">#{{ $customer->customer_number ?? 'N/A' }}</div>
+                                        <div class="text-xs text-gray-500">{{ $customer->phone ?? 'No Phone' }}</div>
                                         <div class="text-xs text-gray-500">{{ $customer->email }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
@@ -123,29 +122,27 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                         {{ $customer->companies->count() }} Company(s) / {{ $customer->pscSubscriptionItems->count() }} PSC(s)
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $customer->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                            {{ ucfirst($customer->status) }}
-                                        </span>
-                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('admin.customers.show', $customer) }}" class="text-indigo-600 hover:text-indigo-900 mr-2" title="View Customer">
+                                        <a href="{{ route('admin.mails.create', ['user_id' => $customer->id]) }}" class="text-green-600 hover:text-green-900 mr-2" title="Add Mail">
+                                            <i class="fas fa-plus-circle"></i> Add Mail
+                                        </a>
+                                        <a href="{{ route('admin.customers.show', $customer) }}" class="text-indigo-600 hover:text-indigo-900 mr-2" title="View Subscriber">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('admin.customers.edit', $customer) }}" class="text-blue-600 hover:text-blue-900 mr-2" title="Edit Customer">
+                                        <a href="{{ route('admin.customers.edit', $customer) }}" class="text-blue-600 hover:text-blue-900 mr-2" title="Edit Subscriber">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         @if($customer->status === 'active')
-                                            <form action="{{ route('admin.customers.suspend', $customer) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to suspend this customer?');">
+                                            <form action="{{ route('admin.customers.suspend', $customer) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to suspend this subscriber?');">
                                                 @csrf
-                                                <button type="submit" class="text-red-600 hover:text-red-900 mr-2" title="Suspend Customer">
+                                                <button type="submit" class="text-red-600 hover:text-red-900 mr-2" title="Suspend Subscriber">
                                                     <i class="fas fa-ban"></i>
                                                 </button>
                                             </form>
                                         @else
                                             <form action="{{ route('admin.customers.activate', $customer) }}" method="POST" class="inline">
                                                 @csrf
-                                                <button type="submit" class="text-green-600 hover:text-green-900 mr-2" title="Activate Customer">
+                                                <button type="submit" class="text-green-600 hover:text-green-900 mr-2" title="Activate Subscriber">
                                                     <i class="fas fa-check-circle"></i>
                                                 </button>
                                             </form>

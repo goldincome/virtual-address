@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Customer Detail - ' . $customer->name)
+@section('title', 'Subscriber Detail - ' . $customer->name)
 
 @section('content')
 <div class="min-h-screen bg-gray-50 pb-12">
@@ -10,7 +10,7 @@
                 <i class="fas fa-building mr-2"></i> Charlton Virtual Office Admin
             </a>
             <a href="{{ route('admin.customers.index') }}" class="text-sm hover:text-orange-300 transition duration-300">
-                <i class="fas fa-arrow-left mr-1"></i> Back to Customers
+                <i class="fas fa-arrow-left mr-1"></i> Back to Subscribers
             </a>
         </nav>
     </header>
@@ -39,6 +39,9 @@
                 <p class="text-sm text-gray-500 mt-1">Customer Number: <span class="font-medium text-gray-700">#{{ $customer->customer_number ?? 'N/A' }}</span></p>
             </div>
             <div class="flex items-center gap-3">
+                <a href="{{ route('admin.mails.create', ['user_id' => $customer->id]) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition">
+                    <i class="fas fa-plus-circle mr-1"></i> Add Mail
+                </a>
                 <a href="{{ route('admin.customers.edit', $customer) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition">
                     <i class="fas fa-edit mr-1"></i> Edit Profile
                 </a>

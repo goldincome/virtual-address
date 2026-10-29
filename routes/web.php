@@ -168,6 +168,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
 
     // Customers
     Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
+    Route::get('customers/archived', [CustomerController::class, 'archived'])->name('customers.archived');
+    Route::post('customers/{customer}/archive', [CustomerController::class, 'archive'])->name('customers.archive');
+    Route::post('customers/{customer}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
     Route::resource('customers', CustomerController::class)->except(['create', 'store', 'destroy']);
     Route::post('customers/{customer}/suspend', [CustomerController::class, 'suspend'])->name('customers.suspend');
     Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])->name('customers.activate');

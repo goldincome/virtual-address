@@ -62,8 +62,8 @@ class BillMailUsages extends Command
                     $priceId = $usage->price_id;
 
                     if ($priceId) {
-                        // Report a single unit of usage to the specific price on the metered subscription.
-                        $meteredSubscription->reportUsageFor($priceId, 1);
+                        // Report usage quantity to the specific price on the metered subscription.
+                        $meteredSubscription->reportUsageFor($priceId, $usage->quantity ?? 1);
                         
                         // Mark the usage as billed.
                         $usage->update(['billed' => true]);

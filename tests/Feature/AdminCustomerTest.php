@@ -154,6 +154,25 @@ class AdminCustomerTest extends TestCase
         $this->assertStringContainsString('text/csv', $response->headers->get('content-type'));
     }
 
+    public function test_admin_can_view_archived_subscribers(): void
+    {
+        $admin = User::factory()->create([
+            'user_type' => UserTypeEnum::ADMIN->value,
+        ]);
+
+        $archivedUser = User::factory()->create([
+            'status' => 'archived',
+            'name' => 'Archived User',
+        ]);
+
+        $response = $this
+            ->actingAs($admin)
+            ->get(route('admin.customers.archived'));
+
+        $response->assertOk();
+        $response->assertSee('Archived User');
+    }
+
     public function test_admin_can_view_and_update_profile(): void
     {
         $admin = User::factory()->create([

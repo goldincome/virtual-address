@@ -23,6 +23,14 @@ class CustomerController extends Controller
             ->where(function($q) {
                 $q->where('user_type', 'customer')->orWhereNull('user_type');
             })
+            ->where('status', '!=', 'archived')
+            ->where(function($q) {
+                $q->where('status', 'active')
+                  ->orWhereDoesntHave('subscriptions', function($s) {
+                      $s->whereNotNull('ends_at')
+                        ->where('ends_at', '<=', now()->subMonths(3));
+                  });
+            })
             ->latest();
 
         if ($search) {
@@ -343,5 +351,68 @@ class CustomerController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Display archived subscribers (inactive > 3 months or manually archived).
+     */
+    public function archived(Request $request)
+    {
+        $search = $request->input('search');
+
+        $query = User::with(['subscriptions', 'orders', 'companies', 'pscSubscriptionItems'])
+            ->where(function($q) {
+                $q->where('user_type', 'customer')->orWhereNull('user_type');
+            })
+            ->where(function($q) {
+                $q->where('status', 'archived')
+                  ->orWhere(function($subQ) {
+                      $subQ->where('status', '!=', 'active')
+                           ->where(function($dateQ) {
+                               $dateQ->whereHas('subscriptions', function($s) {
+                                   $s->whereNotNull('ends_at')
+                                     ->where('ends_at', '<=', now()->subMonths(3));
+                               })
+                               ->orWhereDoesntHave('subscriptions', function($s) {
+                                   $s->where('stripe_status', 'active')
+                                     ->orWhere('stripe_status', 'trialing');
+                               })->where('created_at', '<=', now()->subMonths(3));
+                           });
+                  });
+            })
+            ->latest();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('customer_number', 'like', '%' . $search . '%')
+                  ->orWhere('phone', 'like', '%' . $search . '%');
+            });
+        }
+
+        $customers = $query->paginate(15)->withQueryString();
+
+        return view('admin.customers.archived', compact('customers', 'search'));
+    }
+
+    /**
+     * Move subscriber to archive.
+     */
+    public function archive(Request $request, User $customer)
+    {
+        $customer->update(['status' => 'archived']);
+
+        return redirect()->back()->with('success', 'Subscriber moved to archive successfully.');
+    }
+
+    /**
+     * Restore archived subscriber.
+     */
+    public function restore(Request $request, User $customer)
+    {
+        $customer->update(['status' => 'active']);
+
+        return redirect()->back()->with('success', 'Subscriber restored successfully.');
     }
 }

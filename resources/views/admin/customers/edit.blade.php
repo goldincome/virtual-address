@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Customer - ' . $customer->name)
+@section('title', 'Edit Subscriber - ' . $customer->name)
 
 @section('content')
 <div class="min-h-screen bg-gray-50 py-8">
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
         <div class="bg-white shadow-xl rounded-lg overflow-hidden">
             <div class="px-6 py-4 bg-blue-700 text-white flex justify-between items-center">
-                <h2 class="text-xl font-bold">Edit Customer: {{ $customer->name }}</h2>
+                <h2 class="text-xl font-bold">Edit Subscriber: {{ $customer->name }}</h2>
                 <a href="{{ route('admin.customers.show', $customer) }}" class="text-sm hover:text-orange-300">
                     <i class="fas fa-arrow-left mr-1"></i> Back
                 </a>
@@ -71,7 +71,7 @@
                         Cancel
                     </a>
                     <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">
-                        Update Customer
+                        Update Subscriber
                     </button>
                 </div>
             </form>

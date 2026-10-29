@@ -45,15 +45,21 @@ class MailController extends Controller
             if (!$subscription) {
                 throw new Exception('Selected user does not have an active subscription.');
             }
-            $subscriptionItem = $subscription->items()->where('quantity', null)->first() ?? 
-                 $selectedUser->subscription('metered')->items()->where('quantity', null)->first();
-            if (!$subscriptionItem) {
-            throw new Exception('Selected user does not have a valid subscription item for mail services.');
+            $meteredSub = $selectedUser->subscription('metered');
+            $subscriptionItem = $subscription->items()->where('quantity', null)->first() ??
+                 ($meteredSub ? $meteredSub->items()->where('quantity', null)->first() : null);
+
+            if (!$subscriptionItem && $subscription->plan) {
+                $userMailPlanSetting = $subscription->plan->mailSettings()->where('status', true)->first();
+            } elseif ($subscriptionItem && $subscription->plan) {
+                $userMailPlanSetting = $subscription->plan->mailSettings()
+                    ->where('stripe_product_id', $subscriptionItem->stripe_product)
+                    ->where('stripe_price_id', $subscriptionItem->stripe_price)
+                    ->where('status', true)->first();
+            } else {
+                $userMailPlanSetting = null;
             }
-            $userMailPlanSetting = $selectedUser->subscription('default')->plan->mailSettings()
-            ->where('stripe_product_id', $subscriptionItem->stripe_product)
-            ->where('stripe_price_id', $subscriptionItem->stripe_price)
-            ->where('status', true)->first();
+
             if (!$userMailPlanSetting) {
                 throw new Exception('Selected user does not have a valid Mail Plan setting configured for their current plan.');
             }
@@ -97,54 +103,66 @@ class MailController extends Controller
     {
         $data = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
-            'sender_name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'mail_type' => ['required', Rule::in(MailTypeEnum::toArray())],
-            'scanned_file' => [
-                Rule::requiredIf($request->input('mail_type') === MailTypeEnum::Scanned->value),
-                'nullable',
-                'file',
-                'mimes:pdf,jpg,jpeg,png',
-                'max:2048' // 2MB Max
-            ],
+            'mail_status' => ['required', Rule::in(MailStatusEnum::toArray())],
+            'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
         try{
-            $selectedUser = User::find($data['user_id']); 
+            $selectedUser = User::find($data['user_id']);
 
             if (!$selectedUser) {
                 return redirect()->back()->withErrors(['user_id' => 'Selected user does not exist.']);
             }
-            if($selectedUser->subscribed('default')){
-                $data['price']  = $selectedUser->subscription('default')->plan->mailSettings()
-                    ->where('mail_type', $data['mail_type'])->first()->price ?? null;
-            }
-            else {
-                //check if user subscription is by DirectDebit and it is active
-                $data['price'] = $selectedUser->plan->mailSettings()
-                    ->where('mail_type', $data['mail_type'])->first()->price ?? null;
-            }
-    
-            $data['payment_status'] = PaymentStatusEnum::Pending->value; // Default payment status
-            $data['mail_status'] = MailStatusEnum::Forwarded->value;
-            // Default status
-            $data['recieved_at'] = now(); 
-            if ($request->hasFile('scanned_file')) {
-                $data['mail_status'] = MailStatusEnum::Scanned->value; // Set status to Scanned if file is uploaded
-                $path = $request->file('scanned_file')->store('scanned_mails', 'public');
-                $data['scan_upload_url'] = $path;
+
+            $mailPriceSetting = null;
+            $unitPrice = 0.00;
+
+            if($selectedUser->subscribed('default') && $selectedUser->subscription('default')->plan){
+                $mailPriceSetting = $selectedUser->subscription('default')->plan->mailSettings()
+                    ->where('mail_type', $data['mail_type'])->first();
+                $unitPrice = $mailPriceSetting->price ?? 0.00;
+            } elseif ($selectedUser->plan) {
+                $mailPriceSetting = $selectedUser->plan->mailSettings()
+                    ->where('mail_type', $data['mail_type'])->first();
+                $unitPrice = $mailPriceSetting->price ?? 0.00;
             }
 
-            $mail = Mail::create($data);
-            // Create a MailUsage record for the new mail
-            if($mail) {
-                $subscription = $selectedUser->subscription('default');
-                // If the user has a subscription, we can use it to get the mail settings
-                $mailPriceSetting = $subscription->plan->mailSettings()->where('mail_type', $data['mail_type'])->first();
-                //$usage = $subscription->usageRecordsFor($mailPriceSetting->stripe_price_id);
-                // Create a MailUsage record
-                app(MailUsageService::class)->createMailUsage($selectedUser, $mailPriceSetting, 1, $mail);
+            $quantity = (int) $data['quantity'];
+            $totalPrice = $unitPrice * $quantity;
+
+            $mailData = [
+                'user_id' => $selectedUser->id,
+                'sender_name' => 'Virtual Address Mail',
+                'description' => $data['description'],
+                'mail_type' => $data['mail_type'],
+                'mail_status' => $data['mail_status'],
+                'price' => $totalPrice,
+                'payment_status' => PaymentStatusEnum::Pending->value,
+                'recieved_at' => now(),
+            ];
+
+            if ($data['mail_status'] === MailStatusEnum::Scanned->value) {
+                $mailData['scanned_at'] = now();
+            } elseif ($data['mail_status'] === MailStatusEnum::Forwarded->value) {
+                $mailData['forwarded_at'] = now();
             }
+
+            $mail = Mail::create($mailData);
+
+            // Create a MailUsage record for the new mail
+            if($mail && $mailPriceSetting) {
+                MailUsage::create([
+                    'user_id' => $selectedUser->id,
+                    'mail_id' => $mail->id,
+                    'price_id' => $mailPriceSetting->stripe_price_id,
+                    'price' => $totalPrice,
+                    'quantity' => $quantity,
+                    'billed' => false,
+                ]);
+            }
+
             return redirect()->route('admin.mails.index')
                             ->with('success', 'Mail record created successfully.');
         } catch (\Exception $e) {

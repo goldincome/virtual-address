@@ -12,6 +12,7 @@ class MailUsage extends Model
         'price_id',
         'service_name',
         'price',
+        'quantity',
         'billed',
     ];
 

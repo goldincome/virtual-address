@@ -32,8 +32,12 @@
         <i class="fas fa-envelope-open-text mr-3 w-5 text-center text-orange-400"></i> Mail Services
     </a>
     <a href="{{ route('admin.customers.index') }}" class="block py-2.5 px-4 rounded-md
-        {{ request()->is('admin/customers*') ? 'active' : '' }}">
-        <i class="fas fa-users mr-3 w-5 text-center text-orange-400"></i> Customers
+        {{ request()->is('admin/customers*') && !request()->routeIs('admin.customers.archived') ? 'active' : '' }}">
+        <i class="fas fa-users mr-3 w-5 text-center text-orange-400"></i> Subscribers
+    </a>
+    <a href="{{ route('admin.customers.archived') }}" class="block py-2.5 px-4 rounded-md text-sm pl-8
+        {{ request()->routeIs('admin.customers.archived') ? 'active' : '' }}">
+        <i class="fas fa-archive mr-2 text-orange-400"></i> Archived Subscribers
     </a>
     <a href="{{ route('admin.companies.index') }}" class="block py-2.5 px-4 rounded-md
         {{ request()->is('admin/companies*') ? 'active' : '' }}">
