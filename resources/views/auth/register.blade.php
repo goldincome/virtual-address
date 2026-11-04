@@ -53,6 +53,59 @@
                         @enderror
                     </div>
 
+                    @php
+                        $selectedBusinessType = old('business_type');
+                    @endphp
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Business Type</label>
+                        <div class="mt-2 flex items-center gap-6">
+                            <label class="inline-flex items-center">
+                                <input id="business_type_corporate" name="business_type" type="radio" value="corporate" @checked($selectedBusinessType === 'corporate') required
+                                       class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                Corporate Business
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input id="business_type_self_employed" name="business_type" type="radio" value="self_employed" @checked($selectedBusinessType === 'self_employed') required
+                                       class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                Self employed
+                            </label>
+                        </div>
+                        @error('business_type')
+                            <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div id="business-fields-corporate" @if($selectedBusinessType !== 'corporate') class="hidden" @endif>
+                        <div>
+                            <label for="business_registration_name" class="block text-sm font-medium text-gray-700">Business Registration Name</label>
+                            <input id="business_registration_name" name="business_registration_name" type="text" autocomplete="organization" class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                                   placeholder="Acme Limited" value="{{ old('business_registration_name') }}">
+                            @error('business_registration_name')
+                                <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="business_registration_number" class="block text-sm font-medium text-gray-700">Company Registration Number</label>
+                            <input id="business_registration_number" name="business_registration_number" type="text" inputmode="numeric" autocomplete="off" class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                                   placeholder="12345678" value="{{ old('business_registration_number') }}">
+                            @error('business_registration_number')
+                                <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="business_trading_name" class="block text-sm font-medium text-gray-700">Business Trading Name</label>
+                        <input id="business_trading_name" name="business_trading_name" type="text" autocomplete="organization" required
+                               class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                               placeholder="Acme Trading" value="{{ old('business_trading_name') }}">
+                        @error('business_trading_name')
+                            <span class="mt-1 text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     <div>
                         <label for="email-register" class="block text-sm font-medium text-gray-700">Email Address</label>
                         <input id="email-register" name="email" type="email" autocomplete="email" required
@@ -107,6 +160,38 @@
             </div>
         </div>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const businessTypeRadios = document.querySelectorAll('input[name="business_type"]');
+            const corporateFields = document.getElementById('business-fields-corporate');
+            const businessRegistrationName = document.getElementById('business_registration_name');
+            const businessRegistrationNumber = document.getElementById('business_registration_number');
+
+            function toggleCorporateFields() {
+                const selected = document.querySelector('input[name="business_type"]:checked');
+                const isCorporate = selected !== null && selected.value === 'corporate';
+
+                if (corporateFields) {
+                    corporateFields.classList.toggle('hidden', !isCorporate);
+                }
+
+                if (businessRegistrationName) {
+                    businessRegistrationName.required = isCorporate;
+                }
+
+                if (businessRegistrationNumber) {
+                    businessRegistrationNumber.required = isCorporate;
+                }
+            }
+
+            businessTypeRadios.forEach(function (radio) {
+                radio.addEventListener('change', toggleCorporateFields);
+            });
+
+            toggleCorporateFields();
+        });
+    </script>
 @endsection
 
 @section('css')

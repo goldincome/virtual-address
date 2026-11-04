@@ -2,6 +2,49 @@
 
 @section('title', 'Subscribers Management')
 
+@section('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<style>
+    /* Custom styling for DataTables wrapper to match Tailwind */
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        border-radius: 0.5rem;
+        border-color: #d1d5db;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    .dataTables_wrapper .dataTables_filter {
+        display: none; /* We use our custom search input */
+    }
+    .dataTables_wrapper .dataTables_length {
+        margin-bottom: 1rem;
+        margin-left: 1.5rem;
+    }
+    .dataTables_wrapper .dataTables_info {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+        color: #4b5563;
+    }
+    .dataTables_wrapper .dataTables_paginate {
+        margin-right: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #2563eb !important;
+        color: white !important;
+        border: 1px solid #2563eb !important;
+        border-radius: 0.375rem;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #1d4ed8 !important;
+        color: white !important;
+        border: 1px solid #1d4ed8 !important;
+        border-radius: 0.375rem;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <header class="bg-blue-700 text-white shadow-sm">
@@ -18,47 +61,40 @@
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="bg-white shadow-xl rounded-lg overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                <div class="flex flex-col gap-4">
                     <h2 class="text-2xl font-bold text-blue-800">Subscribers Management</h2>
 
-                    <form method="GET" action="{{ route('admin.customers.index') }}" class="flex flex-wrap items-center gap-2">
-                        <select name="subscription_status" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="status-select" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500">
                             <option value="">All Subscription Statuses</option>
-                            <option value="active" {{ request('subscription_status') == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="cancelled" {{ request('subscription_status') == 'cancelled' ? 'selected' : '' }}>Cancelled / Grace</option>
-                            <option value="expired" {{ request('subscription_status') == 'expired' ? 'selected' : '' }}>Expired</option>
-                            <option value="none" {{ request('subscription_status') == 'none' ? 'selected' : '' }}>None</option>
+                            <option value="Active">Active</option>
+                            <option value="Grace Period">Grace Period</option>
+                            <option value="Cancelled / Expired">Cancelled / Expired</option>
+                            <option value="None">None</option>
                         </select>
 
-                        <select name="plan_id" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500">
+                        <select id="plan-select" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-orange-500 focus:border-orange-500">
                             <option value="">All Plans</option>
                             @foreach($plans as $plan)
-                                <option value="{{ $plan->id }}" {{ request('plan_id') == $plan->id ? 'selected' : '' }}>{{ $plan->name }}</option>
+                                <option value="{{ $plan->id }}">{{ $plan->name }}</option>
                             @endforeach
                         </select>
 
                         <div class="relative flex-1 sm:flex-initial">
-                            <input type="text" name="search" value="{{ $search ?? '' }}"
+                            <input type="text" id="custom-search-input"
                                    placeholder="Search name, email, phone..."
                                    class="w-full sm:w-60 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-orange-500 focus:border-orange-500 text-sm">
                         </div>
 
-                        <button type="submit"
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-150 text-sm font-medium">
-                            <i class="fas fa-search"></i>
-                        </button>
-
-                        <a href="{{ route('admin.customers.export', request()->all()) }}"
+                        <a id="export-excel-btn" href="#"
                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-150 text-sm font-medium flex items-center gap-1">
                             <i class="fas fa-file-excel"></i> Export Excel
                         </a>
 
-                        @if(request()->anyFilled(['search', 'subscription_status', 'plan_id']))
-                            <a href="{{ route('admin.customers.index') }}" class="text-gray-500 hover:text-gray-700 text-sm px-2">
-                                <i class="fas fa-times"></i> Reset
-                            </a>
-                        @endif
-                    </form>
+                        <button id="reset-filters" type="button" class="text-gray-500 hover:text-gray-700 text-sm px-2" title="Reset Filters">
+                            <i class="fas fa-sync-alt"></i> Reset
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -75,11 +111,11 @@
 
             @if($customers->isEmpty())
                 <div class="p-6 text-center text-gray-500">
-                    No subscribers found matching your criteria.
+                    No subscribers found.
                 </div>
             @else
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                <div class="overflow-x-auto p-4">
+                    <table id="subscribers-table" class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-100">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Subscriber</th>
@@ -102,16 +138,16 @@
                                         $subStatus = 'Cancelled / Expired';
                                     }
                                 @endphp
-                                <tr>
+                                <tr data-customer-id="{{ $customer->id }}">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $customer->name }}</div>
                                         <div class="text-xs text-gray-500">{{ $customer->phone ?? 'No Phone' }}</div>
                                         <div class="text-xs text-gray-500">{{ $customer->email }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 plan-name-cell">
                                         {{ $subPlan }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-4 whitespace-nowrap sub-status-cell">
                                         <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                                             @if($subStatus == 'Active') bg-green-100 text-green-800
                                             @elseif($subStatus == 'Grace Period') bg-yellow-100 text-yellow-800
@@ -153,12 +189,94 @@
                         </tbody>
                     </table>
                 </div>
-
-                <div class="px-6 py-4 border-t border-gray-200">
-                    {{ $customers->links() }}
-                </div>
             @endif
         </div>
     </main>
 </div>
+@endsection
+
+@section('js')
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const table = $('#subscribers-table').DataTable({
+            pageLength: 15,
+            lengthMenu: [10, 15, 25, 50, 100],
+            order: [[0, 'asc']],
+            language: {
+                search: "",
+                searchPlaceholder: "Search subscribers..."
+            }
+        });
+
+        // Custom Search Input
+        $('#custom-search-input').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+
+        // Custom Status Filter (Column index 2 for Subscription Status)
+        $('#status-select').on('change', function () {
+            const val = $(this).val();
+            table.column(2).search(val, false, false).draw();
+        });
+
+        // Custom Plan Filter (Column index 1 for Subscription Plan)
+        $('#plan-select').on('change', function () {
+            const selectedText = $(this).find('option:selected').text();
+            const val = $(this).val() ? selectedText : '';
+            table.column(1).search(val, false, false).draw();
+        });
+
+        // Reset Filters
+        $('#reset-filters').on('click', function () {
+            $('#custom-search-input').val('');
+            $('#status-select').val('');
+            $('#plan-select').val('');
+            table.search('').columns().search('').draw();
+        });
+
+        // Export Excel of currently filtered DataTables rows
+        $('#export-excel-btn').on('click', function (e) {
+            e.preventDefault();
+
+            const customerIds = [];
+            table.rows({ search: 'applied' }).every(function () {
+                const node = this.node();
+                const customerId = $(node).attr('data-customer-id');
+                if (customerId) {
+                    customerIds.push(customerId);
+                }
+            });
+
+            if (customerIds.length === 0) {
+                alert('No subscribers to export based on current filters.');
+                return;
+            }
+
+            const form = $('<form>', {
+                method: 'POST',
+                action: "{{ route('admin.customers.export') }}"
+            });
+
+            form.append($('<input>', {
+                type: 'hidden',
+                name: '_token',
+                value: '{{ csrf_token() }}'
+            }));
+
+            customerIds.forEach(id => {
+                form.append($('<input>', {
+                    type: 'hidden',
+                    name: 'customer_ids[]',
+                    value: id
+                }));
+            });
+
+            $('body').append(form);
+            form.submit();
+            form.remove();
+        });
+    });
+</script>
 @endsection

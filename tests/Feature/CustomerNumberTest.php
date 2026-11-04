@@ -34,6 +34,8 @@ class CustomerNumberTest extends TestCase
             'email' => 'customer-number@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'business_type' => 'self_employed',
+            'business_trading_name' => 'Test Trading Name',
         ]);
 
         $user = User::where('email', 'customer-number@example.com')->first();

@@ -28,8 +28,14 @@ class ProfileTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
-                'name' => 'Test User',
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'phone' => '+1234567890',
                 'email' => 'test@example.com',
+                'business_type' => 'corporate',
+                'business_registration_name' => 'Test Registration Name',
+                'business_trading_name' => 'Test Trading Name',
+                'business_registration_number' => '12345678',
             ]);
 
         $response
@@ -50,8 +56,12 @@ class ProfileTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
-                'name' => 'Test User',
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'phone' => '+1234567890',
                 'email' => $user->email,
+                'business_type' => 'self_employed',
+                'business_trading_name' => 'Test Trading Name',
             ]);
 
         $response

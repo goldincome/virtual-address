@@ -32,6 +32,10 @@ class User extends Authenticatable
         'user_type',
         'customer_number',
         'status',
+        'business_type',
+        'business_registration_name',
+        'business_trading_name',
+        'business_registration_number',
     ];
 
     /**
@@ -129,5 +133,50 @@ class User extends Authenticatable
     public function mailUsages()
     {
         return $this->hasMany(MailUsage::class);
+    }
+
+    /**
+     * Format phone number for Excel export to prevent scientific notation.
+     * Normalizes to display format: +44 (0) 2032 474747
+     */
+    public function getFormattedPhoneForExport(): string
+    {
+        if (empty($this->phone)) {
+            return '';
+        }
+
+        $phone = trim((string) $this->phone);
+        
+        // Remove all spaces, parentheses, and hyphens for normalization
+        $digitsOnly = preg_replace('/[\s\(\)\-]/', '', $phone);
+        
+        // Check if it's a UK number (starts with +44 or 0044 or just digits assuming UK)
+        if (preg_match('/^\+?44(\d{10})$/', $digitsOnly, $matches)) {
+            // UK mobile/landline: +44 1234 567890 or +44 20 3247 4747
+            $number = $matches[1];
+            
+            // Format based on number type (simplified)
+            if (strlen($number) === 10) {
+                // Format: +44 (0) XXXX XXXXXX or +44 (0) XX XXXX XXXX
+                if (substr($number, 0, 2) === '20' || substr($number, 0, 2) === '11') {
+                    // London/Major city: +44 (0) 20 3247 4747
+                    return '+44 (0) ' . substr($number, 0, 2) . ' ' . substr($number, 2, 4) . ' ' . substr($number, 6);
+                } else {
+                    // Other: +44 (0) 1234 567890
+                    return '+44 (0) ' . substr($number, 0, 4) . ' ' . substr($number, 4);
+                }
+            }
+            
+            // Fallback for UK
+            return '+44 (0) ' . $number;
+        }
+        
+        // For non-UK numbers or already formatted numbers, preserve the format
+        // but ensure it starts with + to force Excel text mode
+        if (!str_starts_with($phone, '+')) {
+            return '+' . $phone;
+        }
+        
+        return $phone;
     }
 }

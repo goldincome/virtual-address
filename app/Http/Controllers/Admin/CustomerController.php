@@ -96,7 +96,7 @@ class CustomerController extends Controller
             }
         }
 
-        $customers = $query->paginate(15)->withQueryString();
+        $customers = $query->get();
         $plans = Plan::where('is_active', true)->get();
 
         return view('admin.customers.index', compact('customers', 'plans', 'search', 'subStatus', 'planId', 'mailType'));
@@ -197,81 +197,96 @@ class CustomerController extends Controller
      */
     public function export(Request $request)
     {
-        $search = $request->input('search');
-        $subStatus = $request->input('subscription_status');
-        $planId = $request->input('plan_id');
-        $mailType = $request->input('mail_type');
+        if ($request->has('customer_ids') && is_array($request->input('customer_ids'))) {
+            $customerIds = $request->input('customer_ids');
+            $customers = User::with(['subscriptions', 'orders', 'companies', 'pscSubscriptionItems', 'mails'])
+                ->whereIn('id', $customerIds)
+                ->get();
+        } else {
+            $search = $request->input('search');
+            $subStatus = $request->input('subscription_status');
+            $planId = $request->input('plan_id');
+            $mailType = $request->input('mail_type');
 
-        $query = User::with(['subscriptions', 'orders', 'companies', 'pscSubscriptionItems', 'mails'])
-            ->where(function($q) {
-                $q->where('user_type', 'customer')->orWhereNull('user_type');
-            })
-            ->latest();
+            $query = User::with(['subscriptions', 'orders', 'companies', 'pscSubscriptionItems', 'mails'])
+                ->where(function($q) {
+                    $q->where('user_type', 'customer')->orWhereNull('user_type');
+                })
+                ->where('status', '!=', 'archived')
+                ->where(function($q) {
+                    $q->where('status', 'active')
+                      ->orWhereDoesntHave('subscriptions', function($s) {
+                          $s->whereNotNull('ends_at')
+                            ->where('ends_at', '<=', now()->subMonths(3));
+                      });
+                })
+                ->latest();
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%')
-                  ->orWhere('customer_number', 'like', '%' . $search . '%')
-                  ->orWhere('phone', 'like', '%' . $search . '%');
-            });
-        }
-
-        if ($subStatus) {
-            switch ($subStatus) {
-                case 'active':
-                    $query->whereHas('subscriptions', function ($subQuery) {
-                        $subQuery->where(function ($q) {
-                            $q->where('stripe_status', 'active')
-                              ->orWhere('stripe_status', 'trialing');
-                        })->where(function ($q) {
-                            $q->whereNull('ends_at')
-                              ->orWhere('ends_at', '>', now());
-                        });
-                    });
-                    break;
-                case 'cancelled':
-                    $query->whereHas('subscriptions', function ($subQuery) {
-                        $subQuery->where(function ($q) {
-                            $q->whereNotNull('ends_at')
-                              ->where('ends_at', '>', now())
-                              ->orWhere('stripe_status', 'canceled');
-                        });
-                    });
-                    break;
-                case 'expired':
-                    $query->whereHas('subscriptions', function ($subQuery) {
-                        $subQuery->whereNotNull('ends_at')
-                                 ->where('ends_at', '<=', now());
-                    });
-                    break;
-                case 'none':
-                    $query->whereDoesntHave('subscriptions');
-                    break;
-            }
-        }
-
-        if ($planId) {
-            $plan = Plan::find($planId);
-            if ($plan) {
-                $query->where(function($q) use ($plan, $planId) {
-                    $q->whereHas('subscriptions', function ($subQuery) use ($plan) {
-                        $subQuery->where('stripe_price', $plan->stripe_price_id_monthly)
-                                 ->orWhere('stripe_price', $plan->stripe_price_id_yearly)
-                                 ->orWhereHas('items', function ($itemQuery) use ($plan) {
-                                     $itemQuery->where('stripe_price', $plan->stripe_price_id_monthly)
-                                               ->orWhere('stripe_price', $plan->stripe_price_id_yearly);
-                                 });
-                    })
-                    ->orWhereHas('orderDetails', function ($detailQuery) use ($planId) {
-                        $detailQuery->where('product_type', 'virtual_address')
-                                    ->whereJsonContains('plan->id', (int) $planId);
-                    });
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                      ->orWhere('email', 'like', '%' . $search . '%')
+                      ->orWhere('customer_number', 'like', '%' . $search . '%')
+                      ->orWhere('phone', 'like', '%' . $search . '%');
                 });
             }
-        }
 
-        $customers = $query->get();
+            if ($subStatus) {
+                switch ($subStatus) {
+                    case 'active':
+                        $query->whereHas('subscriptions', function ($subQuery) {
+                            $subQuery->where(function ($q) {
+                                $q->where('stripe_status', 'active')
+                                  ->orWhere('stripe_status', 'trialing');
+                            })->where(function ($q) {
+                                $q->whereNull('ends_at')
+                                  ->orWhere('ends_at', '>', now());
+                            });
+                        });
+                        break;
+                    case 'cancelled':
+                        $query->whereHas('subscriptions', function ($subQuery) {
+                            $subQuery->where(function ($q) {
+                                $q->whereNotNull('ends_at')
+                                  ->where('ends_at', '>', now())
+                                  ->orWhere('stripe_status', 'canceled');
+                            });
+                        });
+                        break;
+                    case 'expired':
+                        $query->whereHas('subscriptions', function ($subQuery) {
+                            $subQuery->whereNotNull('ends_at')
+                                     ->where('ends_at', '<=', now());
+                        });
+                        break;
+                    case 'none':
+                        $query->whereDoesntHave('subscriptions');
+                        break;
+                }
+            }
+
+            if ($planId) {
+                $plan = Plan::find($planId);
+                if ($plan) {
+                    $query->where(function($q) use ($plan, $planId) {
+                        $q->whereHas('subscriptions', function ($subQuery) use ($plan) {
+                            $subQuery->where('stripe_price', $plan->stripe_price_id_monthly)
+                                     ->orWhere('stripe_price', $plan->stripe_price_id_yearly)
+                                     ->orWhereHas('items', function ($itemQuery) use ($plan) {
+                                         $itemQuery->where('stripe_price', $plan->stripe_price_id_monthly)
+                                                   ->orWhere('stripe_price', $plan->stripe_price_id_yearly);
+                                     });
+                        })
+                        ->orWhereHas('orderDetails', function ($detailQuery) use ($planId) {
+                            $detailQuery->where('product_type', 'virtual_address')
+                                        ->whereJsonContains('plan->id', (int) $planId);
+                        });
+                    });
+                }
+            }
+
+            $customers = $query->get();
+        }
 
         $filename = 'customers-export-' . date('Y-m-d-His') . '.csv';
 
@@ -334,7 +349,7 @@ class CustomerController extends Controller
                     $customer->customer_number,
                     $customer->name,
                     $customer->email,
-                    $customer->phone,
+                    $customer->getFormattedPhoneForExport(),
                     $subPlan,
                     $subStatus,
                     $expiryDate,

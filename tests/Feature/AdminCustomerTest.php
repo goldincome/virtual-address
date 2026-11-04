@@ -154,6 +154,50 @@ class AdminCustomerTest extends TestCase
         $this->assertStringContainsString('text/csv', $response->headers->get('content-type'));
     }
 
+    public function test_admin_export_formats_phone_numbers_correctly(): void
+    {
+        $admin = User::factory()->create([
+            'user_type' => UserTypeEnum::ADMIN->value,
+        ]);
+
+        // Create customers with various phone formats
+        $ukCustomer = User::factory()->create([
+            'name' => 'UK Customer',
+            'phone' => '442032474747', // Raw UK number without formatting
+        ]);
+
+        $ukCustomerFormatted = User::factory()->create([
+            'name' => 'UK Customer 2',
+            'phone' => '+44 20 3247 4747', // Already formatted
+        ]);
+
+        $usCustomer = User::factory()->create([
+            'name' => 'US Customer',
+            'phone' => '+1 (451) 329-8006', // US format
+        ]);
+
+        $response = $this
+            ->actingAs($admin)
+            ->post(route('admin.customers.export'), [
+                'customer_ids' => [$ukCustomer->id, $ukCustomerFormatted->id, $usCustomer->id],
+            ]);
+
+        $response->assertOk();
+        $content = $response->streamedContent();
+
+        // Verify UK number is formatted correctly and not in scientific notation
+        $this->assertStringContainsString('+44 (0) 20 3247 4747', $content);
+        
+        // Verify already formatted UK number is preserved
+        $this->assertStringContainsString('+44', $content);
+        
+        // Verify US number is preserved with leading +
+        $this->assertStringContainsString('+1', $content);
+        
+        // Ensure no scientific notation (E+11 pattern)
+        $this->assertStringNotContainsString('E+', $content);
+    }
+
     public function test_admin_can_view_archived_subscribers(): void
     {
         $admin = User::factory()->create([

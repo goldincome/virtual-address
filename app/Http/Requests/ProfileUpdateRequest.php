@@ -19,6 +19,10 @@ class ProfileUpdateRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
+            'business_type' => ['required', 'string', 'max:255', Rule::in(['corporate', 'self_employed'])],
+            'business_registration_name' => ['required_if:business_type,corporate', 'nullable', 'string', 'max:255'],
+            'business_trading_name' => ['required', 'string', 'max:255'],
+            'business_registration_number' => ['required_if:business_type,corporate', 'nullable', 'numeric', 'max_digits:8'],
             'email' => [
                 'required',
                 'string',

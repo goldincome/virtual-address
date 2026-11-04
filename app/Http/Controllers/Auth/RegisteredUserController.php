@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Validation\Rule;
 use Gloudemans\Shoppingcart\Facades\Cart;
 
 class RegisteredUserController extends Controller
@@ -40,6 +41,10 @@ class RegisteredUserController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
+            'business_type' => ['required', 'string', 'max:255', Rule::in(['corporate', 'self_employed'])],
+            'business_registration_name' => ['required_if:business_type,corporate', 'nullable', 'string', 'max:255'],
+            'business_trading_name' => ['required', 'string', 'max:255'],
+            'business_registration_number' => ['required_if:business_type,corporate', 'nullable', 'numeric', 'max_digits:8'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -50,6 +55,10 @@ class RegisteredUserController extends Controller
             'phone' => $request->phone,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'business_type' => $request->business_type,
+            'business_registration_name' => $request->business_registration_name,
+            'business_trading_name' => $request->business_trading_name,
+            'business_registration_number' => $request->business_registration_number,
         ]);
 
         event(new Registered($user));

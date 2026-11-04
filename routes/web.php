@@ -167,7 +167,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     Route::resource('company-types', CompanyTypeController::class);
 
     // Customers
-    Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
+    Route::match(['get', 'post'], 'customers/export', [CustomerController::class, 'export'])->name('customers.export');
     Route::get('customers/archived', [CustomerController::class, 'archived'])->name('customers.archived');
     Route::post('customers/{customer}/archive', [CustomerController::class, 'archive'])->name('customers.archive');
     Route::post('customers/{customer}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
