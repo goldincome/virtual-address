@@ -65,8 +65,7 @@ class MailSettingObserver implements ShouldQueue
     public function updated(MailSetting $mailSetting): void
     {
         try{
-            //Todo: First implement if the interval is changed, create a new metered name and price 
-            //
+            // Update Product Name
             if ($mailSetting->isDirty('name') && $mailSetting->stripe_product_id) {
                 $this->stripe->products->update(
                     $mailSetting->stripe_product_id,
@@ -74,16 +73,95 @@ class MailSettingObserver implements ShouldQueue
                 );
             }
 
-            if ($mailSetting->isDirty('price') && $mailSetting->stripe_price_id) {
-                $this->stripe->prices->update(
-                    $mailSetting->stripe_price_id,
-                    ['unit_amount' => $mailSetting->price * 100]
-                );
+            // Update Prices (Archive old, create new) - follows PlanObserver pattern
+            if (($mailSetting->isDirty('price') || $mailSetting->isDirty('interval')) && $mailSetting->stripe_price_id) {
+                $oldPriceId = $mailSetting->getOriginal('stripe_price_id');
+                
+                // Deactivate the old Stripe price
+                if ($oldPriceId) {
+                    try {
+                        $this->stripe->prices->update($oldPriceId, ['active' => false]);
+                    } catch (\Exception $e) {
+                        // Old price may not exist; continue anyway
+                        report($e);
+                    }
+                }
+
+                // Create new metered price with updated amount and/or interval
+                $params = [
+                    'product' => $mailSetting->stripe_product_id,
+                    'unit_amount' => (int) round($mailSetting->price * 100),
+                    'currency' => config('cashier.currency'),
+                    'billing_scheme' => 'per_unit',
+                    'recurring' => [
+                        'interval' => $mailSetting->interval,
+                        'usage_type' => 'metered',
+                    ],
+                ];
+
+                if ($mailSetting->stripe_price_name) {
+                    $params['lookup_key'] = $mailSetting->stripe_price_name;
+                }
+
+                try {
+                    $newStripePrice = $this->stripe->prices->create($params);
+                } catch (\Exception $e) {
+                    // Retry without lookup_key if it causes a conflict
+                    unset($params['lookup_key']);
+                    $newStripePrice = $this->stripe->prices->create($params);
+                }
+
+                // Save new Stripe price ID without triggering events
+                $mailSetting->withoutEvents(function () use ($mailSetting, $newStripePrice) {
+                    $mailSetting->update([
+                        'stripe_price_id' => $newStripePrice->id,
+                    ]);
+                });
+
+                // Repoint existing subscriber metered subscription items to the new price
+                $this->repointSubscriptionItems($oldPriceId, $newStripePrice->id);
             }
            
         } catch (\Exception $e) {
             report($e);
             throw new \Exception("Failed to update Stripe entities: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Repoint existing subscriber metered subscription items from old price to new price.
+     *
+     * @param  string|null  $oldPriceId
+     * @param  string  $newPriceId
+     * @return void
+     */
+    protected function repointSubscriptionItems(?string $oldPriceId, string $newPriceId): void
+    {
+        if (!$oldPriceId) {
+            return;
+        }
+
+        try {
+            // Find all active subscriptions with items using the old price
+            $subscriptions = $this->stripe->subscriptions->all([
+                'status' => 'active',
+                'limit' => 100,
+                'expand' => ['data.items'],
+            ]);
+
+            foreach ($subscriptions->data as $subscription) {
+                foreach ($subscription->items->data ?? [] as $item) {
+                    if (($item->price->id ?? null) === $oldPriceId) {
+                        // Update the subscription item to point to the new price
+                        $this->stripe->subscriptionItems->update($item->id, [
+                            'price' => $newPriceId,
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Log but don't fail the entire update if repointing fails
+            report($e);
         }
     }
 
