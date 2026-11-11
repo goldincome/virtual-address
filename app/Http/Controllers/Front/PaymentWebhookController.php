@@ -158,10 +158,17 @@ class PaymentWebhookController extends CashierController
                 $hostedInvoiceUrl = $invoice['hosted_invoice_url'] ?? null;
                 $attemptCount = $invoice['attempt_count'] ?? null;
 
-                try {
-                    Mail::to($user->email)->queue(new InvoicePaymentFailedMail($user, $invoiceId, $amountDue, $hostedInvoiceUrl, $attemptCount));
-                } catch (\Exception $e) {
-                    report($e);
+                if ($this->isSubscriptionCanceledOrOnGracePeriod($invoice, $user)) {
+                    Log::info('Webhook: Skipping payment failure email for canceled/grace-period subscription.', [
+                        'user_id' => $user->id,
+                        'invoice_id' => $invoiceId,
+                    ]);
+                } else {
+                    try {
+                        Mail::to($user->email)->queue(new InvoicePaymentFailedMail($user, $invoiceId, $amountDue, $hostedInvoiceUrl, $attemptCount));
+                    } catch (\Exception $e) {
+                        report($e);
+                    }
                 }
 
                 Log::warning('Webhook: Invoice payment failed.', [
@@ -203,10 +210,17 @@ class PaymentWebhookController extends CashierController
                 $hostedInvoiceUrl = $invoice['hosted_invoice_url'] ?? null;
                 $attemptCount = $invoice['attempt_count'] ?? null;
 
-                try {
-                    Mail::to($user->email)->queue(new InvoicePaymentFailedMail($user, $invoiceId, $amountDue, $hostedInvoiceUrl, $attemptCount));
-                } catch (\Exception $e) {
-                    report($e);
+                if ($this->isSubscriptionCanceledOrOnGracePeriod($invoice, $user)) {
+                    Log::info('Webhook: Skipping payment failure email for canceled/grace-period subscription.', [
+                        'user_id' => $user->id,
+                        'invoice_id' => $invoiceId,
+                    ]);
+                } else {
+                    try {
+                        Mail::to($user->email)->queue(new InvoicePaymentFailedMail($user, $invoiceId, $amountDue, $hostedInvoiceUrl, $attemptCount));
+                    } catch (\Exception $e) {
+                        report($e);
+                    }
                 }
 
                 Log::warning('Webhook: Invoice payment action required.', [
@@ -448,7 +462,7 @@ class PaymentWebhookController extends CashierController
     protected function updateSubscriptionEndDate(array $payload, User $user)
     {
         $stripeSubscriptionId = $payload['data']['object']['parent']['subscription_details']['subscription'] ;
-        
+
         $subscription = $user->subscriptions()
             ->where('stripe_id', $stripeSubscriptionId)
             ->first();
@@ -463,5 +477,23 @@ class PaymentWebhookController extends CashierController
 
         return null;
     }
-      */  
+      */
+
+    protected function isSubscriptionCanceledOrOnGracePeriod(array $invoice, $user): bool
+    {
+        $subscriptionId = $invoice['subscription'] ?? null;
+        $subscription = null;
+        if ($subscriptionId) {
+            $subscription = $user->subscriptions()->where('stripe_id', $subscriptionId)->first();
+        }
+        if (! $subscription) {
+            $subscription = $user->subscription('default');
+        }
+
+        if ($subscription && ($subscription->canceled() || $subscription->onGracePeriod())) {
+            return true;
+        }
+
+        return false;
+    }
 }

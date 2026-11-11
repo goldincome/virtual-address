@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Enums\MailTypeEnum;
 use App\Enums\ProductTypeEnum;
 use App\Jobs\SendSubscriptionCancelledEmail;
+use App\Mail\InvoicePaymentFailedMail;
 use App\Http\Controllers\Front\PaymentWebhookController;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Cashier\SubscriptionItem;
@@ -206,5 +207,37 @@ class SubscriptionWebhookTest extends TestCase
 
         // Nothing scheduled -> company untouched.
         $this->assertSame('active', $company->fresh()->status);
+    }
+
+    public function test_invoice_payment_failed_does_not_send_email_when_subscription_canceled(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $user = User::factory()->create(['stripe_id' => 'cus_wh_fail']);
+        $product = $this->makeProduct();
+        $this->makePlan($product, 'Base', 'base', 1, 'price_base_monthly');
+
+        $subscription = $this->subscribe($user, 'price_base_monthly', [
+            'ends_at' => Carbon::now()->addDays(5), // on grace period / canceled
+        ]);
+
+        $payload = [
+            'id' => 'evt_invoice_failed_1',
+            'data' => [
+                'object' => [
+                    'id' => 'in_test_1',
+                    'customer' => 'cus_wh_fail',
+                    'subscription' => $subscription->stripe_id,
+                    'amount_due' => 1299,
+                    'attempt_count' => 3,
+                ],
+            ],
+        ];
+
+        $response = app(PaymentWebhookController::class)->handleInvoicePaymentFailed($payload);
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        \Illuminate\Support\Facades\Mail::assertNotQueued(InvoicePaymentFailedMail::class);
     }
 }
