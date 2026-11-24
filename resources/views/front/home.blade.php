@@ -20,9 +20,32 @@
             <p class="text-lg md:text-xl mb-8 text-blue-100 max-w-3xl mx-auto">
                 Establish your presence with our flexible virtual office solutions, meeting rooms, and conference facilities.
             </p>
-            <a href="#our-services" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg">
-                Explore Services <i class="fas fa-chevron-down ml-2"></i>
-            </a>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#virtual-address-plans" class="bg-white hover:bg-blue-50 text-blue-800 font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg">
+                    View Virtual Address Plans <i class="fas fa-chevron-down ml-2"></i>
+                </a>
+                <a href="#our-services" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 shadow-lg">
+                    Explore Services <i class="fas fa-chevron-down ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="quick-plans" class="py-10 bg-blue-800 text-white">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                @foreach($plans->take(3) as $plan)
+                    <div class="bg-white text-blue-800 rounded-lg shadow-xl p-6 text-center flex flex-col">
+                        <h3 class="text-xl font-semibold mb-3">{{ $plan->name }}</h3>
+                        <p class="text-3xl font-bold mb-5">
+                            {{ currencyFormatter($plan->price) }}<span class="text-base font-normal text-gray-600">/month</span>
+                        </p>
+                        <a href="{{ route('virtual-address.show', $plan->slug) }}" class="mt-auto block w-full text-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 shadow">
+                            Subscribe
+                        </a>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </section>
 
